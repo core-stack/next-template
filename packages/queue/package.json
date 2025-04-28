@@ -1,0 +1,32 @@
+{
+  "name": "@packages/queue",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./index.ts",
+  "module": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
+    "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "bullmq": "^5.51.1",
+    "@prisma/client": "^5.22.0",
+    "ioredis": "^5.6.1",
+    "@packages/env": "workspace:*",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.24",
+    "prisma": "^5.22.0",
+    "typescript": "5.8.3"
+  },
+  "exports": {
+    ".": "./index.ts",
+    "./redis": "./redis.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
