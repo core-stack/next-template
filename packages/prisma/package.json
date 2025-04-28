@@ -1,0 +1,32 @@
+{
+  "name": "@packages/prisma",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./index.ts",
+  "module": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "generate": "npx prisma generate --schema=./schema",
+    "migrate": "npx prisma migrate deploy --schema=./schema",
+    "push": "npx prisma db push --schema=./schema",
+    "studio": "npx prisma studio --schema=./schema --browser none",
+    "prebuild": "pnpm run generate",
+    "predev": "pnpm run generate",
+    "format": "npx prisma format --schema=./schema"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.24",
+    "prisma": "^5.22.0",
+    "typescript": "5.8.3"
+  },
+  "exports": {
+    ".": "./index.ts",
+    "./client": "./client.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

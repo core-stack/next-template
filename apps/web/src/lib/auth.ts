@@ -1,10 +1,9 @@
-import { compare } from 'bcryptjs';
-import NextAuth from 'next-auth';
-import Credentials from 'next-auth/providers/credentials';
-import Google from 'next-auth/providers/google';
-
-import { prisma } from '@/lib/prisma';
-import { PrismaAdapter } from '@auth/prisma-adapter';
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "@packages/prisma";
+import { compare } from "bcryptjs";
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
