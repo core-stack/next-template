@@ -1,26 +1,8 @@
-import type { Metadata } from "next"
-import { CreditCard, Download, Zap } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CreditCard, Download, Zap } from "lucide-react";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
-interface BillingPageProps {
-  params: {
-    slug: string
-  }
-}
-
-export async function generateMetadata({ params }: BillingPageProps): Promise<Metadata> {
-  return {
-    title: `Faturamento | Organização ${params.slug}`,
-    description: "Gerencie o faturamento da sua organização",
-  }
-}
-
-export default function BillingPage({ params }: BillingPageProps) {
-  const { slug } = params
-
-  // Dados de exemplo - em produção, estes viriam do backend
+export default function BillingPage() {
   const billingInfo = {
     plan: "Free",
     nextBillingDate: "N/A",

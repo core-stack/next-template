@@ -1,37 +1,15 @@
 import type { Metadata } from "next"
-import { Separator } from '@/components/ui/separator';
+import { Separator } from "@/components/ui/separator";
 
-import { DangerZone } from './danger-zone';
-import { PricingPlans } from './pricing-plans';
-import { WorkspaceSettingsForm } from './workspace-settings-form';
+import { DangerZone } from "./danger-zone";
+import { PricingPlans } from "./pricing-plans";
+import { WorkspaceSettingsForm } from "./workspace-settings-form";
 
-interface WorkspaceSettingsPageProps {
-  params: {
-    slug: string
-  }
-}
-
-export async function generateMetadata({ params }: WorkspaceSettingsPageProps): Promise<Metadata> {
-  // Em produção, você buscaria os dados do workspace do banco de dados
-  const workspace = {
-    name: `Organização ${params.slug}`,
-    description: "Área de trabalho compartilhada para sua equipe",
-  }
-
-  return {
-    title: `Configurações | ${workspace.name}`,
-    description: "Gerencie as configurações da sua organização",
-  }
-}
-
-export default function WorkspaceSettingsPage({ params }: WorkspaceSettingsPageProps) {
-  const { slug } = params
-
-  // Em produção, você buscaria os dados do workspace do banco de dados
+export default function WorkspaceSettingsPage() {
   const workspace = {
     id: "1",
-    slug: slug,
-    name: `Organização ${slug}`,
+    slug: "slug",
+    name: `Organização`,
     description: "Área de trabalho compartilhada para sua equipe",
     backgroundImage: "linear-gradient(to right, #4f46e5, #8b5cf6)",
     isOwner: true,

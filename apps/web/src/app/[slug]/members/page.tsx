@@ -1,30 +1,25 @@
 "use client"
 
-import { ArrowUpDown, ChevronDown, MoreHorizontal, UserPlus } from 'lucide-react';
-import { useState } from 'react';
-
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from '@/components/ui/select';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel,
-  getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState
-} from '@tanstack/react-table';
+  ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel,
+  getSortedRowModel, SortingState, useReactTable, VisibilityState
+} from "@tanstack/react-table";
+import { ArrowUpDown, ChevronDown, MoreHorizontal, UserPlus } from "lucide-react";
+import { useState } from "react";
 
-import { InviteMemberDialog } from './invite-member-dialog';
+import { InviteMemberDialog } from "./invite-member-dialog";
 
 // Tipos baseados no schema do Prisma
 type Role = "ADMIN" | "MEMBER"
@@ -159,12 +154,8 @@ const mockInvites: Invite[] = [
   },
 ]
 
-interface MembersListProps {
-  workspaceId: string
-  isOwner: boolean
-}
-
-export default function MembersList({ workspaceId, isOwner }: MembersListProps) {
+const isOwner = true
+export default function MembersList() {
   const [members, setMembers] = useState<Member[]>(mockMembers)
   const [invites, setInvites] = useState<Invite[]>(mockInvites)
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)

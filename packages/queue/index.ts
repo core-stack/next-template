@@ -1,7 +1,7 @@
-import { Queue } from 'bullmq';
-import { z } from 'zod';
+import { Queue } from "bullmq";
+import { z } from "zod";
 
-import { redisConnection } from './redis';
+import { redisConnection } from "./redis";
 
 export enum QueueName {
   EMAIL = 'email',

@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
-import './globals.css';
+import { ThemeProvider } from "@/components/theme-provider";
 
-
-
-import { ThemeProvider } from '@/components/theme-provider';
-
-import { AuthProvider } from './auth';
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -19,13 +15,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <AuthProvider>
-        <body suppressHydrationWarning>
-          <ThemeProvider defaultTheme="system" storageKey="saas-theme">
-            {children}
-          </ThemeProvider>
-        </body>
-      </AuthProvider>
+      <body suppressHydrationWarning>
+        <ThemeProvider defaultTheme="system" storageKey="saas-theme">
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

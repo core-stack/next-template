@@ -16,7 +16,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@next-auth/prisma-adapter": "^1.0.5",
     "@hookform/resolvers": "^5.0.1",
     "@packages/env": "workspace:*",
     "@packages/prisma": "workspace:*",
@@ -40,7 +39,6 @@
     "dotenv": "^16.5.0",
     "lucide-react": "^0.447.0",
     "next": "^15.2.4",
-    "next-auth": "^4.24.4",
     "react": "^19.1.0",
     "react-color": "^2.19.3",
     "react-dom": "^19.1.0",

@@ -1,33 +1,12 @@
 import type { Metadata } from "next"
 
-import { WorkspaceOverview } from './workspace-overview';
+import { WorkspaceOverview } from "./workspace-overview";
 
-interface WorkspacePageProps {
-  params: {
-    slug: string
-  }
-}
-
-export async function generateMetadata({ params }: WorkspacePageProps): Promise<Metadata> {
-  // Em produção, você buscaria os dados do workspace do banco de dados
-  const workspace = {
-    name: `Organização ${params.slug}`,
-    description: "Área de trabalho compartilhada para sua equipe",
-  }
-
-  return {
-    title: `${workspace.name} | Workspaces`,
-    description: workspace.description || "Gerenciamento de workspace",
-  }
-}
-
-export default function WorkspacePage({ params }: WorkspacePageProps) {
-  const { slug } = params
-  // Em produção, você buscaria os dados do workspace do banco de dados
+export default function WorkspacePage() {
   const workspace = {
     id: "1",
-    slug: slug,
-    name: `Organização ${slug}`,
+    slug: "slug",
+    name: `Organização`,
     description: "Área de trabalho compartilhada para sua equipe",
     backgroundImage: "linear-gradient(to right, #4f46e5, #8b5cf6)",
     isOwner: true,

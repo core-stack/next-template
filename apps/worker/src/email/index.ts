@@ -1,11 +1,10 @@
-import { Job, Worker } from 'bullmq';
-import nodemailer, { SendMailOptions } from 'nodemailer';
-import hbs from 'nodemailer-express-handlebars';
-import path from 'path';
-
-import { env } from '@packages/env';
-import { EmailPayload, QueueName } from '@packages/queue';
-import { redisConnection } from '@packages/queue/redis';
+import { env } from "@packages/env";
+import { EmailPayload, QueueName } from "@packages/queue";
+import { redisConnection } from "@packages/queue/redis";
+import { Job, Worker } from "bullmq";
+import nodemailer, { SendMailOptions } from "nodemailer";
+import hbs from "nodemailer-express-handlebars";
+import path from "path";
 
 const transporter = nodemailer.createTransport({
   host: env.SMTP_HOST,
@@ -21,7 +20,6 @@ transporter.use('compile', hbs({
   viewEngine: {
     extname: '.hbs',
     partialsDir: path.resolve('./templates/email/'),
-    defaultLayout: false,
   },
   viewPath: path.resolve('./templates/email/'),
   extName: '.hbs',
@@ -36,7 +34,7 @@ const emailWorker = new Worker<EmailPayload>(
   QueueName.EMAIL,
   async (job: Job<EmailPayload>) => {
     console.log(job.data);
-    
+
     // const opts: MailOptionsWithTemplate = {
     //   ...job.data,
     //   from: job.data.from ?? env.SMTP_USER,
