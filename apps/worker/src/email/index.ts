@@ -35,11 +35,13 @@ interface MailOptionsWithTemplate extends SendMailOptions {
 const emailWorker = new Worker<EmailPayload>(
   QueueName.EMAIL,
   async (job: Job<EmailPayload>) => {
-    const opts: MailOptionsWithTemplate = {
-      ...job.data,
-      from: job.data.from ?? env.SMTP_USER,
-    }
-    transporter.sendMail(opts);
+    console.log(job.data);
+    
+    // const opts: MailOptionsWithTemplate = {
+    //   ...job.data,
+    //   from: job.data.from ?? env.SMTP_USER,
+    // }
+    // transporter.sendMail(opts);
   },
   { connection: redisConnection }
 );

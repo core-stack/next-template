@@ -18,10 +18,13 @@
     "@packages/queue": "workspace:*",
     "@packages/env": "workspace:*",
     "nodemailer": "^6.10.1",
-    "nodemailer-express-handlebars": "^7.0.0"
+    "nodemailer-express-handlebars": "^7.0.0",
+    "bullmq": "^5.51.1"
   },
   "devDependencies": {
     "@types/node": "^20.17.24",
+    "@types/nodemailer": "^6.4.17",
+    "@types/nodemailer-express-handlebars": "^4.0.5",
     "prisma": "^5.22.0",
     "typescript": "5.8.3"
   },

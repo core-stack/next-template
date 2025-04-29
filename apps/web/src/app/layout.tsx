@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import './globals.css';
 
-import { SessionProvider } from 'next-auth/react';
+
 
 import { ThemeProvider } from '@/components/theme-provider';
+
+import { AuthProvider } from './auth';
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,13 +19,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <SessionProvider>
+      <AuthProvider>
         <body suppressHydrationWarning>
           <ThemeProvider defaultTheme="system" storageKey="saas-theme">
             {children}
           </ThemeProvider>
         </body>
-      </SessionProvider>
+      </AuthProvider>
     </html>
   );
 }

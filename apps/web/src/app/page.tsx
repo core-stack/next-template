@@ -1,9 +1,7 @@
 import { CreateWorkspaceButton } from '@/components/workspace/create-button';
 import { WorkspaceList } from '@/components/workspace/list';
-import { auth } from '@/lib/auth';
 
 export default async function Home() {
-  const session = await auth();
   return (
     <div className="container py-10 m-auto">
       <div className="flex items-center justify-between mb-8">
