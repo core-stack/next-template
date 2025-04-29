@@ -1,9 +1,9 @@
-import dotenv from 'dotenv';
-import path from 'path';
-import { z } from 'zod';
+import dotenv from "dotenv";
+import path from "path";
+import { z } from "zod";
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-  
+
 const envSchema = z.object({
   REDIS_URL: z.string().url(),
 
@@ -12,6 +12,12 @@ const envSchema = z.object({
   SMTP_USER: z.string(),
   SMTP_PASSWORD: z.string(),
   SMTP_SECURE: z.coerce.boolean().default(false),
+
+  GOOGLE_CLIENT_ID: z.string(),
+  GOOGLE_CLIENT_SECRET: z.string(),
+  GOOGLE_REDIRECT_URL: z.string(),
+
+  JWT_SECRET: z.string(),
 })
 
 export const env = envSchema.parse(process.env);
