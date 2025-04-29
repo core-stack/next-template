@@ -8,7 +8,7 @@
   "module": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "dev": "dotenv -e .env -- npx tsx --watch src/worker/consumer/index.ts",
+    "dev": "pnpm tsx --watch src/index.ts",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "typecheck": "tsc --noEmit"

@@ -210,6 +210,9 @@ importers:
 
   packages/env:
     dependencies:
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
       zod:
         specifier: ^3.24.3
         version: 3.24.3
