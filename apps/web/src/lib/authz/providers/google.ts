@@ -1,8 +1,7 @@
-import axios from 'axios';
+import { prisma } from "@packages/prisma";
+import axios from "axios";
 
-import { prisma, User } from '@packages/prisma';
-
-import { Provider } from './';
+import { AccountWithMembers, Provider } from "./types";
 
 type Opts = {
   GOOGLE_CLIENT_ID: string;
@@ -22,7 +21,7 @@ export const GoogleProvider = ({ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIREC
         url.searchParams.set('prompt', 'consent');
         return url.toString();
     },
-    callback: async (code: string): Promise<User> => {
+    callback: async (code: string): Promise<AccountWithMembers> => {
       const tokenRes = await axios.post('https://oauth2.googleapis.com/token', {
         code,
         client_id: GOOGLE_CLIENT_ID,
@@ -30,15 +29,15 @@ export const GoogleProvider = ({ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIREC
         redirect_uri: REDIRECT_URI,
         grant_type: 'authorization_code',
       });
-    
+
       const { access_token } = tokenRes.data;
-    
+
       const profileRes = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
         headers: { Authorization: `Bearer ${access_token}` },
       });
-    
+
       const profile = profileRes.data;
-    
+
       const account = await prisma.account.upsert({
         where: { provider_providerAccountId: { provider: path, providerAccountId: profile.sub} },
         update: {},
@@ -57,11 +56,21 @@ export const GoogleProvider = ({ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIREC
           }
         },
         include: {
-          user: true
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+              emailVerified: true,
+            },
+            include: {
+              members: true
+            }
+          }
         }
       });
-    
-      return account.user;
-    }    
+      return account;
+    }
   } as Provider
 }

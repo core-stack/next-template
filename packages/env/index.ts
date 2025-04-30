@@ -18,6 +18,8 @@ const envSchema = z.object({
   GOOGLE_REDIRECT_URL: z.string(),
 
   JWT_SECRET: z.string(),
+  JWT_ACCESS_TOKEN_DURATION: z.coerce.number().default(60 * 5), // 5 minutes
+  JWT_REFRESH_TOKEN_DURATION: z.coerce.number().default(60 * 60 * 24 * 7), // 7 days
 })
 
 export const env = envSchema.parse(process.env);
