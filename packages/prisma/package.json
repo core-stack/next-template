@@ -6,20 +6,21 @@
   "module": "./index.ts",
   "types": "./index.ts",
   "scripts": {
-    "generate": "dotenv -e ../../.env -- npx prisma generate --schema=./schema",
-    "migrate": "dotenv -e ../../.env -- npx prisma migrate deploy --schema=./schema",
-    "push": "dotenv -e ../../.env -- npx prisma db push --schema=./schema",
-    "studio": "dotenv -e ../../.env -- npx prisma studio --schema=./schema --browser none",
+    "generate": "dotenv -e ../../.env -- prisma generate --schema=./schema",
+    "migrate": "dotenv -e ../../.env -- prisma migrate deploy --schema=./schema",
+    "push": "dotenv -e ../../.env -- prisma db push --schema=./schema",
+    "studio": "dotenv -e ../../.env -- prisma studio --schema=./schema --browser none",
     "prebuild": "pnpm run generate",
     "postinstall": "pnpm run generate",
     "predev": "pnpm run generate",
-    "format": "npx prisma format --schema=./schema"
+    "format": "prisma format --schema=./schema"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0"
   },
   "devDependencies": {
     "@types/node": "^20.17.24",
+    "dotenv-cli": "^7.4.4",
     "prisma": "^5.22.0",
     "typescript": "5.8.3"
   },

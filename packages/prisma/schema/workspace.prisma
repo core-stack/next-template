@@ -4,7 +4,7 @@ enum Role {
 }
 
 model Member {
-  id                 String  @id @default(cuid())
+  id                 String  @id @default(uuid())
 
   userId             String  @map("user_id")
   user               User    @relation(fields: [userId], references: [id])
@@ -24,14 +24,13 @@ model Member {
 }
 
 model Workspace {
-  id                 String  @id @default(cuid())
+  id                 String  @id @default(uuid())
 
   slug               String  @unique
   name               String
   description        String?
 
-  backgroundImage     String // url | color
-
+  backgroundImage    String // url | color
 
   members            Member[]
   invites            Invite[]
@@ -46,7 +45,7 @@ model Invite {
   id                 String  @id @default(cuid())
   
   workspaceId  String  @map("workspace_id")
-  workspace  Workspace    @relation(fields: [workspaceId], references: [id])
+  workspace  Workspace @relation(fields: [workspaceId], references: [id])
 
   email              String
   role               Role @default(MEMBER)
