@@ -13,17 +13,17 @@ model Account {
 
   provider           String
   providerAccountId  String  @map("provider_account_id")
- 
+
   userId             String  @map("user_id")
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
- 
+
 model User {
   id            String    @id @default(uuid())
- 
+
   name          String?
   email         String?   @unique
   password      String?
@@ -33,15 +33,23 @@ model User {
   accounts      Account[]
 
   members       Member[]
- 
+
+  verificationToken VerificationToken[]
+
   @@map("users")
 }
 
+enum VerificationType {
+  ACTIVE_ACCOUNT
+}
+
 model VerificationToken {
-  identifier String
-  token      String
+  type       VerificationType
+  token      String  @unique @default(uuid())
   expires    DateTime
- 
-  @@unique([identifier, token])
+
+  userId             String  @map("user_id")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("verification_tokens")
 }

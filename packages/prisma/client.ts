@@ -6,4 +6,5 @@ export type {
   Invite,
   Account,
   VerificationToken,
+  VerificationType
 } from "@prisma/client"

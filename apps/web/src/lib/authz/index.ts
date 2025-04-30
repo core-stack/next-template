@@ -1,3 +1,5 @@
+import { createAccount } from "./credentials/create-account";
+import { login } from "./credentials/login";
 import { generateTokens, verifyToken } from "./jwt";
 import { Provider } from "./providers/types";
 
@@ -10,6 +12,8 @@ type Auth = {
     generateTokens: typeof generateTokens;
     verifyToken: typeof verifyToken;
   }
+  createAccount: typeof createAccount;
+  login: typeof login;
 }
 
 export function NewAuth(options: AuthOptions): Auth {
@@ -20,6 +24,8 @@ export function NewAuth(options: AuthOptions): Auth {
     jwt: {
       generateTokens,
       verifyToken
-    }
+    },
+    createAccount,
+    login
   }
 }
