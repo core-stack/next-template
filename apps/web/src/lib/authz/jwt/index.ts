@@ -1,12 +1,12 @@
-import { env } from "@/env";
-import { Role } from "@packages/prisma";
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 
-import { UserWithMembers } from "./types";
+import { env } from '@/env';
+
+
 
 export type AccessToken = {
+  sessionId: string;
   userId: string;
-  workspaces: { [workspaceId: string]: Role };
 }
 
 export type RefreshToken = {
@@ -24,12 +24,12 @@ type Tokens = {
   refreshTokenDuration: number;
 }
 
-export function generateTokens(user: UserWithMembers): Tokens {
+export function generateTokens(sessionId: string, userId: string): Tokens {
   const accessTokenPayload: AccessToken = {
-    userId: user.id,
-    workspaces: user.members.reduce((acc, member) => ({ ...acc, [member.workspaceId]: member.role }), {}),
+    userId,
+    sessionId
   }
-  const refreshTokenPayload: RefreshToken = { userId: user.id }
+  const refreshTokenPayload: RefreshToken = { userId }
 
   return {
     accessTokenDuration: JWT_ACCESS_TOKEN_DURATION,

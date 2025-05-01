@@ -7,6 +7,7 @@
     "dev": "turbo dev",
     "db:generate": "cd packages/prisma && pnpm generate",
     "db:migrate": "cd packages/prisma && pnpm migrate",
+    "db:migrate:dev": "cd packages/prisma && pnpm migrate:dev",
     "db:push": "cd packages/prisma && pnpm push",
     "db:studio": "cd packages/prisma && pnpm studio"
   },

@@ -30,6 +30,11 @@ model User {
   emailVerified DateTime? @map("email_verified")
   image         String?
 
+  role          Role      @default(USER)
+
+  createdAt     DateTime? @map("created_at")
+  updatedAt     DateTime? @map("updated_at")
+
   accounts      Account[]
 
   members       Member[]

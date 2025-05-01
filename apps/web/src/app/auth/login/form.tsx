@@ -2,8 +2,7 @@
 
 import { Mail } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'next/navigation';
 import { FcGoogle } from 'react-icons/fc';
 import * as z from 'zod';
 
@@ -13,6 +12,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { useSubmit } from '@/hooks/use-submit';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 const loginSchema = z.object({
@@ -23,35 +23,25 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>
 
 export function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false)
-
-  const form = useForm<LoginFormValues>({
+  const searchParams = useSearchParams();
+  const form = useSubmit<LoginFormValues>({
+    submitTo: `/api/auth/login?redirect=${searchParams.get("redirect")}`,
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
-  })
+    onSuccess: (res?: { redirect: string }) => {
+      window.location.href = res ? res.redirect : "/";
+    },
+  });
 
-  async function onSubmit(data: LoginFormValues) {
-    setIsLoading(true)
-
-    // Simulando uma chamada de API
-    try {
-      console.log(data)
-      // Aqui você implementaria a lógica de autenticação
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const isLoading = form.formState.isSubmitting;
 
   return (
     <div className="grid gap-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.onSubmit} className="space-y-4">
           <FormField
             control={form.control}
             name="email"

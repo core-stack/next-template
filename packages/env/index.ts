@@ -1,6 +1,6 @@
-import dotenv from "dotenv";
-import path from "path";
-import { z } from "zod";
+import dotenv from 'dotenv';
+import path from 'path';
+import { z } from 'zod';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
@@ -20,6 +20,8 @@ const envSchema = z.object({
   JWT_SECRET: z.string(),
   JWT_ACCESS_TOKEN_DURATION: z.coerce.number().default(60 * 5), // 5 minutes
   JWT_REFRESH_TOKEN_DURATION: z.coerce.number().default(60 * 60 * 24 * 7), // 7 days
+
+  SESSION_DURATION: z.coerce.number().default(60 * 60), // 1 hour 
 })
 
 export const env = envSchema.parse(process.env);

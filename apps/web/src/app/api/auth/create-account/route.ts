@@ -1,8 +1,5 @@
-import { auth } from "@/lib/auth";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from 'next/server';
 
-export const POST = async (req: NextRequest) => {
-  const body = await req.json();
-  const res = await auth.createAccount(body);
-  return NextResponse.json(res);
-}
+import { auth } from '@/lib/auth';
+
+export const POST = (req: NextRequest) => auth.createAccount(req);

@@ -1,7 +1,9 @@
-import { prisma } from "@packages/prisma";
-import axios from "axios";
+import axios from 'axios';
+import { NextRequest } from 'next/server';
 
-import { AccountWithMembers, Provider } from "./types";
+import { prisma } from '@packages/prisma';
+
+import { AccountWithMembers, Provider } from './types';
 
 type Opts = {
   GOOGLE_CLIENT_ID: string;
@@ -21,7 +23,7 @@ export const GoogleProvider = ({ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIREC
         url.searchParams.set('prompt', 'consent');
         return url.toString();
     },
-    callback: async (code: string): Promise<AccountWithMembers> => {
+    callback: async (req: NextRequest, code: string): Promise<AccountWithMembers> => {
       const tokenRes = await axios.post('https://oauth2.googleapis.com/token', {
         code,
         client_id: GOOGLE_CLIENT_ID,
@@ -65,11 +67,22 @@ export const GoogleProvider = ({ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIREC
               emailVerified: true,
             },
             include: {
-              members: true
+              members: {
+                select: {
+                  role: true,
+                  workspace: {
+                    select: {
+                      id: true,
+                      slug: true,
+                    }
+                  }
+                }
+              }
             }
           }
         }
       });
+
       return account;
     }
   } as Provider

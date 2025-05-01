@@ -2,8 +2,6 @@
 
 import { Mail } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { FcGoogle } from 'react-icons/fc';
 import * as z from 'zod';
 
@@ -13,6 +11,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { useSubmit } from '@/hooks/use-submit';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 const createAccountSchema = z
@@ -30,9 +29,8 @@ const createAccountSchema = z
 type CreateAccountFormValues = z.infer<typeof createAccountSchema>
 
 export function CreateAccountForm() {
-  const [isLoading, setIsLoading] = useState(false)
-
-  const form = useForm<CreateAccountFormValues>({
+  const form = useSubmit<CreateAccountFormValues>({
+    submitTo: "/api/auth/create-account",
     resolver: zodResolver(createAccountSchema),
     defaultValues: {
       name: "",
@@ -40,27 +38,14 @@ export function CreateAccountForm() {
       password: "",
       confirmPassword: "",
     },
-  })
-
-  async function onSubmit(data: CreateAccountFormValues) {
-    setIsLoading(true)
-
-    // Simulando uma chamada de API
-    try {
-      console.log(data)
-      // Aqui você implementaria a lógica de criação de conta
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
+  });
+  
+  const isLoading = form.formState.isSubmitting;
+  
   return (
     <div className="grid gap-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.onSubmit} className="space-y-4">
           <FormField
             control={form.control}
             name="name"
