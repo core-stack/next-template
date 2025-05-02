@@ -1,79 +1,18 @@
 "use client"
 
-import { Building, Settings, Users } from 'lucide-react';
-import Link from 'next/link';
-import { useState } from 'react';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useWorkspace } from "@/hooks/use-workspace";
+import { Workspace } from "@packages/prisma";
+import { Building, Settings, Users } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
-} from '@/components/ui/card';
-
-import { WorkspaceDialog } from './dialog';
-
-// Tipos baseados no schema do Prisma
-type Role = "ADMIN" | "MEMBER"
-
-interface Workspace {
-  id: string
-  slug: string
-  name: string
-  description: string | null
-  backgroundImage: string
-  createdAt: Date
-  updatedAt: Date
-  isOwner: boolean
-  role: Role
-  projectCount: number
-  memberCount: number
-}
-
-// Dados de exemplo - em produção, estes viriam do backend
-const mockWorkspaces: Workspace[] = [
-  {
-    id: "1",
-    slug: "agencia-digital",
-    name: "Agência Digital",
-    description: "Agência especializada em marketing digital e desenvolvimento web",
-    backgroundImage: "linear-gradient(to right, #4f46e5, #8b5cf6)",
-    createdAt: new Date("2023-01-15"),
-    updatedAt: new Date("2023-05-20"),
-    isOwner: true,
-    role: "ADMIN",
-    projectCount: 12,
-    memberCount: 8,
-  },
-  {
-    id: "2",
-    slug: "consultoria-tech",
-    name: "Consultoria Tech",
-    description: "Empresa de consultoria em tecnologia e transformação digital",
-    backgroundImage: "linear-gradient(to right, #0ea5e9, #22d3ee)",
-    createdAt: new Date("2023-02-10"),
-    updatedAt: new Date("2023-06-05"),
-    isOwner: false,
-    role: "MEMBER",
-    projectCount: 5,
-    memberCount: 15,
-  },
-  {
-    id: "3",
-    slug: "estudio-design",
-    name: "Estúdio Design",
-    description: "Estúdio de design gráfico e experiência do usuário",
-    backgroundImage: "linear-gradient(to right, #f59e0b, #f97316)",
-    createdAt: new Date("2023-03-22"),
-    updatedAt: new Date("2023-07-12"),
-    isOwner: false,
-    role: "ADMIN",
-    projectCount: 8,
-    memberCount: 6,
-  },
-]
+import { WorkspaceDialog } from "./dialog";
 
 export function WorkspaceList() {
-  const [workspaces, setWorkspaces] = useState<Workspace[]>(mockWorkspaces)
+  const { data: workspaces, mutate } = useWorkspace();
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -113,7 +52,7 @@ export function WorkspaceList() {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {workspaces.map((workspace) => (
+        {workspaces?.map((workspace) => (
           <WorkspaceCard key={workspace.id} workspace={workspace} onEdit={() => handleEditWorkspace(workspace)} />
         ))}
         <CreateWorkspaceCard onClick={() => setIsDialogOpen(true)} />
@@ -123,7 +62,6 @@ export function WorkspaceList() {
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         workspace={selectedWorkspace}
-        onSave={handleSaveWorkspace}
       />
     </>
   )
@@ -139,11 +77,11 @@ function WorkspaceCard({ workspace, onEdit }: { workspace: Workspace; onEdit: ()
     <Card className="overflow-hidden border-2 hover:border-primary/50 transition-all">
       <div className="h-32 w-full relative" style={cardStyle}>
         <div className="absolute top-2 right-2 flex gap-2">
-          {workspace.isOwner && (
+          {/* {workspace. && (
             <Badge variant="secondary" className="bg-white/80 hover:bg-white/90">
               Proprietário
             </Badge>
-          )}
+          )} */}
           <Badge variant="secondary" className="bg-white/80 hover:bg-white/90">
             {workspace.role === "ADMIN" ? "Admin" : "Membro"}
           </Badge>

@@ -1,5 +1,5 @@
 enum Role {
-  // global   
+  // global
   ROOT
   ADMIN
   USER
@@ -49,12 +49,15 @@ model Workspace {
 
 model Invite {
   id                 String  @id @default(cuid())
-  
+
   workspaceId  String  @map("workspace_id")
   workspace  Workspace @relation(fields: [workspaceId], references: [id])
 
   email              String
   role               Role @default(WORKSPACE_MEMBER)
+
+  userId String @map("user_id")
+  user User @relation(fields: [userId], references: [id])
 
   expiresAt          DateTime
   createdAt          DateTime @default(now())

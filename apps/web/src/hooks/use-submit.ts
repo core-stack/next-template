@@ -1,6 +1,6 @@
-import { FieldValues, useForm, UseFormProps } from 'react-hook-form';
+import { FieldValues, useForm, UseFormProps } from "react-hook-form";
 
-import { useToast } from './use-toast';
+import { useToast } from "./use-toast";
 
 type Params<TFieldValues extends FieldValues = FieldValues, TContext = any, TTransformedValues = TFieldValues> = UseFormProps<TFieldValues, TContext, TTransformedValues> & {
   submitTo: string
@@ -16,13 +16,15 @@ type Params<TFieldValues extends FieldValues = FieldValues, TContext = any, TTra
   }
   onSuccess?: (response?: any) => void
   onError?: (response?: any) => void
+  beforeSubmit?: (data: TTransformedValues) => TTransformedValues
 };
 export const useSubmit = <TFieldValues extends FieldValues = FieldValues, TContext = any, TTransformedValues = TFieldValues>(
-  { submitTo, onSuccess, onError, feedback, ...props }: Params<TFieldValues, TContext, TTransformedValues>
+  { submitTo, onSuccess, onError, beforeSubmit, feedback, ...props }: Params<TFieldValues, TContext, TTransformedValues>
 ) => {
   const { toast } = useToast();
   const form = useForm(props);
   const submit = form.handleSubmit(async (data) => {
+    data = beforeSubmit ? beforeSubmit(data) : data;
     const res = await fetch(submitTo, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

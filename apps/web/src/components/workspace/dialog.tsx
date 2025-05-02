@@ -1,53 +1,34 @@
-import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
-import { ChromePicker } from 'react-color';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-const workspaceSchema = z.object({
-  name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres" }),
-  slug: z
-    .string()
-    .min(2, { message: "O slug deve ter pelo menos 2 caracteres" })
-    .regex(/^[a-z0-9-]+$/, { message: "O slug deve conter apenas letras minúsculas, números e hífens" }),
-  description: z.string().optional(),
-  backgroundType: z.enum(["color", "gradient", "image"]),
-  backgroundColor: z.string().optional(),
-  backgroundGradient: z.string().optional(),
-  backgroundImage: z.string().optional(),
-})
-
-type WorkspaceFormValues = z.infer<typeof workspaceSchema>
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useSubmit } from "@/hooks/use-submit";
+import { cn } from "@/lib/utils";
+import { WorkspaceSchema, workspaceSchema } from "@/validation/workspace";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { ChromePicker } from "react-color";
 
 interface WorkspaceDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   workspace?: any | null
-  onSave: (data: any) => void
 }
 
-export function WorkspaceDialog({ open, onOpenChange, workspace, onSave }: WorkspaceDialogProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [color, setColor] = useState("#6366f1")
+export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDialogProps) {
   const [showColorPicker, setShowColorPicker] = useState(false)
 
   const isEditing = !!workspace
 
-  const form = useForm<WorkspaceFormValues>({
+  const form = useSubmit<WorkspaceSchema>({
     resolver: zodResolver(workspaceSchema),
     defaultValues: {
       name: workspace?.name || "",
@@ -56,43 +37,23 @@ export function WorkspaceDialog({ open, onOpenChange, workspace, onSave }: Works
       backgroundType: "gradient",
       backgroundColor: "#6366f1",
       backgroundGradient: "linear-gradient(to right, #6366f1, #a855f7)",
-      backgroundImage: "",
+    },
+    submitTo: "/api/workspace",
+    beforeSubmit: (data) => {
+      if (data.backgroundType === "color" && !data.backgroundColor) {
+        data.backgroundColor = "#6366f1"
+      } else if (data.backgroundType === "gradient" && !data.backgroundGradient) {
+        data.backgroundGradient = "linear-gradient(to right, #6366f1, #a855f7)"
+      }
+      return data;
+    },
+    onSuccess: () => {
+      onOpenChange(false)
     },
   })
 
-  async function onSubmit(data: WorkspaceFormValues) {
-    setIsLoading(true)
+  const isLoading = form.formState.isSubmitting;
 
-    try {
-      // Determinar o valor final do backgroundImage com base no tipo selecionado
-      let finalBackground = ""
-
-      if (data.backgroundType === "color") {
-        finalBackground = data.backgroundColor || "#6366f1"
-      } else if (data.backgroundType === "gradient") {
-        finalBackground = data.backgroundGradient || "linear-gradient(to right, #6366f1, #a855f7)"
-      } else {
-        finalBackground = data.backgroundImage || ""
-      }
-
-      // Preparar os dados para salvar
-      const workspaceData = {
-        name: data.name,
-        slug: data.slug,
-        description: data.description,
-        backgroundImage: finalBackground,
-      }
-
-      // Chamar a função onSave com os dados do workspace
-      onSave(workspaceData)
-    } catch (error) {
-      console.error("Erro ao salvar workspace:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Função para gerar slug a partir do nome
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -101,7 +62,6 @@ export function WorkspaceDialog({ open, onOpenChange, workspace, onSave }: Works
       .replace(/-+/g, "-")
   }
 
-  // Atualizar o slug quando o nome mudar (apenas se o slug não foi editado manualmente)
   const watchName = form.watch("name")
   const watchSlug = form.watch("slug")
 
@@ -122,7 +82,7 @@ export function WorkspaceDialog({ open, onOpenChange, workspace, onSave }: Works
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.onSubmit} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -186,7 +146,6 @@ export function WorkspaceDialog({ open, onOpenChange, workspace, onSave }: Works
                       <TabsList className="grid grid-cols-3 mb-2">
                         <TabsTrigger value="color">Cor</TabsTrigger>
                         <TabsTrigger value="gradient">Gradiente</TabsTrigger>
-                        <TabsTrigger value="image">Imagem</TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="color" className="space-y-4">
@@ -283,28 +242,6 @@ export function WorkspaceDialog({ open, onOpenChange, workspace, onSave }: Works
                             </FormItem>
                           )}
                         />
-                      </TabsContent>
-
-                      <TabsContent value="image" className="space-y-4">
-                        <FormField
-                          control={form.control}
-                          name="backgroundImage"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input placeholder="URL da imagem (https://...)" {...field} value={field.value || ""} />
-                              </FormControl>
-                              <FormDescription>Insira a URL de uma imagem para usar como fundo.</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        {form.watch("backgroundImage") && (
-                          <div
-                            className="h-32 w-full rounded-md bg-cover bg-center"
-                            style={{ backgroundImage: `url(${form.watch("backgroundImage")})` }}
-                          />
-                        )}
                       </TabsContent>
                     </Tabs>
                   </FormControl>

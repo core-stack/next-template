@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { env } from "@/env";
+import { can, getRolePermissions, Permission, RoleName } from "@packages/permission";
+import { NextRequest, NextResponse } from "next/server";
 
-import { env } from '@/env';
-import { can, getRolePermissions, Permission, RoleName } from '@packages/permission';
-
-import { Authz } from './authz';
-import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from './authz/error';
-import { GoogleProvider } from './authz/providers/google';
-import { Session } from './authz/session';
+import { Authz } from "./authz";
+import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "./authz/error";
+import { GoogleProvider } from "./authz/providers/google";
+import { Session } from "./authz/session";
 
 export const auth = new Authz({
   providers: [
@@ -27,7 +26,7 @@ type HandlerWithError = (
 type HandlerWithAuth = (
   req: NextRequest,
   session: Session,
-  context: { params: Record<string, string> }
+  context?: { params: Record<string, string> }
 ) => Promise<Response> | Response;
 
 export function withError(handler: HandlerWithError) {
@@ -47,10 +46,14 @@ export function withError(handler: HandlerWithError) {
 }
 
 export function withAuth(handler: HandlerWithAuth) {
-  return withError(async (req: NextRequest, context: { params: Record<string, string> }) => {
+  return withError(async (req: NextRequest, context?: { params: Record<string, string> }) => {
     let session: Session | null = null;
     try {
       session = await auth.getSession(req);
+      if (context?.params.slug) {
+        const workspace = session?.workspaces.find((w) => w.slug === context.params.slug);
+        if (!workspace) throw new UnauthorizedError();
+      }
     } catch (error) {
       if (error instanceof UnauthorizedError) {
         // refresh
@@ -67,11 +70,11 @@ export function withAuth(handler: HandlerWithAuth) {
 }
 
 export function withRBAC(opts: { permissions: Permission[] }, handler: HandlerWithAuth) {
-  return withAuth(async (req: NextRequest, session: Session, context: { params: Record<string, string> }) => {
+  return withAuth(async (req: NextRequest, session: Session, context?: { params: Record<string, string> }) => {
     const { permissions } = opts;
     let userPermissions = getRolePermissions(session.user.role as RoleName);
-    
-    if (context.params.slug) {
+
+    if (context?.params.slug) {
       const workspace = session.workspaces.find((w) => w.slug === context.params.slug);
       if (workspace) userPermissions.push(...getRolePermissions(workspace.role  as RoleName));
     }
