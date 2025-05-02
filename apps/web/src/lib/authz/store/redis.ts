@@ -24,9 +24,14 @@ export class RedisStore<T> implements Store<T> {
   async set(key: string, value: T, opts?: StoreOptions): Promise<void> {
     if (opts?.expiry) {
       await this.redis.set(this.makeKey(key), JSON.stringify(value), "EX", opts.expiry);
-      return;
-    }
-    await this.redis.set(this.makeKey(key), JSON.stringify(value));
+    } else {
+      const ttl = await this.redis.ttl(this.makeKey(key));
+      if (ttl > 0) {
+        await this.redis.set(this.makeKey(key), JSON.stringify(value), "KEEPTTL");
+      } else {
+        await this.redis.set(this.makeKey(key), JSON.stringify(value)); // sem TTL
+      }
+    }    
   }
 
   async delete(key: string): Promise<void> {

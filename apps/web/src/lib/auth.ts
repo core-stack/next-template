@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { env } from '@/env';
-import { can, getRolePermissions, Permission } from '@packages/permission';
+import { can, getRolePermissions, Permission, RoleName } from '@packages/permission';
 
 import { Authz } from './authz';
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from './authz/error';
@@ -48,10 +48,19 @@ export function withError(handler: HandlerWithError) {
 
 export function withAuth(handler: HandlerWithAuth) {
   return withError(async (req: NextRequest, context: { params: Record<string, string> }) => {
-    const session = await auth.getSession(req);
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    let session: Session | null = null;
+    try {
+      session = await auth.getSession(req);
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        // refresh
+        const refreshResult = await auth.refreshToken(req);
+        session = refreshResult.session;
+      } else {
+        throw error;
+      }
     }
+    if (!session) throw new UnauthorizedError();
 
     return await handler(req, session, context);
   });
@@ -60,11 +69,11 @@ export function withAuth(handler: HandlerWithAuth) {
 export function withRBAC(opts: { permissions: Permission[] }, handler: HandlerWithAuth) {
   return withAuth(async (req: NextRequest, session: Session, context: { params: Record<string, string> }) => {
     const { permissions } = opts;
-    let userPermissions = getRolePermissions(session.user.role);
+    let userPermissions = getRolePermissions(session.user.role as RoleName);
     
     if (context.params.slug) {
       const workspace = session.workspaces.find((w) => w.slug === context.params.slug);
-      if (workspace) userPermissions.push(...getRolePermissions(workspace.role));
+      if (workspace) userPermissions.push(...getRolePermissions(workspace.role  as RoleName));
     }
 
     if (!can(userPermissions, permissions)) {

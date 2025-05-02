@@ -10,6 +10,7 @@ export type Session = {
   }
   lastSeen: Date
   createdAt: Date
+  refreshToken: string
   workspaces: {
     id: string
     slug: string

@@ -3,11 +3,10 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { env } from '@/env';
 import { Member, prisma, User } from '@packages/prisma';
 
 import { UnauthorizedError } from './error';
-import { AccessToken, generateTokens, verifyToken } from './jwt';
+import { AccessToken, generateTokens, RefreshToken, verifyToken } from './jwt';
 import { Provider } from './providers/types';
 import { Session } from './session';
 import { MemoryStore } from './store/memory';
@@ -126,6 +125,8 @@ export class Authz {
   }
 
   private async createSessionAndTokens(user: User & { members: Array<Member & { workspace: { id: string, slug: string }}> }) {
+    const sessionId = crypto.randomUUID();
+    const token = generateTokens(sessionId, user.id);
     const session: Session = {
       user: {
         id: user.id,
@@ -133,13 +134,13 @@ export class Authz {
         name: user.name || "",
         role: user.role
       },
+      refreshToken: token.refreshToken,
       createdAt: new Date(),
       workspaces: user.members.map((m) => ({ id: m.workspaceId, slug: m.workspace.slug, role: m.role })),
       lastSeen: new Date(),
-      id: crypto.randomUUID(),
+      id: sessionId,
     }
-    await this.store.set(session.id, session, { expiry: env.SESSION_DURATION });
-    const token = generateTokens(session.id, user.id);
+    await this.store.set(session.id, session, { expiry: token.refreshTokenDuration });
     return { token, session };
   }
 
@@ -149,6 +150,38 @@ export class Authz {
     const token = verifyToken<AccessToken>(cookie);
     if (!token) throw new UnauthorizedError();
     const { sessionId } = token;
-    return await this.store.get(sessionId);
+    const session = await this.store.get(sessionId);
+    if (!session) throw new UnauthorizedError();
+    session.lastSeen = new Date();
+    await this.store.set(sessionId, session);
+    return session
+  }
+
+  async refreshToken(req: NextRequest) {
+    const refreshTokenInCookie = req.cookies.get("refresh-token")?.value;
+    if (!refreshTokenInCookie) throw new UnauthorizedError();
+    const tokenData = verifyToken<RefreshToken>(refreshTokenInCookie);
+    if (!tokenData) throw new UnauthorizedError();
+    
+    const { sessionId } = tokenData;
+    const session = await this.store.get(sessionId);
+    if (!session) throw new UnauthorizedError();
+    if (session.refreshToken !== refreshTokenInCookie) throw new UnauthorizedError();
+    
+    const user = await prisma.user.findUnique({ 
+      where: { id: session.user.id }, 
+      include: { 
+        members: { include: { workspace: { select: { id: true, slug: true } }} }
+      }
+    });
+    if (!user) throw new UnauthorizedError();
+    const { token, session: newSession } = await this.createSessionAndTokens(user);
+    const { accessToken,  refreshToken, accessTokenDuration, refreshTokenDuration } = token;
+    const cookie = await cookies();
+
+    cookie.set("access-token", accessToken, { maxAge: accessTokenDuration });
+    cookie.set("refresh-token", refreshToken, { maxAge: refreshTokenDuration });
+
+    return { token, session: newSession };
   }
 }

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
 
 import { AccessToken, verifyToken } from './lib/authz/jwt';
 
@@ -52,7 +51,6 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
   }
-
 
   return NextResponse.next();
 }
