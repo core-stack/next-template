@@ -1,61 +1,47 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useWorkspace } from "@/hooks/use-workspace";
-import { Workspace } from "@packages/prisma";
-import { Building, Settings, Users } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
+import { Building, Settings, Users } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
 
-import { WorkspaceDialog } from "./dialog";
+import { Button } from '@/components/ui/button';
+import {
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
+} from '@/components/ui/card';
+import { trpc } from '@/lib/trpc/client';
+import { WorkspaceWithCountSchema } from '@/lib/trpc/schema/workspace';
+
+import { Badge } from '../ui/badge';
+import { WorkspaceDialog } from './dialog';
 
 export function WorkspaceList() {
-  const { data: workspaces, mutate } = useWorkspace();
-  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null)
+  const { data: workspaces = [] } = trpc.workspace.get.useQuery();
+  const { data: user } = trpc.user.self.useQuery();
+
+  const [selectedWorkspace, setSelectedWorkspace] = useState<WorkspaceWithCountSchema | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const handleEditWorkspace = (workspace: Workspace) => {
+  const handleEditWorkspace = (workspace: WorkspaceWithCountSchema) => {
     setSelectedWorkspace(workspace)
     setIsDialogOpen(true)
   }
 
-  const handleCloseDialog = () => {
+  const handleCreateWorkspace = () => {
     setSelectedWorkspace(null)
-    setIsDialogOpen(false)
+    setIsDialogOpen(true)
   }
-
-  const handleSaveWorkspace = (updatedWorkspace: Partial<Workspace>) => {
-    if (selectedWorkspace) {
-      setWorkspaces(workspaces.map((w) => (w.id === selectedWorkspace.id ? { ...w, ...updatedWorkspace } : w)))
-    } else {
-      // Lógica para adicionar novo workspace
-      const newWorkspace: Workspace = {
-        id: `${workspaces.length + 1}`,
-        slug: updatedWorkspace.slug || `workspace-${workspaces.length + 1}`,
-        name: updatedWorkspace.name || "Novo Workspace",
-        description: updatedWorkspace.description || null,
-        backgroundImage: updatedWorkspace.backgroundImage || "linear-gradient(to right, #6366f1, #a855f7)",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isOwner: true,
-        role: "ADMIN",
-        projectCount: 0,
-        memberCount: 1,
-      }
-      setWorkspaces([...workspaces, newWorkspace])
-    }
-    handleCloseDialog()
-  }
-
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {workspaces?.map((workspace) => (
-          <WorkspaceCard key={workspace.id} workspace={workspace} onEdit={() => handleEditWorkspace(workspace)} />
+        {workspaces.map((workspace) => (
+          <WorkspaceCard 
+            key={workspace.id}
+            workspace={workspace}
+            onEdit={() => handleEditWorkspace(workspace)}
+            role={user?.members.find((m) => m.workspaceId === workspace.id)?.role}
+          />
         ))}
-        <CreateWorkspaceCard onClick={() => setIsDialogOpen(true)} />
+        <CreateWorkspaceCard onClick={handleCreateWorkspace} />
       </div>
 
       <WorkspaceDialog
@@ -67,23 +53,15 @@ export function WorkspaceList() {
   )
 }
 
-function WorkspaceCard({ workspace, onEdit }: { workspace: Workspace; onEdit: () => void }) {
-  const isBackgroundImage = workspace.backgroundImage.startsWith("http")
-  const cardStyle = isBackgroundImage
-    ? { backgroundImage: `url(${workspace.backgroundImage})`, backgroundSize: "cover" }
-    : { background: workspace.backgroundImage }
+function WorkspaceCard({ workspace, onEdit, role }: { workspace: WorkspaceWithCountSchema; onEdit: () => void, role?: string }) {
+  const cardStyle = { background: workspace.backgroundColor || workspace.backgroundGradient }
 
   return (
     <Card className="overflow-hidden border-2 hover:border-primary/50 transition-all">
       <div className="h-32 w-full relative" style={cardStyle}>
         <div className="absolute top-2 right-2 flex gap-2">
-          {/* {workspace. && (
-            <Badge variant="secondary" className="bg-white/80 hover:bg-white/90">
-              Proprietário
-            </Badge>
-          )} */}
-          <Badge variant="secondary" className="bg-white/80 hover:bg-white/90">
-            {workspace.role === "ADMIN" ? "Admin" : "Membro"}
+          <Badge variant="secondary" className="bg-yellow-300 hover:bg-yellow-400 text-black">
+            {role}
           </Badge>
         </div>
       </div>
@@ -100,9 +78,6 @@ function WorkspaceCard({ workspace, onEdit }: { workspace: Workspace; onEdit: ()
             <Users className="mr-1 h-4 w-4" />
             <span>{workspace.memberCount} membros</span>
           </div>
-          <div>
-            <span>{workspace.projectCount} projetos</span>
-          </div>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
@@ -114,7 +89,7 @@ function WorkspaceCard({ workspace, onEdit }: { workspace: Workspace; onEdit: ()
         </Button>
         <Button variant="outline" size="sm" onClick={onEdit}>
           <Settings className="mr-2 h-4 w-4" />
-          Configurações
+          Editar
         </Button>
       </CardFooter>
     </Card>

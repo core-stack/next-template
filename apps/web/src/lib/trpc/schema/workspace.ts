@@ -1,0 +1,29 @@
+import { z } from 'zod';
+
+export const workspaceSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres" }),
+  slug: z
+    .string()
+    .min(2, { message: "O slug deve ter pelo menos 2 caracteres" })
+    .regex(/^[a-z0-9-]+$/, { message: "O slug deve conter apenas letras minúsculas, números e hífens" }),
+  description: z.string().optional(),
+  backgroundType: z.enum(["color", "gradient", "image"]),
+  backgroundColor: z.string().optional(),
+  backgroundGradient: z.string().optional(),
+});
+export type WorkspaceSchema = z.infer<typeof workspaceSchema>;
+
+export const workspaceListSchema = z.array(workspaceSchema);
+export type WorkspaceListSchema = z.infer<typeof workspaceListSchema>;
+
+export const createWorkspaceSchema = workspaceSchema.omit({ id: true });
+export type CreateWorkspaceSchema = z.infer<typeof createWorkspaceSchema>;
+
+export const updateWorkspaceSchema = workspaceSchema;
+export type UpdateWorkspaceSchema = z.infer<typeof updateWorkspaceSchema>;
+
+export const workspaceWithCountSchema = workspaceSchema.extend({
+  memberCount: z.number(),
+});
+export type WorkspaceWithCountSchema = z.infer<typeof workspaceWithCountSchema>;

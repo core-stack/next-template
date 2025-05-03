@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { auth } from './lib/auth';
 import { AccessToken, verifyToken } from './lib/authz/jwt';
 
 export const config = {
@@ -33,22 +34,26 @@ export async function middleware(req: NextRequest) {
   if (!token && publicRoute) {
     return NextResponse.next();
   }
-  
-  if (!token && !publicRoute) {
-    const redirectUrl = new URL(REDIRECT_WHEN_NOT_AUTHENTICATED_PATH, req.url);
-    return NextResponse.redirect(redirectUrl);
-  }
 
   if (token && publicRoute && publicRoute.whenAuthneticated === "redirect") {
     const redirectUrl = new URL("/", req.url);
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (token && !publicRoute) {
+  if (!publicRoute) {
     const accessToken = token ? verifyToken<AccessToken>(token) : null;
     if (!accessToken) {
-      const redirectUrl = new URL(REDIRECT_WHEN_NOT_AUTHENTICATED_PATH, req.url);
-      return NextResponse.redirect(redirectUrl);
+      try {
+        const res = await auth.refreshToken(req);
+        const response = NextResponse.next();
+        response.cookies.set("access-token", res.token.accessToken, { maxAge: res.token.accessTokenDuration, httpOnly: true });
+        response.cookies.set("refresh-token", res.token.refreshToken, { maxAge: res.token.refreshTokenDuration, httpOnly: true });
+        return response;
+      } catch (error) {
+        await auth.finishSession(req);
+        const redirectUrl = new URL(REDIRECT_WHEN_NOT_AUTHENTICATED_PATH, req.url);
+        return NextResponse.redirect(redirectUrl);
+      }
     }
   }
 

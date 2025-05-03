@@ -2,8 +2,8 @@
 
 import { Mail } from 'lucide-react';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
 import { FcGoogle } from 'react-icons/fc';
-import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -11,26 +11,12 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { useSubmit } from '@/hooks/use-submit';
+import { trpc } from '@/lib/trpc/client';
+import { createAccountSchema, CreateAccountSchema } from '@/lib/trpc/schema/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-const createAccountSchema = z
-  .object({
-    name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres" }),
-    email: z.string().email({ message: "Email inválido" }),
-    password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres" }),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "As senhas não coincidem",
-    path: ["confirmPassword"],
-  })
-
-type CreateAccountFormValues = z.infer<typeof createAccountSchema>
-
 export function CreateAccountForm() {
-  const form = useSubmit<CreateAccountFormValues>({
-    submitTo: "/api/auth/create-account",
+  const form = useForm<CreateAccountSchema>({
     resolver: zodResolver(createAccountSchema),
     defaultValues: {
       name: "",
@@ -41,11 +27,15 @@ export function CreateAccountForm() {
   });
   
   const isLoading = form.formState.isSubmitting;
-  
+  const { mutate } = trpc.auth.createAccount.useMutation();
+  const onSubmit = form.handleSubmit(async (data) => {
+    mutate(data, { onSuccess: data => window.location.href = data.redirect });
+  })
+ 
   return (
     <div className="grid gap-6">
       <Form {...form}>
-        <form onSubmit={form.onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4">
           <FormField
             control={form.control}
             name="name"

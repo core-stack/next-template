@@ -1,73 +1,85 @@
-import { Button } from "@/components/ui/button";
+import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ChromePicker } from 'react-color';
+import { useForm } from 'react-hook-form';
+
+import { Button } from '@/components/ui/button';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { useSubmit } from "@/hooks/use-submit";
-import { cn } from "@/lib/utils";
-import { WorkspaceSchema, workspaceSchema } from "@/validation/workspace";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { ChromePicker } from "react-color";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { trpc } from '@/lib/trpc/client';
+import { workspaceSchema, WorkspaceSchema } from '@/lib/trpc/schema/workspace';
+import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const generateSlug = (name: string) => {
+  return name
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+}
 
 interface WorkspaceDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  workspace?: any | null
+  workspace?: WorkspaceSchema | null
 }
 
 export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDialogProps) {
   const [showColorPicker, setShowColorPicker] = useState(false)
-
   const isEditing = !!workspace
 
-  const form = useSubmit<WorkspaceSchema>({
+  const form = useForm<WorkspaceSchema>({
     resolver: zodResolver(workspaceSchema),
     defaultValues: {
+      id: "",
       name: workspace?.name || "",
       slug: workspace?.slug || "",
       description: workspace?.description || "",
-      backgroundType: "gradient",
-      backgroundColor: "#6366f1",
-      backgroundGradient: "linear-gradient(to right, #6366f1, #a855f7)",
-    },
-    submitTo: "/api/workspace",
-    beforeSubmit: (data) => {
-      if (data.backgroundType === "color" && !data.backgroundColor) {
-        data.backgroundColor = "#6366f1"
-      } else if (data.backgroundType === "gradient" && !data.backgroundGradient) {
-        data.backgroundGradient = "linear-gradient(to right, #6366f1, #a855f7)"
-      }
-      return data;
-    },
-    onSuccess: () => {
-      onOpenChange(false)
-    },
-  })
+      backgroundType: workspace?.backgroundType || "gradient",
+      backgroundColor: workspace?.backgroundColor || "#6366f1",
+      backgroundGradient: workspace?.backgroundGradient || "linear-gradient(to right, #6366f1, #a855f7)",
+    }
+  });
 
   const isLoading = form.formState.isSubmitting;
-
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-  }
+  const utils = trpc.useUtils();
+  const { mutate } = isEditing ? trpc.workspace.update.useMutation() : trpc.workspace.create.useMutation();
+  const onSubmit = form.handleSubmit(async (data) => mutate(data, { 
+    onSuccess: () => {
+      utils.workspace.get.invalidate();
+      utils.user.self.invalidate();
+      onOpenChange(false)
+    }
+  }));
 
   const watchName = form.watch("name")
-  const watchSlug = form.watch("slug")
 
-  if (watchName && !watchSlug && !isEditing) {
-    form.setValue("slug", generateSlug(watchName))
-  }
+  useEffect(() => {
+    if (watchName && !isEditing) {
+      form.setValue("slug", generateSlug(watchName))
+    }
+  }, [watchName, isEditing])
+
+  useEffect(() => {
+    form.reset({
+      id: isEditing ? workspace?.id || "" : "",
+      name: workspace?.name || "",
+      slug: workspace?.slug || "",
+      description: workspace?.description || "",
+      backgroundType: workspace?.backgroundType || "gradient",
+      backgroundColor: workspace?.backgroundColor || "#6366f1",
+      backgroundGradient: workspace?.backgroundGradient || "linear-gradient(to right, #6366f1, #a855f7)",
+    });
+  }, [workspace, form, isEditing]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -82,7 +94,7 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.onSubmit} className="space-y-6">
+          <form onSubmit={onSubmit} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -105,7 +117,7 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
                 <FormItem>
                   <FormLabel>URL da Organização</FormLabel>
                   <FormControl>
-                    <Input placeholder="minha-empresa" {...field} />
+                    <Input placeholder="minha-empresa" {...field} disabled={isEditing} />
                   </FormControl>
                   <FormDescription>
                     O slug é usado na URL da organização. Apenas letras minúsculas, números e hífens.

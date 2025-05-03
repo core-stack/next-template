@@ -2,6 +2,7 @@ import { Role } from '@packages/prisma';
 
 export type Session = {
   id: string
+  status: "active" | "revoked"
   user: {
     id: string
     email?: string

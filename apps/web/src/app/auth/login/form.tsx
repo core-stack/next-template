@@ -3,45 +3,40 @@
 import { Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
 import { FcGoogle } from 'react-icons/fc';
-import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import {
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage
+  Form, FormControl, FormError, FormField, FormItem, FormLabel, FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { useSubmit } from '@/hooks/use-submit';
+import { trpc } from '@/lib/trpc/client';
+import { LoginSchema, loginSchema } from '@/lib/trpc/schema/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
-
-const loginSchema = z.object({
-  email: z.string().email({ message: "Email inválido" }),
-  password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres" }),
-})
-
-type LoginFormValues = z.infer<typeof loginSchema>
 
 export function LoginForm() {
   const searchParams = useSearchParams();
-  const form = useSubmit<LoginFormValues>({
-    submitTo: `/api/auth/login?redirect=${searchParams.get("redirect")}`,
+  const form = useForm<LoginSchema>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
-    onSuccess: (res?: { redirect: string }) => {
-      window.location.href = res ? res.redirect : "/";
-    },
   });
 
   const isLoading = form.formState.isSubmitting;
+  
+  const { mutate, error } = trpc.auth.login.useMutation();
+  const onSubmit = form.handleSubmit(async (data) => {
+    mutate({ ...data, redirect: searchParams.get("redirect") || undefined }, { onSuccess: data => window.location.href = data.redirect }); 
+  })
 
   return (
     <div className="grid gap-6">
       <Form {...form}>
-        <form onSubmit={form.onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4">
           <FormField
             control={form.control}
             name="email"
@@ -81,6 +76,9 @@ export function LoginForm() {
               </FormItem>
             )}
           />
+          {
+            error?.message && <FormError>{error.message}</FormError>
+          }
           <Button type="submit" className="w-full" isLoading={isLoading}>
             Entrar
           </Button>

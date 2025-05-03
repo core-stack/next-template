@@ -1,0 +1,98 @@
+import { z } from 'zod';
+
+import { prisma } from '@packages/prisma';
+
+import {
+  createWorkspaceSchema, updateWorkspaceSchema, workspaceWithCountSchema
+} from '../schema/workspace';
+import { protectedProcedure, router } from '../server';
+
+export const workspaceRouter = router({
+  get: protectedProcedure
+    .output(workspaceWithCountSchema.array())
+    .query(async ({ ctx }) => {
+      const workspaces = await prisma.workspace.findMany({
+        where: {
+          members: {
+            some: {
+              userId: ctx.session.user.id
+            }
+          }
+        },
+        include: {
+          _count: {
+            select: {
+              members: true
+            }
+          }
+        }
+      });
+      return workspaces.map(w => ({
+        id: w.id,
+        name: w.name,
+        slug: w.slug,
+        backgroundType: w.backgroundImage.startsWith("#") ? "color" : "gradient",
+        backgroundColor: w.backgroundImage.startsWith("#") ? w.backgroundImage : undefined,
+        backgroundGradient: w.backgroundImage.startsWith("#") ? undefined : w.backgroundImage,
+        description: w.description ?? undefined,
+        memberCount: w._count.members,
+      }));
+    }),
+  getById: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ input }) => {
+      const workspace = await prisma.workspace.findUnique({
+        where: {
+          id: input.id
+        }
+      });
+      return workspace;
+    }),
+  create: protectedProcedure
+    .input(createWorkspaceSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { session } = ctx;
+      await prisma.workspace.create({
+        data: {
+          name: input.name,
+          slug: input.slug,
+          description: input.description,
+          backgroundImage: (input.backgroundType === "color" ? input.backgroundColor : input.backgroundGradient) || "",
+          members: {
+            create: {
+              owner: true,
+              role: "WORKSPACE_ADMIN",
+              user: {
+                connect: {
+                  id: session.user.id
+                }
+              }
+            }
+          }
+        }
+      });
+    }),
+  existsBySlug: protectedProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ input }) => {
+      const workspace = await prisma.workspace.findUnique({
+        where: {
+          slug: input.slug
+        }
+      });
+      return !!workspace;
+    }),
+  update: protectedProcedure
+    .input(updateWorkspaceSchema)
+    .mutation(async ({ input }) => {
+      await prisma.workspace.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+          slug: input.slug,
+          description: input.description,
+          backgroundImage: input.backgroundColor || input.backgroundGradient,
+        }
+      });
+    }),
+});

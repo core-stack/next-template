@@ -1,12 +1,28 @@
-import useSWR, { SWRConfig } from "swr";
+'use client';
 
-export const Provider = ({ children }: { children: React.ReactNode }) => {
+import { useState } from 'react';
+
+import { trpc } from '@/lib/trpc/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { httpBatchLink } from '@trpc/client';
+
+export function TrpcProvider({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient());
+  const [trpcClient] = useState(() =>
+    trpc.createClient({
+      links: [
+        httpBatchLink({
+          url: '/api/trpc',
+        }),
+      ],
+    })
+  );
+
   return (
-    <SWRConfig value={{
-      refreshInterval: 3000,
-      fetcher: (resource, init) => fetch(resource, init).then(res => res.json())
-    }}>
-      {children}
-    </SWRConfig>
-  )
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </trpc.Provider>
+  );
 }

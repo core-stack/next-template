@@ -1,7 +1,6 @@
 import bcrypt from 'bcrypt';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 
 import { Member, prisma, User } from '@packages/prisma';
 
@@ -20,22 +19,6 @@ export async function hashPassword(password: string) {
 export async function comparePassword(password: string, hash: string) {
   return await bcrypt.compare(password, hash)
 }
-
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-});
-
-const createAccountSchema = z.object({
-  email: z.string().email(),
-  name: z.string(),
-  password: z.string(),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
-
 
 export type AuthOptions = {
   providers: Provider[]
@@ -70,61 +53,7 @@ export class Authz {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
-  async login(req: NextRequest) {
-    const body = await req.json();
-
-    const { email, password } = await loginSchema.parseAsync(body);
-  
-    const user = await prisma.user.findUnique({ 
-      where: { email }, 
-      include: { 
-        members: { include: { workspace: { select: { id: true, slug: true } }} }
-      }
-    });
-  
-    if (!user) return NextResponse.json({error: "Email ou senha incorretos"}, { status: 400});
-    if (!user.password) return NextResponse.json({error: "Email ou senha incorretos"}, { status: 400});
-    const valid = await comparePassword(password, user.password);
-    if (!valid) return NextResponse.json({error: "Email ou senha incorretos"}, { status: 400});
-  
-    const { token: { accessToken, refreshToken, accessTokenDuration, refreshTokenDuration } } = await this.createSessionAndTokens(user);
-    const cookie = await cookies();
-
-    cookie.set("access-token", accessToken, { maxAge: accessTokenDuration });
-    cookie.set("refresh-token", refreshToken, { maxAge: refreshTokenDuration });
-    let redirect = req.nextUrl.searchParams.get('redirect');
-    if (redirect === "null") redirect = "/";
-    return NextResponse.json({ redirect }, { status: 200 });
-  }
-
-  async createAccount(req: NextRequest) {
-    const body = await req.json();
-    // validate
-    let { email, name, password } = createAccountSchema.parse(body);
-    // verify email in use
-    const userWithEmail = await prisma.user.findUnique({where: { email: email }});
-    if (userWithEmail) return NextResponse.json({ error: "Email já em uso" }, { status: 400 });
-  
-    // hash password
-    password = await hashPassword(password);
-  
-    // create user
-    const user = await prisma.user.create({
-      data: {
-        email, name, password,
-        verificationToken: {
-          create: {
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-            type: "ACTIVE_ACCOUNT"
-          }
-        }
-      }
-    });
-    user.password = null;
-    return NextResponse.json(user);
-  }
-
-  private async createSessionAndTokens(user: User & { members: Array<Member & { workspace: { id: string, slug: string }}> }) {
+  async createSessionAndTokens(user: User & { members: Array<Member & { workspace: { id: string, slug: string }}> }) {
     const sessionId = crypto.randomUUID();
     const token = generateTokens(sessionId, user.id);
     const session: Session = {
@@ -136,6 +65,7 @@ export class Authz {
       },
       refreshToken: token.refreshToken,
       createdAt: new Date(),
+      status: "active",
       workspaces: user.members.map((m) => ({ id: m.workspaceId, slug: m.workspace.slug, role: m.role })),
       lastSeen: new Date(),
       id: sessionId,
@@ -144,7 +74,7 @@ export class Authz {
     return { token, session };
   }
 
-  async getSession(req: NextRequest): Promise<Session | null> {
+  async getSession(req: NextRequest): Promise<Session | undefined> {
     const cookie = req.cookies.get("access-token")?.value;
     if (!cookie) throw new UnauthorizedError();
     const token = verifyToken<AccessToken>(cookie);
@@ -155,6 +85,18 @@ export class Authz {
     session.lastSeen = new Date();
     await this.store.set(sessionId, session);
     return session
+  }
+  
+  async finishSession(req: NextRequest) {
+    const refreshTokenInCookie = req.cookies.get("refresh-token")?.value;
+    if (!refreshTokenInCookie) return;
+    const token = verifyToken<RefreshToken>(refreshTokenInCookie);
+    if (!token) return;
+    const session = await this.store.get(token.sessionId);
+    if (!session) return;
+    session.lastSeen = new Date();
+    session.status = "revoked";
+    await this.store.set(session.id, session);
   }
 
   async refreshToken(req: NextRequest) {
@@ -175,13 +117,6 @@ export class Authz {
       }
     });
     if (!user) throw new UnauthorizedError();
-    const { token, session: newSession } = await this.createSessionAndTokens(user);
-    const { accessToken,  refreshToken, accessTokenDuration, refreshTokenDuration } = token;
-    const cookie = await cookies();
-
-    cookie.set("access-token", accessToken, { maxAge: accessTokenDuration });
-    cookie.set("refresh-token", refreshToken, { maxAge: refreshTokenDuration });
-
-    return { token, session: newSession };
+    return await this.createSessionAndTokens(user);
   }
 }
