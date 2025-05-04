@@ -15,7 +15,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { trpc } from '@/lib/trpc/client';
-import { workspaceSchema, WorkspaceSchema } from '@/lib/trpc/schema/workspace';
+import {
+  CreateWorkspaceSchema, createWorkspaceSchema, WorkspaceSchema
+} from '@/lib/trpc/schema/workspace';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -37,10 +39,9 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
   const [showColorPicker, setShowColorPicker] = useState(false)
   const isEditing = !!workspace
 
-  const form = useForm<WorkspaceSchema>({
-    resolver: zodResolver(workspaceSchema),
+  const form = useForm<CreateWorkspaceSchema>({
+    resolver: zodResolver(createWorkspaceSchema),
     defaultValues: {
-      id: "",
       name: workspace?.name || "",
       slug: workspace?.slug || "",
       description: workspace?.description || "",
@@ -53,13 +54,19 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
   const isLoading = form.formState.isSubmitting;
   const utils = trpc.useUtils();
   const { mutate } = isEditing ? trpc.workspace.update.useMutation() : trpc.workspace.create.useMutation();
-  const onSubmit = form.handleSubmit(async (data) => mutate(data, { 
-    onSuccess: () => {
-      utils.workspace.get.invalidate();
-      utils.user.self.invalidate();
-      onOpenChange(false)
-    }
-  }));
+  const onSubmit = form.handleSubmit(async (data) => {
+    
+    mutate({
+      ...data,
+      id: workspace?.id || "",
+    }, { 
+      onSuccess: () => {
+        utils.workspace.get.invalidate();
+        utils.user.self.invalidate();
+        onOpenChange(false)
+      }
+    });
+  });
 
   const watchName = form.watch("name")
 
@@ -68,10 +75,10 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
       form.setValue("slug", generateSlug(watchName))
     }
   }, [watchName, isEditing])
-
+  console.log(form.formState.errors);
+  
   useEffect(() => {
     form.reset({
-      id: isEditing ? workspace?.id || "" : "",
       name: workspace?.name || "",
       slug: workspace?.slug || "",
       description: workspace?.description || "",
@@ -85,11 +92,11 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Editar Organização" : "Criar Organização"}</DialogTitle>
+          <DialogTitle>{isEditing ? "Editar workspace" : "Criar workspace"}</DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Edite as informações da sua organização"
-              : "Preencha as informações para criar uma nova organização"}
+              ? "Edite as informações do ser workspace"
+              : "Preencha as informações para criar um novo workspace"}
           </DialogDescription>
         </DialogHeader>
 
@@ -115,12 +122,12 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
               name="slug"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL da Organização</FormLabel>
+                  <FormLabel>URL do workspace</FormLabel>
                   <FormControl>
                     <Input placeholder="minha-empresa" {...field} disabled={isEditing} />
                   </FormControl>
                   <FormDescription>
-                    O slug é usado na URL da organização. Apenas letras minúsculas, números e hífens.
+                    O slug é usado na URL do workspace. Apenas letras minúsculas, números e hífens.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -135,13 +142,13 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
                   <FormLabel>Descrição</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Descreva o propósito desta organização"
+                      placeholder="Descreva o propósito deste workspace"
                       className="resize-none"
                       {...field}
                       value={field.value || ""}
                     />
                   </FormControl>
-                  <FormDescription>Uma breve descrição sobre sua organização.</FormDescription>
+                  <FormDescription>Uma breve descrição sobre seu workspace.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

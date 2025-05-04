@@ -1,6 +1,6 @@
 export type {
   User,
-  Role,
+  Notification,
   Workspace,
   Member,
   Invite,
@@ -8,3 +8,8 @@ export type {
   VerificationToken,
   VerificationType
 } from "@prisma/client"
+
+export {
+  WorkspaceRole,
+  UserRole,
+} from '@prisma/client';

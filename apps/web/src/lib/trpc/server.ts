@@ -1,7 +1,7 @@
 import cookie from 'cookie';
 
 import { auth } from '@/lib/auth';
-import { can, getRolePermissions, Permission, RoleName } from '@packages/permission';
+import { can, getRolePermissions, Permission } from '@packages/permission';
 import { initTRPC, TRPCError } from '@trpc/server';
 
 import { Context } from './context';
@@ -39,7 +39,7 @@ export const rbacMiddleware = (requiredPermissions: Permission[]) => {
     const rawInput = await getRawInput();
     if (!ctx.session) throw new TRPCError({ code: 'UNAUTHORIZED' });
 
-    const userPermissions = getRolePermissions(ctx.session.user.role as RoleName);
+    const userPermissions = getRolePermissions(ctx.session.user.role as UserRole);
 
     if (rawInput && typeof rawInput === 'object' && 'workspaceSlug' in rawInput) {
       const workspace = ctx.session.workspaces.find(
@@ -47,7 +47,7 @@ export const rbacMiddleware = (requiredPermissions: Permission[]) => {
       );
       
       if (workspace) {
-        userPermissions.push(...getRolePermissions(workspace.role as RoleName));
+        userPermissions.push(...getRolePermissions(workspace.role as UserRole));
       }
     }
 

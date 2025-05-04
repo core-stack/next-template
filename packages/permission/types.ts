@@ -1,3 +1,5 @@
+import { UserRole as UserRoleName, WorkspaceRole as WorkspaceRoleName } from '@packages/prisma';
+
 export enum Permission {
   // global scope
   ROOT = "*:*:*",
@@ -19,16 +21,18 @@ export enum Permission {
   DELETE_MEMBER = "workspace:member:delete",
 }
 
-export enum RoleName {
-  ROOT = "ROOT",
-  ADMIN = "ADMIN",
-  USER = "USER",
-  WORKSPACE_ADMIN = "WORKSPACE_ADMIN",
-  WORKSPACE_MEMBER = "WORKSPACE_MEMBER",
-}
-
-export type Role = {
-  scope: "global" | "workspace";
-  name: RoleName;
+export type WorkspaceRoleType = {
+  scope: "workspace";
+  name: WorkspaceRoleName;
   permissions: Permission[];
 }
+export type UserRoleType = {
+  scope: "global";
+  name: UserRoleName;
+  permissions: Permission[];
+}
+export {
+  WorkspaceRoleName,
+  UserRoleName
+}
+export type Role = WorkspaceRoleType | UserRoleType;

@@ -21,6 +21,13 @@ model Account {
   @@map("accounts")
 }
 
+enum UserRole {
+  // global
+  ROOT
+  ADMIN
+  USER
+}
+
 model User {
   id            String    @id @default(uuid())
 
@@ -30,7 +37,7 @@ model User {
   emailVerified DateTime? @map("email_verified")
   image         String?
 
-  role          Role      @default(USER)
+  role          UserRole  @default(USER)
 
   createdAt     DateTime? @map("created_at")
   updatedAt     DateTime? @map("updated_at")
@@ -38,7 +45,7 @@ model User {
   accounts      Account[]
   invites       Invite[]
   members       Member[]
-
+  notifications Notification[]
   verificationToken VerificationToken[]
 
   @@map("users")

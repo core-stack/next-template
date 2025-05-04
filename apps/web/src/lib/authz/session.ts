@@ -1,13 +1,13 @@
-import { Role } from '@packages/prisma';
+import { UserRole, WorkspaceRole } from '@packages/prisma';
 
 export type Session = {
   id: string
   status: "active" | "revoked"
   user: {
     id: string
-    email?: string
+    email: string
     name?: string
-    role: Role
+    role: UserRole
   }
   lastSeen: Date
   createdAt: Date
@@ -15,6 +15,6 @@ export type Session = {
   workspaces: {
     id: string
     slug: string
-    role: Role
+    role: WorkspaceRole
   }[]
 }

@@ -69,6 +69,7 @@ export const workspaceRouter = router({
           backgroundImage: (input.backgroundType === "color" ? input.backgroundColor : input.backgroundGradient) || "",
           members: {
             create: {
+              email: session.user.email,
               owner: true,
               role: "WORKSPACE_ADMIN",
               user: {

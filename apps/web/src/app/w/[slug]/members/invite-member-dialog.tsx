@@ -30,10 +30,9 @@ type InviteFormValues = z.infer<typeof inviteSchema>
 interface InviteMemberDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onInvite: (email: string, role: "ADMIN" | "MEMBER") => void
 }
 
-export function InviteMemberDialog({ open, onOpenChange, onInvite }: InviteMemberDialogProps) {
+export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<InviteFormValues>({
@@ -48,7 +47,6 @@ export function InviteMemberDialog({ open, onOpenChange, onInvite }: InviteMembe
     setIsLoading(true)
 
     try {
-      onInvite(data.email, data.role)
       form.reset()
     } catch (error) {
       console.error("Erro ao convidar membro:", error)
