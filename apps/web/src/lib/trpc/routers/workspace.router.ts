@@ -1,11 +1,17 @@
 import { z } from 'zod';
 
 import { prisma } from '@packages/prisma';
+import { TRPCError } from '@trpc/server';
 
 import {
   createWorkspaceSchema, updateWorkspaceSchema, workspaceWithCountSchema
 } from '../schema/workspace';
 import { protectedProcedure, router } from '../server';
+
+const slugInUse = async (slug: string) => {
+  const workspace = await prisma.workspace.findUnique({ where: { slug } });
+  return !!workspace;
+}
 
 export const workspaceRouter = router({
   get: protectedProcedure
@@ -52,6 +58,9 @@ export const workspaceRouter = router({
     .input(createWorkspaceSchema)
     .mutation(async ({ ctx, input }) => {
       const { session } = ctx;
+      if (await slugInUse(input.slug)) {
+        throw new TRPCError({ code: "CONFLICT", message: "Slug já em uso" });
+      }
       await prisma.workspace.create({
         data: {
           name: input.name,
@@ -74,14 +83,8 @@ export const workspaceRouter = router({
     }),
   existsBySlug: protectedProcedure
     .input(z.object({ slug: z.string() }))
-    .query(async ({ input }) => {
-      const workspace = await prisma.workspace.findUnique({
-        where: {
-          slug: input.slug
-        }
-      });
-      return !!workspace;
-    }),
+    .query(async ({ input }) => slugInUse(input.slug)),
+
   update: protectedProcedure
     .input(updateWorkspaceSchema)
     .mutation(async ({ input }) => {
@@ -89,9 +92,8 @@ export const workspaceRouter = router({
         where: { id: input.id },
         data: {
           name: input.name,
-          slug: input.slug,
           description: input.description,
-          backgroundImage: input.backgroundColor || input.backgroundGradient,
+          backgroundImage: (input.backgroundType === "color" ? input.backgroundColor : input.backgroundGradient) || "",
         }
       });
     }),
