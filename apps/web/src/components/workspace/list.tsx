@@ -1,6 +1,6 @@
 "use client"
 
-import { Building, Settings, Users } from 'lucide-react';
+import { ArrowBigRight, Building, Settings, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -82,9 +82,9 @@ function WorkspaceCard({ workspace, onEdit, role }: { workspace: WorkspaceWithCo
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline" size="sm" asChild>
-          <Link href={`/workspaces/${workspace.slug}`}>
-            <Users className="mr-2 h-4 w-4" />
-            Membros
+          <Link href={`/w/${workspace.slug}`}>
+            <ArrowBigRight className="mr-2 h-4 w-4" />
+            Entrar
           </Link>
         </Button>
         <Button variant="outline" size="sm" onClick={onEdit}>
