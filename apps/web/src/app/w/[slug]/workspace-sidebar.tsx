@@ -10,16 +10,18 @@ import {
 } from '@/components/ui/select';
 import { UserProfile } from '@/components/user/profile';
 import { trpc } from '@/lib/trpc/client';
+import { WorkspaceSchema } from '@/lib/trpc/schema/workspace';
 import { cn } from '@/lib/utils';
 
 interface WorkspaceSidebarProps {
   slug: string
+  currentWokspace: WorkspaceSchema
 }
 
-export function WorkspaceSidebar({ slug }: WorkspaceSidebarProps) {
+export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProps) {
   const pathname = usePathname() || ""
   const router = useRouter();
-  const { data: workspaces = [] } = trpc.workspace.get.useQuery();
+  const { data: workspaces = [currentWokspace] } = trpc.workspace.get.useQuery();
 
   const routes = [
     {

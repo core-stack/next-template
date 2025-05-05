@@ -10,24 +10,28 @@ import {
 } from '@/components/ui/card';
 import { trpc } from '@/lib/trpc/client';
 import { WorkspaceWithCountSchema } from '@/lib/trpc/schema/workspace';
+import { cn } from '@/lib/utils';
 
 import { Badge } from '../ui/badge';
 import { WorkspaceDialog } from './create-or-update-dialog';
 
+type WorkspaceWithCount = Omit<WorkspaceWithCountSchema, "disabledAt"> & {
+  disabledAt?: string;
+}
 export function WorkspaceList() {
   const { data: workspaces = [] } = trpc.workspace.get.useQuery();
   const { data: user } = trpc.user.self.useQuery();
 
-  const [selectedWorkspace, setSelectedWorkspace] = useState<WorkspaceWithCountSchema | null>(null)
+  const [selectedWorkspace, setSelectedWorkspace] = useState<WorkspaceWithCount | undefined>(undefined)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const handleEditWorkspace = (workspace: WorkspaceWithCountSchema) => {
+  const handleEditWorkspace = (workspace: WorkspaceWithCount) => {
     setSelectedWorkspace(workspace)
     setIsDialogOpen(true)
   }
 
   const handleCreateWorkspace = () => {
-    setSelectedWorkspace(null)
+    setSelectedWorkspace(undefined)
     setIsDialogOpen(true)
   }
   return (
@@ -47,17 +51,21 @@ export function WorkspaceList() {
       <WorkspaceDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        workspace={selectedWorkspace}
+        workspace={{
+          ...selectedWorkspace!,
+          disabledAt: selectedWorkspace?.disabledAt ? new Date(selectedWorkspace.disabledAt) : undefined
+        }}
       />
     </>
   )
 }
 
-function WorkspaceCard({ workspace, onEdit, role }: { workspace: WorkspaceWithCountSchema; onEdit: () => void, role?: string }) {
+function WorkspaceCard({ workspace, onEdit, role }: { workspace: WorkspaceWithCount; onEdit: () => void, role?: string }) {
   const cardStyle = { background: workspace.backgroundColor || workspace.backgroundGradient }
-
+  console.log(workspace);
+  
   return (
-    <Card className="overflow-hidden border-2 hover:border-primary/50 transition-all">
+    <Card className={cn("overflow-hidden border-2 hover:border-primary/50 transition-all", workspace.disabledAt && "opacity-50")}>
       <div className="h-32 w-full relative" style={cardStyle}>
         <div className="absolute top-2 right-2 flex gap-2">
           <Badge variant="secondary" className="bg-yellow-300 hover:bg-yellow-400 text-black">
@@ -68,7 +76,7 @@ function WorkspaceCard({ workspace, onEdit, role }: { workspace: WorkspaceWithCo
       <CardHeader>
         <CardTitle className="flex items-center">
           <Building className="mr-2 h-5 w-5 text-muted-foreground" />
-          {workspace.name}
+          {workspace.name} {workspace.disabledAt && <Badge className="ml-2" variant="destructive">Desativado</Badge>}
         </CardTitle>
         <CardDescription>{workspace.description || "Sem descrição"}</CardDescription>
       </CardHeader>
@@ -81,13 +89,13 @@ function WorkspaceCard({ workspace, onEdit, role }: { workspace: WorkspaceWithCo
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="outline" size="sm" className={!workspace.disabledAt ? "" : "pointer-events-none"} disabled={!!workspace.disabledAt} asChild>
           <Link href={`/w/${workspace.slug}`}>
             <ArrowBigRight className="mr-2 h-4 w-4" />
             Entrar
           </Link>
         </Button>
-        <Button variant="outline" size="sm" onClick={onEdit}>
+        <Button variant="outline" size="sm" disabled={!!workspace.disabledAt} onClick={onEdit}>
           <Settings className="mr-2 h-4 w-4" />
           Editar
         </Button>

@@ -1,22 +1,25 @@
-import { Button } from "@/components/ui/button";
+import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ChromePicker } from 'react-color';
+import { useForm } from 'react-hook-form';
+
+import { Button } from '@/components/ui/button';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { trpc } from "@/lib/trpc/client";
-import { CreateWorkspaceSchema, createWorkspaceSchema, WorkspaceSchema } from "@/lib/trpc/schema/workspace";
-import { cn } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { ChromePicker } from "react-color";
-import { useForm } from "react-hook-form";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { trpc } from '@/lib/trpc/client';
+import {
+  CreateWorkspaceSchema, createWorkspaceSchema, WorkspaceSchema
+} from '@/lib/trpc/schema/workspace';
+import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const generateSlug = (name: string) => {
   return name
@@ -29,7 +32,7 @@ const generateSlug = (name: string) => {
 interface WorkspaceDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  workspace?: WorkspaceSchema | null
+  workspace?: WorkspaceSchema
 }
 
 export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDialogProps) {

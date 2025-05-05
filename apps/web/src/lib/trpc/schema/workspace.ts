@@ -11,6 +11,7 @@ export const workspaceSchema = z.object({
   backgroundType: z.enum(["color", "gradient", "image"]),
   backgroundColor: z.string().optional(),
   backgroundGradient: z.string().optional(),
+  disabledAt: z.date().optional(),
 });
 export type WorkspaceSchema = z.infer<typeof workspaceSchema>;
 

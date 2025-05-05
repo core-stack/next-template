@@ -53,6 +53,7 @@ export const workspaceRouter = router({
         backgroundGradient: w.backgroundImage.startsWith("#") ? undefined : w.backgroundImage,
         description: w.description ?? undefined,
         memberCount: w._count.members,
+        disabledAt: w.disabledAt ?? undefined
       }));
     }),
   getById: protectedProcedure
@@ -61,11 +62,11 @@ export const workspaceRouter = router({
     .query(async ({ input }) => {
       const workspace = await prisma.workspace.findUnique({
         where: {
-          id: input.id
+          id: input.id, disabledAt: null
         }
       });
       if (!workspace) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Workspace not found" });
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
       }
       return formatWorkspace(workspace);
     }),
@@ -73,9 +74,9 @@ export const workspaceRouter = router({
     .input(z.object({ slug: z.string() }))
     .output(workspaceSchema)
     .query(async ({ input }) => {
-      const workspace = await prisma.workspace.findUnique({ where: input });
+      const workspace = await prisma.workspace.findUnique({ where: { slug: input.slug, disabledAt: null } });
       if (!workspace) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Workspace not found" });
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
       }
       return formatWorkspace(workspace);
     }),
@@ -115,13 +116,16 @@ export const workspaceRouter = router({
     .input(updateWorkspaceSchema)
     .mutation(async ({ input }) => {
       const res = await prisma.workspace.update({
-        where: { id: input.id },
+        where: { id: input.id, disabledAt: null },
         data: {
           name: input.name,
           description: input.description,
           backgroundImage: (input.backgroundType === "color" ? input.backgroundColor : input.backgroundGradient) || "",
         }
       });
+      if (!res) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
+      }
       return formatWorkspace(res);
     }),
   disable: protectedProcedure
@@ -134,7 +138,7 @@ export const workspaceRouter = router({
       if (!user.password) throw new TRPCError({ code: "FORBIDDEN", message: "Por favor, defina uma senha para ativar esse workspace" });
       if (!await comparePassword(input.password, user.password)) throw new TRPCError({ code: "FORBIDDEN", message: "Senha incorreta" });
       const workspace = await prisma.workspace.findUnique({
-        where: { slug: input.slug, name: input.confirmText },
+        where: { slug: input.slug, name: input.confirmText, disabledAt: null },
       });
       if (!workspace) throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
       await prisma.workspace.update({ where: { id: workspace.id }, data: { disabledAt: new Date() } });
@@ -150,7 +154,7 @@ export const workspaceRouter = router({
       if (!await comparePassword(input.password, user.password)) throw new TRPCError({ code: "FORBIDDEN", message: "Senha incorreta" });
 
       await prisma.workspace.update({
-        where: { slug: input.slug },
+        where: { slug: input.slug, disabledAt: { not: null } },
         data: { disabledAt: null }
       });
     }),

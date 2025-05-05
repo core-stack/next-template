@@ -1,6 +1,6 @@
-import { prisma } from "@packages/prisma";
+import { prisma } from '@packages/prisma';
 
-import { protectedProcedure, router } from "../trpc";
+import { protectedProcedure, router } from '../trpc';
 
 export const userRouter = router({
   self: protectedProcedure.query(async ({ ctx }) => {

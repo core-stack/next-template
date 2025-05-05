@@ -1,23 +1,22 @@
-import { env } from "@/env";
-import { Session } from "@/lib/authz/session";
-import { sendNotification } from "@/lib/notification";
-import { prisma } from "@packages/prisma";
-import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
-import { TRPCError } from "@trpc/server";
-import moment from "moment";
-import { z } from "zod";
+import moment from 'moment';
+import { z } from 'zod';
 
-import { inviteMemberSchema } from "../schema/invite";
-import { protectedProcedure, router } from "../trpc";
+import { env } from '@/env';
+import { sendNotification } from '@/lib/notification';
+import { hasAccess } from '@/lib/utils';
+import { prisma } from '@packages/prisma';
+import { addInQueue, EmailTemplate, QueueName } from '@packages/queue';
+import { TRPCError } from '@trpc/server';
 
-const hasAccess = (session: Session, slug: string) => session.workspaces.some((w) => w.slug === slug);
+import { inviteMemberSchema } from '../schema/invite';
+import { protectedProcedure, router } from '../trpc';
 
 export const inviteRouter = router({
   getByWorkspace: protectedProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => {
       const invites = await prisma.invite.findMany({
-        where: { workspace: { slug: input.slug } },
+        where: { workspace: { slug: input.slug, disabledAt: null } },
       });
       return invites;
     }),
@@ -27,8 +26,8 @@ export const inviteRouter = router({
     .mutation(async ({ input, ctx }) => {
       if (!hasAccess(ctx.session, input.slug)) throw new TRPCError({ code: 'FORBIDDEN', message: "Você não tem acesso a esse workspace" });
 
-      const workspace = await prisma.workspace.findUnique({ where: { slug: input.slug }});
-      if (!workspace) throw new TRPCError({ code: 'NOT_FOUND', message: "Workspace nao encontrado" });
+      const workspace = await prisma.workspace.findUnique({ where: { slug: input.slug, disabledAt: null }});
+      if (!workspace) throw new TRPCError({ code: 'NOT_FOUND', message: "Workspace não encontrado" });
 
       for (const { email, role } of input.emails) {
         // verify if exists member with email
