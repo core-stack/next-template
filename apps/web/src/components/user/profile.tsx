@@ -1,6 +1,7 @@
 "use client";
 import { ChevronDown, HelpCircle, LogOut, Moon, Settings, Sun, User } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,7 +15,12 @@ import { Button } from '../ui/button';
 export const UserProfile = () => {
   const { data: user } = trpc.user.self.useQuery();
   const { theme, setTheme } = useTheme();
+  const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { mutate } = trpc.auth.logout.useMutation();
+  const handleLogout = () => {
+    mutate(undefined, { onSuccess: () => router.push("/auth/login") });
+  }
 
   return (
     <Popover onOpenChange={setIsCollapsed} open={isCollapsed}>
@@ -90,7 +96,10 @@ export const UserProfile = () => {
         </div>
 
         <div className="pt-2 border-t">
-          <button className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted w-full text-left text-red-500 hover:text-red-600">
+          <button
+            onClick={handleLogout} 
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted w-full text-left text-red-500 hover:text-red-600"
+          >
             <LogOut className="h-4 w-4" />
             <span>Sair</span>
           </button>
