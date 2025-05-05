@@ -11,14 +11,18 @@ const lazyTransporter: Promise<Transporter> | undefined = env.SMTP_ENABLED ?
 const emailWorker = new Worker<EmailPayload>(
   QueueName.EMAIL,
   async (job: Job<EmailPayload>) => {
-    console.log(job.data);
 
     const opts: MailOptionsWithTemplate = {
       ...job.data,
       from: job.data.from ?? env.SMTP_USER,
     }
     const transporter = await lazyTransporter
-    await transporter?.sendMail(opts);
+    if (!transporter) {
+      console.warn("SMTP is disabled");
+      console.log(job.data);
+    } else {
+      await transporter.sendMail(opts);
+    }
   },
   { connection: redisConnection }
 );

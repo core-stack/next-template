@@ -1,21 +1,20 @@
-import { cookies } from 'next/headers';
+import { auth } from "@/lib/auth";
+import { comparePassword, hashPassword } from "@/lib/authz";
+import { prisma } from "@packages/prisma";
+import { TRPCError } from "@trpc/server";
+import { cookies } from "next/headers";
 
-import { auth } from '@/lib/auth';
-import { comparePassword, hashPassword } from '@/lib/authz';
-import { prisma } from '@packages/prisma';
-import { TRPCError } from '@trpc/server';
-
-import { createAccountSchema, loginSchema } from '../schema/auth';
-import { protectedProcedure, publicProcedure, router } from '../server';
+import { createAccountSchema, loginSchema } from "../schema/auth";
+import { publicProcedure, router } from "../server";
 
 export const authRouter = router({
   login: publicProcedure
     .input(loginSchema)
     .mutation(async ({ input }) => {
       const { email, password, redirect } = input
-      const user = await prisma.user.findUnique({ 
-        where: { email }, 
-        include: { 
+      const user = await prisma.user.findUnique({
+        where: { email },
+        include: {
           members: { include: { workspace: { select: { id: true, slug: true } }} }
         }
       });
@@ -52,10 +51,10 @@ export const authRouter = router({
       // verify email in use
       const userWithEmail = await prisma.user.findUnique({where: { email: email }});
       if (userWithEmail) throw new TRPCError({ code: "BAD_REQUEST", message: "Email já em uso" });
-    
+
       // hash password
       const hashedPassword = await hashPassword(password);
-    
+
       // create user
       const user = await prisma.user.create({
         data: {
@@ -76,7 +75,7 @@ export const authRouter = router({
       return { redirect: "/w" };
     }),
 
-  logout: protectedProcedure.mutation(async () => {
+  logout: publicProcedure.mutation(async () => {
     const cookie = await cookies();
     cookie.delete("access-token");
     cookie.delete("refresh-token");

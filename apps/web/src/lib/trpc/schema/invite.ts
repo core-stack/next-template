@@ -1,6 +1,5 @@
-import { z } from 'zod';
-
-import { WorkspaceRole } from '@packages/prisma';
+import { WorkspaceRole } from "@packages/prisma";
+import { z } from "zod";
 
 export const inviteSchema = z.object({
   id: z.string().uuid(),
@@ -13,3 +12,16 @@ export const inviteSchema = z.object({
   expiresAt: z.date(),
 });
 export type InviteSchema = z.infer<typeof inviteSchema>;
+
+
+export const inviteMemberSchema = z.object({
+  emails: z.object({
+    email: z.string().email({ message: "Email inválido" }),
+    role: z.nativeEnum(WorkspaceRole, {
+      required_error: "Selecione uma função",
+    }),
+  }).array(),
+  slug: z.string(),
+});
+
+export type InviteMemberSchema = z.infer<typeof inviteMemberSchema>;

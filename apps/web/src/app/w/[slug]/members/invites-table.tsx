@@ -1,17 +1,14 @@
-import { ArrowUpDown } from 'lucide-react';
-import { useState } from 'react';
-
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useWorkspace } from "@/hooks/use-workspace";
+import { trpc } from "@/lib/trpc/client";
+import { InviteSchema } from "@/lib/trpc/schema/invite";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from '@/components/ui/table';
-import { useWorkspace } from '@/hooks/use-workspace';
-import { trpc } from '@/lib/trpc/client';
-import { InviteSchema } from '@/lib/trpc/schema/invite';
-import {
-  ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel,
-  getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState
-} from '@tanstack/react-table';
+  ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel,
+  getSortedRowModel, SortingState, useReactTable, VisibilityState
+} from "@tanstack/react-table";
+import { ArrowUpDown } from "lucide-react";
+import { useState } from "react";
 
 type InviteTableRow = Omit<InviteSchema, "createdAt" | "updatedAt" | "expiresAt"> & {
   createdAt: string
@@ -72,11 +69,33 @@ export const InvitesTable = () => {
       },
     },
     {
+      accessorKey: "expiresAt",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="p-0 hover:bg-transparent"
+          >
+            Data de expiração
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
+      cell: ({ row }) => {
+        const expiresAt = new Date(row.getValue("expiresAt"))
+        const formatted = new Intl.DateTimeFormat("pt-BR", {
+          dateStyle: "medium",
+        }).format(expiresAt)
+        return <div>{formatted}</div>
+      },
+    },
+    {
       id: "actions",
       cell: () => {
         return isOwner ? (
           <div className="text-right">
-            <Button variant="ghost" size="sm">
+            <Button variant="destructive-outline" size="sm">
               Cancelar
             </Button>
           </div>

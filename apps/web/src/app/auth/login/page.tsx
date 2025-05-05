@@ -1,6 +1,7 @@
-import Link from 'next/link';
+import Link from "next/link";
+import { Suspense } from "react";
 
-import { LoginForm } from './form';
+import { LoginForm } from "./form";
 
 import type { Metadata } from "next"
 export const metadata: Metadata = {
@@ -32,7 +33,10 @@ export default function LoginPage() {
             <h1 className="text-2xl font-semibold tracking-tight">Bem-vindo de volta</h1>
             <p className="text-sm text-muted-foreground">Entre com seu email e senha para acessar sua conta</p>
           </div>
-          <LoginForm />
+          <Suspense>
+            <LoginForm />
+          </Suspense>
+
           <p className="px-8 text-center text-sm text-muted-foreground">
             Ao continuar, você concorda com nossos{" "}
             <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
