@@ -9,6 +9,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "dev": "pnpm tsx --watch src/index.ts",
+    "start": "pnpm tsx src/index.ts",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "typecheck": "tsc --noEmit"
