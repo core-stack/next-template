@@ -38,6 +38,8 @@ model Workspace {
   members            Member[]
   invites            Invite[]
 
+  disabledAt         DateTime?
+
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 

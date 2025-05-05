@@ -27,3 +27,13 @@ export const workspaceWithCountSchema = workspaceSchema.extend({
   memberCount: z.number(),
 });
 export type WorkspaceWithCountSchema = z.infer<typeof workspaceWithCountSchema>;
+
+export const disableWorkspaceSchema = z.object({
+  slug: z.string(),
+  password: z.string(),
+  confirmText: z.string(),
+})
+export type DisableWorkspaceSchema = z.infer<typeof disableWorkspaceSchema>;
+
+export const enableWorkspaceSchema = disableWorkspaceSchema.omit({ confirmText: true });
+export type EnableWorkspaceSchema = z.infer<typeof enableWorkspaceSchema>;

@@ -1,10 +1,11 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
-import { Building } from "lucide-react";
-import { useState } from "react";
+import { Building } from 'lucide-react';
+import { useState } from 'react';
 
-import { WorkspaceDialog } from "./dialog";
+import { Button } from '@/components/ui/button';
+
+import { WorkspaceDialog } from './create-or-update-dialog';
 
 export function CreateWorkspaceButton() {
   const [open, setOpen] = useState(false)

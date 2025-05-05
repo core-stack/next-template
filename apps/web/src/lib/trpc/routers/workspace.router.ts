@@ -1,11 +1,12 @@
 import { z } from 'zod';
 
+import { comparePassword } from '@/lib/authz';
 import { prisma, Workspace } from '@packages/prisma';
 import { TRPCError } from '@trpc/server';
 
 import {
-  createWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema, workspaceSchema,
-  workspaceWithCountSchema
+  createWorkspaceSchema, disableWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema,
+  workspaceSchema, workspaceWithCountSchema
 } from '../schema/workspace';
 import { protectedProcedure, router } from '../trpc';
 
@@ -113,13 +114,44 @@ export const workspaceRouter = router({
   update: protectedProcedure
     .input(updateWorkspaceSchema)
     .mutation(async ({ input }) => {
-      await prisma.workspace.update({
+      const res = await prisma.workspace.update({
         where: { id: input.id },
         data: {
           name: input.name,
           description: input.description,
           backgroundImage: (input.backgroundType === "color" ? input.backgroundColor : input.backgroundGradient) || "",
         }
+      });
+      return formatWorkspace(res);
+    }),
+  disable: protectedProcedure
+    .input(disableWorkspaceSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { session } = ctx;
+      const userId = session.user.id;
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) throw new TRPCError({ code: "FORBIDDEN", message: "Você não tem acesso a esse workspace" });
+      if (!user.password) throw new TRPCError({ code: "FORBIDDEN", message: "Por favor, defina uma senha para ativar esse workspace" });
+      if (!await comparePassword(input.password, user.password)) throw new TRPCError({ code: "FORBIDDEN", message: "Senha incorreta" });
+      const workspace = await prisma.workspace.findUnique({
+        where: { slug: input.slug, name: input.confirmText },
+      });
+      if (!workspace) throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
+      await prisma.workspace.update({ where: { id: workspace.id }, data: { disabledAt: new Date() } });
+    }),
+  enable: protectedProcedure
+    .input(disableWorkspaceSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { session } = ctx;
+      const userId = session.user.id;
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) throw new TRPCError({ code: "FORBIDDEN", message: "Você não tem acesso a esse workspace" });
+      if (!user.password) throw new TRPCError({ code: "FORBIDDEN", message: "Por favor, defina uma senha para ativar esse workspace" });
+      if (!await comparePassword(input.password, user.password)) throw new TRPCError({ code: "FORBIDDEN", message: "Senha incorreta" });
+
+      await prisma.workspace.update({
+        where: { slug: input.slug },
+        data: { disabledAt: null }
       });
     }),
 });

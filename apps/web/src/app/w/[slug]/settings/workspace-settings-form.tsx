@@ -32,6 +32,7 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
   const form = useForm<UpdateWorkspaceSchema>({
     resolver: zodResolver(updateWorkspaceSchema),
     defaultValues: {
+      id: workspace.id,
       name: workspace.name,
       slug: workspace.slug,
       description: workspace.description,
@@ -43,6 +44,7 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
 
   const reset = () => {
     form.reset({
+      id: workspace.id,
       name: workspace.name,
       slug: workspace.slug,
       description: workspace.description,
@@ -57,12 +59,22 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
   const { mutate } = trpc.workspace.update.useMutation();
   const onSubmit = form.handleSubmit(async (data) => {
     mutate(data, {
-      onSuccess: () => {
-        utils.workspace.get.invalidate();
+      onSuccess: async (updated) => {
+        form.reset({
+          id: updated.id,
+          name: updated.name,
+          slug: updated.slug,
+          description: updated.description,
+          backgroundType: updated.backgroundType,
+          backgroundColor: updated.backgroundColor || "#6366f1",
+          backgroundGradient: updated.backgroundGradient || "linear-gradient(to right, #6366f1, #a855f7)",
+        })
+        await utils.workspace.get.invalidate();
       }
     });
   });
-
+  console.log(form.formState.errors);
+  
   return (
     <Card>
       <CardHeader>

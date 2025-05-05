@@ -1,5 +1,3 @@
-
-
 import { Separator } from '@/components/ui/separator';
 import { caller } from '@/lib/trpc/server';
 
@@ -12,9 +10,11 @@ type Props = {
     slug: string
   }>
 }
+
 export default async function WorkspaceSettingsPage({ params }: Props) {
   const { slug } = await params;
   const workspace = await caller.workspace.getBySlug({ slug });
+
   return (
     <div className="container py-10">
       <div className="flex flex-col gap-6 max-w-4xl mx-auto">
@@ -33,7 +33,7 @@ export default async function WorkspaceSettingsPage({ params }: Props) {
         </div>
 
         <div className="mt-6">
-          <DangerZone workspaceId={workspace.id} workspaceName={workspace.name} />
+          <DangerZone workspaceName={workspace.name} />
         </div>
       </div>
     </div>

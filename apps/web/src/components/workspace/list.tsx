@@ -12,7 +12,7 @@ import { trpc } from '@/lib/trpc/client';
 import { WorkspaceWithCountSchema } from '@/lib/trpc/schema/workspace';
 
 import { Badge } from '../ui/badge';
-import { WorkspaceDialog } from './dialog';
+import { WorkspaceDialog } from './create-or-update-dialog';
 
 export function WorkspaceList() {
   const { data: workspaces = [] } = trpc.workspace.get.useQuery();
