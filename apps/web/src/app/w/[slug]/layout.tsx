@@ -4,13 +4,13 @@ import type { ReactNode } from "react"
 
 interface WorkspaceLayoutProps {
   children: ReactNode
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default function WorkspaceLayout({ children, params }: WorkspaceLayoutProps) {
-  const { slug } = params
+export default async function WorkspaceLayout({ children, params }: WorkspaceLayoutProps) {
+  const { slug } = await params
 
   return (
     <div className="flex min-h-screen">
