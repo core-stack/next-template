@@ -1,10 +1,11 @@
-import { env } from "@packages/env";
-import { EmailPayload, QueueName } from "@packages/queue";
-import { redisConnection } from "@packages/queue/redis";
-import { Job, Worker } from "bullmq";
-import nodemailer, { SendMailOptions } from "nodemailer";
-import hbs from "nodemailer-express-handlebars";
-import path from "path";
+import { Job, Worker } from 'bullmq';
+import nodemailer, { SendMailOptions } from 'nodemailer';
+import hbs from 'nodemailer-express-handlebars';
+import path from 'path';
+
+import { env } from '@packages/env';
+import { EmailPayload, QueueName } from '@packages/queue';
+import { redisConnection } from '@packages/queue/redis';
 
 const transporter = nodemailer.createTransport({
   host: env.SMTP_HOST,
@@ -35,11 +36,11 @@ const emailWorker = new Worker<EmailPayload>(
   async (job: Job<EmailPayload>) => {
     console.log(job.data);
 
-    // const opts: MailOptionsWithTemplate = {
-    //   ...job.data,
-    //   from: job.data.from ?? env.SMTP_USER,
-    // }
-    // transporter.sendMail(opts);
+    const opts: MailOptionsWithTemplate = {
+      ...job.data,
+      from: job.data.from ?? env.SMTP_USER,
+    }
+    transporter.sendMail(opts);
   },
   { connection: redisConnection }
 );

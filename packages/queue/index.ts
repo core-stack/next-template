@@ -1,26 +1,11 @@
-import { Queue } from "bullmq";
-import { z } from "zod";
+import { Queue } from 'bullmq';
 
-import { redisConnection } from "./redis";
+import { EmailPayload, emailPayloadSchema } from './email';
+import { redisConnection } from './redis';
 
 export enum QueueName {
   EMAIL = 'email',
 }
-
-export enum EmailTemplate {
-  FORGOT_PASSWORD = 'forgot-password',
-  INVITE = 'invite',
-  ACTIVE_ACCOUNT = 'active-account',
-}
-
-const emailPayloadSchema = z.object({
-  to: z.string().email(),
-  subject: z.string(),
-  template: z.nativeEnum(EmailTemplate),
-  context: z.record(z.string()),
-  from: z.string().optional(),
-})
-export type EmailPayload = z.infer<typeof emailPayloadSchema>;
 
 const schemaMap = {
   [QueueName.EMAIL]: emailPayloadSchema,
@@ -41,3 +26,5 @@ export function getQueue(queue: QueueName) {
 export function addInQueue<T extends QueueName>(queue: T, payload: QueuesMap[T]) {
   return getQueue(queue).add(queue, schemaMap[queue].parse(payload));
 }
+
+export * from "./email";

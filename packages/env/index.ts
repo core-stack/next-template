@@ -29,6 +29,8 @@ const envSchema = z.object({
   AWS_ENDPOINT: z.string(),
 
   WORKSPACE_INVITE_EXPIRES_IN_MS: z.coerce.number().default(60 * 60 * 24 * 7), // 7 days
+
+  APP_URL: z.string().url().default('http://localhost:3000'),
 })
 
 export const env = envSchema.parse(process.env);
