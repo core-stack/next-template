@@ -248,22 +248,6 @@ importers:
         specifier: 5.8.3
         version: 5.8.3
 
-  packages/email:
-    dependencies:
-      '@packages/queue':
-        specifier: workspace:*
-        version: link:../queue
-      zod:
-        specifier: ^3.24.3
-        version: 3.24.3
-    devDependencies:
-      '@types/node':
-        specifier: ^20.17.24
-        version: 20.17.32
-      typescript:
-        specifier: 5.8.3
-        version: 5.8.3
-
   packages/env:
     dependencies:
       dotenv:

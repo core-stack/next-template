@@ -1,7 +1,7 @@
-import { env } from '@/env';
+import { env } from "@/env";
 
-import { Authz } from './authz';
-import { GoogleProvider } from './authz/providers/google';
+import { Authz } from "./authz";
+import { GoogleProvider } from "./authz/providers/google";
 
 export const auth = new Authz({
   providers: [
@@ -11,5 +11,5 @@ export const auth = new Authz({
       REDIRECT_URI: env.GOOGLE_REDIRECT_URL
     }),
   ],
-  sessionStore: "redis",
+  sessionStore: env.SESSION_STORE,
 })
