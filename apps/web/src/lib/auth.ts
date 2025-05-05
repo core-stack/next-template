@@ -1,7 +1,7 @@
-import { env } from "@/env";
+import { env } from '@/env';
 
-import { Authz } from "./authz";
-import { GoogleProvider } from "./authz/providers/google";
+import { Authz } from './authz';
+import { GoogleProvider } from './authz/providers/google';
 
 export const auth = new Authz({
   providers: [

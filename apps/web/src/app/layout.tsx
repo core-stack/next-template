@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { ThemeProvider } from "@/components/theme-provider";
-import { HydrateClient } from "@/lib/trpc/server";
+import './globals.css';
 
-import "./globals.css";
-import { TRPCProvider } from "./provider";
+import { ThemeProvider } from '@/components/theme-provider';
+
+import { TRPCProvider } from './provider';
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,13 +18,11 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <HydrateClient>
           <TRPCProvider>
             <ThemeProvider defaultTheme="system" storageKey="saas-theme">
               {children}
             </ThemeProvider>
           </TRPCProvider>
-        </HydrateClient>
       </body>
     </html>
   );

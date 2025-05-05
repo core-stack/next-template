@@ -1,17 +1,28 @@
-import { prisma } from "@packages/prisma";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import { z } from 'zod';
+
+import { prisma, Workspace } from '@packages/prisma';
+import { TRPCError } from '@trpc/server';
 
 import {
-  createWorkspaceSchema, updateWorkspaceSchema, workspaceSchema, workspaceWithCountSchema
-} from "../schema/workspace";
-import { protectedProcedure, router } from "../trpc";
+  createWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema, workspaceSchema,
+  workspaceWithCountSchema
+} from '../schema/workspace';
+import { protectedProcedure, router } from '../trpc';
 
 const slugInUse = async (slug: string) => {
   const workspace = await prisma.workspace.findUnique({ where: { slug } });
   return !!workspace;
 }
 
+const formatWorkspace = (workspace: Workspace) => {
+  return {
+    ...workspace,
+    backgroundType: workspace.backgroundImage.startsWith("#") ? "color" : "gradient",
+    description: workspace.description ?? undefined,
+    backgroundColor: workspace.backgroundImage.startsWith("#") ? workspace.backgroundImage : undefined,
+    backgroundGradient: workspace.backgroundImage.startsWith("#") ? undefined : workspace.backgroundImage
+  } as WorkspaceSchema;
+}
 export const workspaceRouter = router({
   get: protectedProcedure
     .output(workspaceWithCountSchema.array())
@@ -55,11 +66,7 @@ export const workspaceRouter = router({
       if (!workspace) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Workspace not found" });
       }
-      return {
-        ...workspace,
-        backgroundType: workspace.backgroundImage.startsWith("#") ? "color" : "gradient",
-        description: workspace.description ?? undefined
-      };
+      return formatWorkspace(workspace);
     }),
   getBySlug: protectedProcedure
     .input(z.object({ slug: z.string() }))
@@ -69,11 +76,7 @@ export const workspaceRouter = router({
       if (!workspace) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Workspace not found" });
       }
-      return {
-        ...workspace,
-        backgroundType: workspace.backgroundImage.startsWith("#") ? "color" : "gradient",
-        description: workspace.description ?? undefined
-      };
+      return formatWorkspace(workspace);
     }),
   create: protectedProcedure
     .input(createWorkspaceSchema)

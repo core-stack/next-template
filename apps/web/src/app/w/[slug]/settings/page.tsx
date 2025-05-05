@@ -1,17 +1,20 @@
-"use client";
 
-import { Separator } from "@/components/ui/separator";
-import { trpc } from "@/lib/trpc/client";
-import { useParams } from "next/navigation";
 
-import { DangerZone } from "./danger-zone";
-import { PricingPlans } from "./pricing-plans";
-import { WorkspaceSettingsForm } from "./workspace-settings-form";
+import { Separator } from '@/components/ui/separator';
+import { caller } from '@/lib/trpc/server';
 
-export default function WorkspaceSettingsPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const { data: workspace, isLoading } = trpc.workspace.getBySlug.useQuery({ slug });
-  if (!workspace || isLoading) return null;
+import { DangerZone } from './danger-zone';
+import { PricingPlans } from './pricing-plans';
+import { WorkspaceSettingsForm } from './workspace-settings-form';
+
+type Props = {
+  params: Promise<{
+    slug: string
+  }>
+}
+export default async function WorkspaceSettingsPage({ params }: Props) {
+  const { slug } = await params;
+  const workspace = await caller.workspace.getBySlug({ slug });
   return (
     <div className="container py-10">
       <div className="flex flex-col gap-6 max-w-4xl mx-auto">

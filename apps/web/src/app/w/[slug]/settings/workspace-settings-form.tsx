@@ -1,22 +1,26 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from 'react';
+import { ChromePicker } from 'react-color';
+import { useForm } from 'react-hook-form';
+
+import { Button } from '@/components/ui/button';
+import {
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
+} from '@/components/ui/card';
 import {
   Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { trpc } from "@/lib/trpc/client";
-import { updateWorkspaceSchema, UpdateWorkspaceSchema, WorkspaceSchema } from "@/lib/trpc/schema/workspace";
-import { cn } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { ChromePicker } from "react-color";
-import { useForm } from "react-hook-form";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { trpc } from '@/lib/trpc/client';
+import {
+  updateWorkspaceSchema, UpdateWorkspaceSchema, WorkspaceSchema
+} from '@/lib/trpc/schema/workspace';
+import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface WorkspaceSettingsFormProps {
   workspace: WorkspaceSchema
@@ -32,32 +36,32 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
       slug: workspace.slug,
       description: workspace.description,
       backgroundType: workspace.backgroundType,
-      backgroundColor: workspace.backgroundColor,
-      backgroundGradient: workspace.backgroundGradient,
+      backgroundColor: workspace.backgroundColor || "#6366f1",
+      backgroundGradient: workspace.backgroundGradient || "linear-gradient(to right, #6366f1, #a855f7)",
     }
   });
 
-  const isLoading = form.formState.isSubmitting;
-  const utils = trpc.useUtils();
-  const { mutate } = trpc.workspace.update.useMutation();
-  const onSubmit = form.handleSubmit(async (data) => {
-    mutate({ ...data, id: workspace.id }, {
-      onSuccess: () => {
-        utils.workspace.get.invalidate();
-      }
-    });
-  });
-
-  useEffect(() => {
+  const reset = () => {
     form.reset({
       name: workspace.name,
       slug: workspace.slug,
       description: workspace.description,
       backgroundType: workspace.backgroundType,
-      backgroundColor: workspace.backgroundColor,
-      backgroundGradient: workspace.backgroundGradient,
+      backgroundColor: workspace.backgroundColor || "#6366f1",
+      backgroundGradient: workspace.backgroundGradient || "linear-gradient(to right, #6366f1, #a855f7)",
+    })
+  }
+  const isLoading = form.formState.isSubmitting;
+  const isDirty = form.formState.isDirty;
+  const utils = trpc.useUtils();
+  const { mutate } = trpc.workspace.update.useMutation();
+  const onSubmit = form.handleSubmit(async (data) => {
+    mutate(data, {
+      onSuccess: () => {
+        utils.workspace.get.invalidate();
+      }
     });
-  }, [workspace, form]);
+  });
 
   return (
     <Card>
@@ -86,12 +90,11 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
             <FormField
               control={form.control}
               name="slug"
-              disabled
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>URL da Organização</FormLabel>
                   <FormControl>
-                    <Input placeholder="minha-empresa" {...field} />
+                    <Input placeholder="minha-empresa" disabled {...field} />
                   </FormControl>
                   <FormDescription>
                     O slug é usado na URL da organização. Apenas letras minúsculas, números e hífens.
@@ -129,10 +132,9 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
                   <FormLabel>Aparência</FormLabel>
                   <FormControl>
                     <Tabs defaultValue={field.value} className="w-full" onValueChange={field.onChange}>
-                      <TabsList className="grid grid-cols-3 mb-2">
+                      <TabsList className="grid grid-cols-2 mb-2">
                         <TabsTrigger value="color">Cor</TabsTrigger>
                         <TabsTrigger value="gradient">Gradiente</TabsTrigger>
-                        <TabsTrigger value="image">Imagem</TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="color" className="space-y-4">
@@ -236,9 +238,14 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
                 </FormItem>
               )}
             />
-            <CardFooter className="flex justify-end">
-              <Button type="submit" onClick={onSubmit} disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <CardFooter className="flex justify-end gap-2">
+              {
+                isDirty &&
+                <Button type="button" onClick={reset} variant="destructive-outline" isLoading={isLoading}>
+                  Cancelar
+                </Button>
+              }
+              <Button type="submit" disabled={isLoading || !isDirty} isLoading={isLoading}>
                 Salvar alterações
               </Button>
             </CardFooter>
