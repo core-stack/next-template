@@ -1,110 +1,63 @@
 "use client"
 
-import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
-import { ChromePicker } from 'react-color';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-
-import { Button } from '@/components/ui/button';
-import {
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
-} from '@/components/ui/card';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-const workspaceSchema = z.object({
-  name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres" }),
-  slug: z
-    .string()
-    .min(2, { message: "O slug deve ter pelo menos 2 caracteres" })
-    .regex(/^[a-z0-9-]+$/, { message: "O slug deve conter apenas letras minúsculas, números e hífens" }),
-  description: z.string().optional(),
-  backgroundType: z.enum(["color", "gradient", "image"]),
-  backgroundColor: z.string().optional(),
-  backgroundGradient: z.string().optional(),
-  backgroundImage: z.string().optional(),
-})
-
-type WorkspaceFormValues = z.infer<typeof workspaceSchema>
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { trpc } from "@/lib/trpc/client";
+import { updateWorkspaceSchema, UpdateWorkspaceSchema, WorkspaceSchema } from "@/lib/trpc/schema/workspace";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChromePicker } from "react-color";
+import { useForm } from "react-hook-form";
 
 interface WorkspaceSettingsFormProps {
-  workspace: {
-    id: string
-    slug: string
-    name: string
-    description?: string | null
-    backgroundImage?: string
-  }
+  workspace: WorkspaceSchema
 }
 
 export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
 
-  // Determinar o tipo de fundo atual
-  let initialBackgroundType = "gradient"
-  if (workspace.backgroundImage?.startsWith("#")) {
-    initialBackgroundType = "color"
-  } else if (workspace.backgroundImage?.startsWith("http")) {
-    initialBackgroundType = "image"
-  }
-
-  const form = useForm<WorkspaceFormValues>({
-    resolver: zodResolver(workspaceSchema),
+  const form = useForm<UpdateWorkspaceSchema>({
+    resolver: zodResolver(updateWorkspaceSchema),
     defaultValues: {
       name: workspace.name,
       slug: workspace.slug,
-      description: workspace.description || "",
-      backgroundType: initialBackgroundType as any,
-      backgroundColor: workspace.backgroundImage?.startsWith("#") ? workspace.backgroundImage : "#6366f1",
-      backgroundGradient:
-        !workspace.backgroundImage?.startsWith("#") && !workspace.backgroundImage?.startsWith("http")
-          ? workspace.backgroundImage
-          : "linear-gradient(to right, #6366f1, #a855f7)",
-      backgroundImage: workspace.backgroundImage?.startsWith("http") ? workspace.backgroundImage : "",
-    },
-  })
-
-  async function onSubmit(data: WorkspaceFormValues) {
-    setIsLoading(true)
-
-    try {
-      // Determinar o valor final do backgroundImage com base no tipo selecionado
-      let finalBackground = ""
-
-      if (data.backgroundType === "color") {
-        finalBackground = data.backgroundColor || "#6366f1"
-      } else if (data.backgroundType === "gradient") {
-        finalBackground = data.backgroundGradient || "linear-gradient(to right, #6366f1, #a855f7)"
-      } else {
-        finalBackground = data.backgroundImage || ""
-      }
-
-      // Preparar os dados para salvar
-      const workspaceData = {
-        name: data.name,
-        slug: data.slug,
-        description: data.description,
-        backgroundImage: finalBackground,
-      }
-
-      console.log("Atualizando workspace:", workspaceData)
-      // Aqui você implementaria a lógica para atualizar o workspace
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-    } catch (error) {
-      console.error("Erro ao salvar workspace:", error)
-    } finally {
-      setIsLoading(false)
+      description: workspace.description,
+      backgroundType: workspace.backgroundType,
+      backgroundColor: workspace.backgroundColor,
+      backgroundGradient: workspace.backgroundGradient,
     }
-  }
+  });
+
+  const isLoading = form.formState.isSubmitting;
+  const utils = trpc.useUtils();
+  const { mutate } = trpc.workspace.update.useMutation();
+  const onSubmit = form.handleSubmit(async (data) => {
+    mutate({ ...data, id: workspace.id }, {
+      onSuccess: () => {
+        utils.workspace.get.invalidate();
+      }
+    });
+  });
+
+  useEffect(() => {
+    form.reset({
+      name: workspace.name,
+      slug: workspace.slug,
+      description: workspace.description,
+      backgroundType: workspace.backgroundType,
+      backgroundColor: workspace.backgroundColor,
+      backgroundGradient: workspace.backgroundGradient,
+    });
+  }, [workspace, form]);
 
   return (
     <Card>
@@ -114,7 +67,7 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={onSubmit} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -133,6 +86,7 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
             <FormField
               control={form.control}
               name="slug"
+              disabled
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>URL da Organização</FormLabel>
@@ -276,43 +230,21 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
                           )}
                         />
                       </TabsContent>
-
-                      <TabsContent value="image" className="space-y-4">
-                        <FormField
-                          control={form.control}
-                          name="backgroundImage"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input placeholder="URL da imagem (https://...)" {...field} value={field.value || ""} />
-                              </FormControl>
-                              <FormDescription>Insira a URL de uma imagem para usar como fundo.</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        {form.watch("backgroundImage") && (
-                          <div
-                            className="h-32 w-full rounded-md bg-cover bg-center"
-                            style={{ backgroundImage: `url(${form.watch("backgroundImage")})` }}
-                          />
-                        )}
-                      </TabsContent>
                     </Tabs>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <CardFooter className="flex justify-end">
+              <Button type="submit" onClick={onSubmit} disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Salvar alterações
+              </Button>
+            </CardFooter>
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex justify-end">
-        <Button type="submit" onClick={form.handleSubmit(onSubmit)} disabled={isLoading}>
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Salvar alterações
-        </Button>
-      </CardFooter>
     </Card>
   )
 }

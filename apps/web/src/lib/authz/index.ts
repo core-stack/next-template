@@ -1,16 +1,15 @@
-import bcrypt from 'bcrypt';
-import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import { Member, prisma, User } from "@packages/prisma";
+import bcrypt from "bcrypt";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
-import { Member, prisma, User } from '@packages/prisma';
-
-import { UnauthorizedError } from './error';
-import { AccessToken, generateTokens, RefreshToken, verifyToken } from './jwt';
-import { Provider } from './providers/types';
-import { Session } from './session';
-import { MemoryStore } from './store/memory';
-import { RedisStore } from './store/redis';
-import { Store } from './store/types';
+import { UnauthorizedError } from "./error";
+import { AccessToken, generateTokens, RefreshToken, verifyToken } from "./jwt";
+import { Provider } from "./providers/types";
+import { Session } from "./session";
+import { MemoryStore } from "./store/memory";
+import { RedisStore } from "./store/redis";
+import { Store } from "./store/types";
 
 export async function hashPassword(password: string) {
   return await bcrypt.hash(password, 10)
@@ -41,7 +40,7 @@ export class Authz {
   async oauth2Callback(req: NextRequest, provider: string) {
     const code = req.nextUrl.searchParams.get('code');
     if (!code) return NextResponse.json({ error: 'Missing code' }, { status: 400 });
-  
+
     const { user } = await this.providers[provider].callback(req, code);
 
     const { token: { accessToken, refreshToken, accessTokenDuration, refreshTokenDuration } } = await this.createSessionAndTokens(user);
@@ -74,10 +73,9 @@ export class Authz {
     return { token, session };
   }
 
-  async getSession(req: NextRequest): Promise<Session | undefined> {
-    const cookie = req.cookies.get("access-token")?.value;
-    if (!cookie) throw new UnauthorizedError();
-    const token = verifyToken<AccessToken>(cookie);
+  async getSession(accessToken?: string): Promise<Session | undefined> {
+    if (!accessToken) throw new UnauthorizedError();
+    const token = verifyToken<AccessToken>(accessToken);
     if (!token) throw new UnauthorizedError();
     const { sessionId } = token;
     const session = await this.store.get(sessionId);
@@ -86,7 +84,7 @@ export class Authz {
     await this.store.set(sessionId, session);
     return session
   }
-  
+
   async finishSession(req: NextRequest) {
     const refreshTokenInCookie = req.cookies.get("refresh-token")?.value;
     if (!refreshTokenInCookie) return;
@@ -99,20 +97,19 @@ export class Authz {
     await this.store.set(session.id, session);
   }
 
-  async refreshToken(req: NextRequest) {
-    const refreshTokenInCookie = req.cookies.get("refresh-token")?.value;
+  async refreshToken(refreshTokenInCookie?: string) {
     if (!refreshTokenInCookie) throw new UnauthorizedError();
     const tokenData = verifyToken<RefreshToken>(refreshTokenInCookie);
     if (!tokenData) throw new UnauthorizedError();
-    
+
     const { sessionId } = tokenData;
     const session = await this.store.get(sessionId);
     if (!session) throw new UnauthorizedError();
     if (session.refreshToken !== refreshTokenInCookie) throw new UnauthorizedError();
-    
-    const user = await prisma.user.findUnique({ 
-      where: { id: session.user.id }, 
-      include: { 
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
         members: { include: { workspace: { select: { id: true, slug: true } }} }
       }
     });

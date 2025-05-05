@@ -21,7 +21,9 @@ export const InvitesTable = () => {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = useState({})
+  const [rowSelection, setRowSelection] = useState({});
+  const utils = trpc.useUtils();
+  const { mutate } = trpc.invite.delete.useMutation();
 
   const inviteColumns: ColumnDef<InviteTableRow>[] = [
     {
@@ -92,10 +94,19 @@ export const InvitesTable = () => {
     },
     {
       id: "actions",
-      cell: () => {
+      cell: ({ row }) => {
         return isOwner ? (
           <div className="text-right">
-            <Button variant="destructive-outline" size="sm">
+            <Button
+              variant="destructive-outline"
+              size="sm"
+              onClick={() => {
+                mutate({
+                  id: row.original.id,
+                  slug,
+                }, { onSuccess: () => utils.invite.getByWorkspace.invalidate() })
+              }}
+            >
               Cancelar
             </Button>
           </div>

@@ -1,11 +1,10 @@
-import { z } from 'zod';
+import { Session } from "@/lib/authz/session";
+import { prisma } from "@packages/prisma";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
-import { Session } from '@/lib/authz/session';
-import { prisma } from '@packages/prisma';
-import { TRPCError } from '@trpc/server';
-
-import { memberSchema } from '../schema/member';
-import { protectedProcedure, router } from '../server';
+import { memberSchema } from "../schema/member";
+import { protectedProcedure, router } from "../trpc";
 
 const hasAccess = (session: Session, slug: string) => session.workspaces.some((w) => w.slug === slug);
 
@@ -19,5 +18,5 @@ export const memberRouter = router({
         where: { workspace: { slug: input.slug } },
         include: { user: { select: { id: true, email: true, name: true, image: true }} },
       });
-    }), 
+    }),
 });

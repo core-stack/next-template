@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
-import { auth } from './lib/auth';
-import { AccessToken, verifyToken } from './lib/authz/jwt';
+import { auth } from "./lib/auth";
+import { AccessToken, verifyToken } from "./lib/authz/jwt";
 
 export const config = {
   matcher: [
@@ -28,9 +28,9 @@ const publicRoutes = [
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get('access-token')?.value;
-  
+
   const publicRoute = publicRoutes.find(route => route.path === pathname);
-  
+
   if (!token && publicRoute) {
     return NextResponse.next();
   }
@@ -44,7 +44,8 @@ export async function middleware(req: NextRequest) {
     const accessToken = token ? verifyToken<AccessToken>(token) : null;
     if (!accessToken) {
       try {
-        const res = await auth.refreshToken(req);
+        const refreshToken = req.cookies.get('refresh-token')?.value;
+        const res = await auth.refreshToken(refreshToken);
         const response = NextResponse.next();
         response.cookies.set("access-token", res.token.accessToken, { maxAge: res.token.accessTokenDuration, httpOnly: true });
         response.cookies.set("refresh-token", res.token.refreshToken, { maxAge: res.token.refreshTokenDuration, httpOnly: true });

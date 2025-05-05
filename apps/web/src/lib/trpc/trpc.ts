@@ -5,23 +5,29 @@ import cookie from "cookie";
 import { Context } from "./context";
 
 const t = initTRPC.context<Context>().create();
+export const { createCallerFactory } = t;
 
 export const middleware = t.middleware;
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
 const authMiddleware = middleware(async ({ ctx, next }) => {
-  if (!ctx.req) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Request not found' });
   let session = ctx.session;
-  const resHeaders = ctx.resHeaders || new Headers();
+  const hasRefreshToken = !!ctx.refreshToken;
   try {
-    if (!session) {
-      const refreshResult = await auth.refreshToken(ctx.req);
+    if (!session && hasRefreshToken) {
+      const refreshResult = await auth.refreshToken(ctx.refreshToken);
       session = refreshResult.session;
-      const accessToken = cookie.serialize('access-token', refreshResult.token.accessToken, { maxAge: refreshResult.token.accessTokenDuration, httpOnly: true });
-      const refreshToken = cookie.serialize('refresh-token', refreshResult.token.refreshToken, { maxAge: refreshResult.token.refreshTokenDuration, httpOnly: true });
-      resHeaders.set('Set-Cookie', accessToken);
-      resHeaders.set('Set-Cookie', refreshToken);
+      const accessToken = cookie.serialize('access-token', refreshResult.token.accessToken, {
+        maxAge: refreshResult.token.accessTokenDuration,
+        httpOnly: true,
+      });
+      const refreshToken = cookie.serialize('refresh-token', refreshResult.token.refreshToken, {
+        maxAge: refreshResult.token.refreshTokenDuration,
+        httpOnly: true,
+      });
+      ctx.resHeaders!.set('Set-Cookie', accessToken);
+      ctx.resHeaders!.set('Set-Cookie', refreshToken);
     }
   } catch (error) {
     throw new TRPCError({ code: 'UNAUTHORIZED' });
@@ -29,7 +35,7 @@ const authMiddleware = middleware(async ({ ctx, next }) => {
 
   if (!session) throw new TRPCError({ code: 'UNAUTHORIZED' });
 
-  return next({ ctx: { ...ctx, resHeaders, session } });
+  return next({ ctx: { ...ctx, session } });
 });
 
 // export const rbacMiddleware = (requiredPermissions: Permission[]) => {

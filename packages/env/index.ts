@@ -34,7 +34,7 @@ const envSchema = z.object({
   AWS_SECRET_ACCESS_KEY: z.string(),
   AWS_ENDPOINT: z.string(),
 
-  WORKSPACE_INVITE_EXPIRES_IN_MS: z.coerce.number().default(60 * 60 * 24 * 7), // 7 days
+  WORKSPACE_INVITE_EXPIRES: z.coerce.number().default(60 * 60 * 24 * 7), // 7 days
 
   APP_URL: z.string().url().default('http://localhost:3000'),
 })

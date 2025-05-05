@@ -5,7 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { cookies } from "next/headers";
 
 import { createAccountSchema, loginSchema } from "../schema/auth";
-import { publicProcedure, router } from "../server";
+import { publicProcedure, router } from "../trpc";
 
 export const authRouter = router({
   login: publicProcedure

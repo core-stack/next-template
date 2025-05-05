@@ -1,12 +1,11 @@
-import { z } from 'zod';
-
-import { prisma } from '@packages/prisma';
-import { TRPCError } from '@trpc/server';
+import { prisma } from "@packages/prisma";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import {
-  createWorkspaceSchema, updateWorkspaceSchema, workspaceWithCountSchema
-} from '../schema/workspace';
-import { protectedProcedure, router } from '../server';
+  createWorkspaceSchema, updateWorkspaceSchema, workspaceSchema, workspaceWithCountSchema
+} from "../schema/workspace";
+import { protectedProcedure, router } from "../trpc";
 
 const slugInUse = async (slug: string) => {
   const workspace = await prisma.workspace.findUnique({ where: { slug } });
@@ -46,13 +45,35 @@ export const workspaceRouter = router({
     }),
   getById: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
+    .output(workspaceSchema)
     .query(async ({ input }) => {
       const workspace = await prisma.workspace.findUnique({
         where: {
           id: input.id
         }
       });
-      return workspace;
+      if (!workspace) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workspace not found" });
+      }
+      return {
+        ...workspace,
+        backgroundType: workspace.backgroundImage.startsWith("#") ? "color" : "gradient",
+        description: workspace.description ?? undefined
+      };
+    }),
+  getBySlug: protectedProcedure
+    .input(z.object({ slug: z.string() }))
+    .output(workspaceSchema)
+    .query(async ({ input }) => {
+      const workspace = await prisma.workspace.findUnique({ where: input });
+      if (!workspace) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workspace not found" });
+      }
+      return {
+        ...workspace,
+        backgroundType: workspace.backgroundImage.startsWith("#") ? "color" : "gradient",
+        description: workspace.description ?? undefined
+      };
     }),
   create: protectedProcedure
     .input(createWorkspaceSchema)

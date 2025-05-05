@@ -4,10 +4,11 @@ import { sendNotification } from "@/lib/notification";
 import { prisma } from "@packages/prisma";
 import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
 import { TRPCError } from "@trpc/server";
+import moment from "moment";
 import { z } from "zod";
 
 import { inviteMemberSchema } from "../schema/invite";
-import { protectedProcedure, router } from "../server";
+import { protectedProcedure, router } from "../trpc";
 
 const hasAccess = (session: Session, slug: string) => session.workspaces.some((w) => w.slug === slug);
 
@@ -37,14 +38,13 @@ export const inviteRouter = router({
         // verify if exists invite with email
         const invite = await prisma.invite.findUnique({where: { workspaceId_email: { email, workspaceId: workspace.id } }});
         if (invite) {
-          invite.expiresAt = new Date(Date.now() + env.WORKSPACE_INVITE_EXPIRES_IN_MS);
+          invite.expiresAt = new Date(Date.now() + env.WORKSPACE_INVITE_EXPIRES);
           await prisma.invite.update({where: { id: invite.id }, data: { expiresAt: invite.expiresAt }});
           continue;
         }
 
         const userWithEmail = await prisma.user.findUnique({where: { email }});
-        console.log(env.WORKSPACE_INVITE_EXPIRES_IN_MS);
-        console.log(new Date(Date.now() + env.WORKSPACE_INVITE_EXPIRES_IN_MS));
+
         if (userWithEmail) {
           prisma.$transaction(async (tx) => {
             const invite = await tx.invite.create({
@@ -52,7 +52,7 @@ export const inviteRouter = router({
                 workspaceId: workspace.id,
                 email,
                 role,
-                expiresAt: new Date(Date.now() + env.WORKSPACE_INVITE_EXPIRES_IN_MS),
+                expiresAt: moment().add(env.WORKSPACE_INVITE_EXPIRES, "seconds").toDate(),
                 userId: userWithEmail.id,
               }
             });
@@ -78,7 +78,7 @@ export const inviteRouter = router({
             data: {
               workspaceId: workspace.id,
               email,
-              expiresAt: new Date(Date.now() + env.WORKSPACE_INVITE_EXPIRES_IN_MS),
+              expiresAt: moment().add(env.WORKSPACE_INVITE_EXPIRES, "seconds").toDate(),
             }
           });
           await addInQueue(QueueName.EMAIL, {
@@ -92,5 +92,14 @@ export const inviteRouter = router({
           });
         }
       }
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ id: z.string(), slug: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      if (!hasAccess(ctx.session, input.slug)) throw new TRPCError({ code: 'FORBIDDEN', message: "Você não tem acesso a esse workspace" });
+
+      await prisma.invite.delete({ where: { id: input.id } });
+      await prisma.notification.deleteMany({ where: { link: `/invite?code=${input.id}` } });
     })
 });
