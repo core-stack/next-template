@@ -1,7 +1,7 @@
-import { ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-import { Session } from './authz/session';
+import { Session } from "./authz/session";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

@@ -1,9 +1,12 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export enum EmailTemplate {
   FORGOT_PASSWORD = 'forgot-password',
   INVITE = 'invite',
   ACTIVE_ACCOUNT = 'active-account',
+  CHANGE_PASSWORD = 'change-password',
+  CHANGE_EMAIL = 'change-email',
+
 }
 
 const forgotPasswordSchema = z.object({
@@ -17,6 +20,13 @@ const inviteSchema = z.object({
 
 const activeAccountSchema = z.object({
   activationUrl: z.string().url(),
+});
+const changePasswordSchema = z.object({
+  name: z.string().nullable(),
+});
+const changeEmailSchema = z.object({
+  name: z.string().nullable(),
+  newEmail: z.string().email(),
 });
 
 export const emailPayloadSchema = z.discriminatedUnion('template', [
@@ -40,6 +50,20 @@ export const emailPayloadSchema = z.discriminatedUnion('template', [
     from: z.string().optional(),
     template: z.literal(EmailTemplate.ACTIVE_ACCOUNT),
     context: activeAccountSchema,
+  }),
+  z.object({
+    to: z.string().email(),
+    subject: z.string(),
+    from: z.string().optional(),
+    template: z.literal(EmailTemplate.CHANGE_PASSWORD),
+    context: changePasswordSchema,
+  }),
+  z.object({
+    to: z.string().email(),
+    subject: z.string(),
+    from: z.string().optional(),
+    template: z.literal(EmailTemplate.CHANGE_EMAIL),
+    context: changeEmailSchema,
   }),
 ]);
 
