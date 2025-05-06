@@ -43,6 +43,7 @@ export function WorkspaceList() {
             workspace={workspace}
             onEdit={() => handleEditWorkspace(workspace)}
             role={user?.members.find((m) => m.workspaceId === workspace.id)?.role}
+            owner={user?.members.find((m) => m.workspaceId === workspace.id)?.owner}
           />
         ))}
         <CreateWorkspaceCard onClick={handleCreateWorkspace} />
@@ -59,15 +60,25 @@ export function WorkspaceList() {
     </>
   )
 }
-
-function WorkspaceCard({ workspace, onEdit, role }: { workspace: WorkspaceWithCount; onEdit: () => void, role?: string }) {
+type WorkspaceCardProps = {
+  workspace: WorkspaceWithCount;
+  onEdit: () => void;
+  role?: string;
+  owner?: boolean;
+}
+function WorkspaceCard({ workspace, onEdit, role, owner }: WorkspaceCardProps) {
   const cardStyle = { background: workspace.backgroundColor || workspace.backgroundGradient }
-  console.log(workspace);
   
   return (
     <Card className={cn("overflow-hidden border-2 hover:border-primary/50 transition-all", workspace.disabledAt && "opacity-50")}>
       <div className="h-32 w-full relative" style={cardStyle}>
         <div className="absolute top-2 right-2 flex gap-2">
+          {
+            owner && 
+            <Badge variant="secondary" className="bg-green-300 hover:bg-green-400 text-black">
+              Proprietario
+            </Badge>
+          }
           <Badge variant="secondary" className="bg-yellow-300 hover:bg-yellow-400 text-black">
             {role}
           </Badge>
@@ -78,7 +89,7 @@ function WorkspaceCard({ workspace, onEdit, role }: { workspace: WorkspaceWithCo
           <Building className="mr-2 h-5 w-5 text-muted-foreground" />
           {workspace.name} {workspace.disabledAt && <Badge className="ml-2" variant="destructive">Desativado</Badge>}
         </CardTitle>
-        <CardDescription>{workspace.description || "Sem descrição"}</CardDescription>
+        <CardDescription className='truncate'>{workspace.description || "Sem descrição"}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-between text-sm text-muted-foreground">

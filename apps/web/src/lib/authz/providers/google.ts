@@ -68,6 +68,7 @@ export const GoogleProvider = ({ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIREC
             },
             include: {
               members: {
+                where: { workspace: { disabledAt: null } },
                 select: {
                   role: true,
                   workspace: {

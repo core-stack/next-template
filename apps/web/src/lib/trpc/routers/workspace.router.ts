@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { auth } from '@/lib/auth';
 import { comparePassword } from '@/lib/authz';
 import { prisma, Workspace } from '@packages/prisma';
 import { TRPCError } from '@trpc/server';
@@ -19,9 +20,9 @@ const formatWorkspace = (workspace: Workspace) => {
   return {
     ...workspace,
     backgroundType: workspace.backgroundImage.startsWith("#") ? "color" : "gradient",
-    description: workspace.description ?? undefined,
-    backgroundColor: workspace.backgroundImage.startsWith("#") ? workspace.backgroundImage : undefined,
-    backgroundGradient: workspace.backgroundImage.startsWith("#") ? undefined : workspace.backgroundImage
+    description: workspace.description ?? null,
+    backgroundColor: workspace.backgroundImage.startsWith("#") ? workspace.backgroundImage : null,
+    backgroundGradient: workspace.backgroundImage.startsWith("#") ? null : workspace.backgroundImage,
   } as WorkspaceSchema;
 }
 export const workspaceRouter = router({
@@ -49,11 +50,11 @@ export const workspaceRouter = router({
         name: w.name,
         slug: w.slug,
         backgroundType: w.backgroundImage.startsWith("#") ? "color" : "gradient",
-        backgroundColor: w.backgroundImage.startsWith("#") ? w.backgroundImage : undefined,
-        backgroundGradient: w.backgroundImage.startsWith("#") ? undefined : w.backgroundImage,
-        description: w.description ?? undefined,
+        backgroundColor: w.backgroundImage.startsWith("#") ? w.backgroundImage : null,
+        backgroundGradient: w.backgroundImage.startsWith("#") ? null : w.backgroundImage,
+        description: w.description,
         memberCount: w._count.members,
-        disabledAt: w.disabledAt ?? undefined
+        disabledAt: w.disabledAt
       }));
     }),
   getById: protectedProcedure
@@ -107,6 +108,7 @@ export const workspaceRouter = router({
           }
         }
       });
+      await auth.reloadSession(session.id);
     }),
   existsBySlug: protectedProcedure
     .input(z.object({ slug: z.string() }))
@@ -114,7 +116,8 @@ export const workspaceRouter = router({
 
   update: protectedProcedure
     .input(updateWorkspaceSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const { session } = ctx;
       const res = await prisma.workspace.update({
         where: { id: input.id, disabledAt: null },
         data: {
@@ -126,6 +129,7 @@ export const workspaceRouter = router({
       if (!res) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
       }
+      await auth.reloadSession(session.id);
       return formatWorkspace(res);
     }),
   disable: protectedProcedure

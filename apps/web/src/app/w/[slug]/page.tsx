@@ -1,7 +1,3 @@
-import type { Metadata } from "next"
-
-
-
 import { WorkspaceOverview } from './workspace-overview';
 
 export default function WorkspacePage() {

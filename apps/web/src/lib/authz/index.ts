@@ -1,15 +1,16 @@
-import { Member, prisma, User } from "@packages/prisma";
-import bcrypt from "bcrypt";
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import bcrypt from 'bcrypt';
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
 
-import { UnauthorizedError } from "./error";
-import { AccessToken, generateTokens, RefreshToken, verifyToken } from "./jwt";
-import { Provider } from "./providers/types";
-import { Session } from "./session";
-import { MemoryStore } from "./store/memory";
-import { RedisStore } from "./store/redis";
-import { Store } from "./store/types";
+import { Member, prisma, User } from '@packages/prisma';
+
+import { UnauthorizedError } from './error';
+import { AccessToken, generateTokens, RefreshToken, verifyToken } from './jwt';
+import { Provider } from './providers/types';
+import { Session } from './session';
+import { MemoryStore } from './store/memory';
+import { RedisStore } from './store/redis';
+import { Store } from './store/types';
 
 export async function hashPassword(password: string) {
   return await bcrypt.hash(password, 10)
@@ -85,6 +86,22 @@ export class Authz {
     return session
   }
 
+  async reloadSession(sessionId: string) {
+    const session = await this.store.get(sessionId);
+    if (!session) throw new UnauthorizedError();
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { members: { include: { workspace: true }, where: { workspace: { disabledAt: null } } } }
+    });
+    if (!user) throw new UnauthorizedError();
+    session.workspaces = user.members.map((m) => ({ id: m.workspaceId, slug: m.workspace.slug, role: m.role }));
+    session.status = "active";
+    session.user.role = user.role;
+    session.lastSeen = new Date();
+    await this.store.set(sessionId, session);
+    return session;
+  }
+
   async finishSession(req: NextRequest) {
     const refreshTokenInCookie = req.cookies.get("refresh-token")?.value;
     if (!refreshTokenInCookie) return;
@@ -109,9 +126,7 @@ export class Authz {
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      include: {
-        members: { include: { workspace: { select: { id: true, slug: true } }} }
-      }
+      include: { members: { include: { workspace: true }, where: { workspace: { disabledAt: null } } } }
     });
     if (!user) throw new UnauthorizedError();
     return await this.createSessionAndTokens(user);

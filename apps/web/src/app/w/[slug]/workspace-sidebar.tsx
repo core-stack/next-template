@@ -1,14 +1,16 @@
 "use client"
 
-import { CreditCard, LayoutDashboard, Settings, Users, Zap } from 'lucide-react';
+import { CreditCard, LayoutDashboard, Plus, Settings, Users, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
   Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue
 } from '@/components/ui/select';
 import { UserProfile } from '@/components/user/profile';
+import { WorkspaceDialog } from '@/components/workspace/create-or-update-dialog';
 import { trpc } from '@/lib/trpc/client';
 import { WorkspaceSchema } from '@/lib/trpc/schema/workspace';
 import { cn } from '@/lib/utils';
@@ -22,6 +24,7 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
   const pathname = usePathname() || ""
   const router = useRouter();
   const { data: workspaces = [currentWokspace] } = trpc.workspace.get.useQuery();
+  const [open, setOpen] = useState(false);
 
   const routes = [
     {
@@ -69,18 +72,20 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Seus workspaces</SelectLabel>
-              {workspaces.map((ws) => (
+              {workspaces.filter(w => w.disabledAt === null).map((ws) => (
                 <SelectItem key={ws.id} value={ws.slug}>
                   {ws.name}
                 </SelectItem>
               ))}
             </SelectGroup>
             <SelectGroup>
-              <SelectItem value="new">
-                <span className="flex items-center gap-2">
-                  <span className="text-primary">+</span> Criar novo workspace
-                </span>
-              </SelectItem>
+              <button
+                onClick={() => setOpen(true)} 
+                className='flex items-center gap-3 rounded-md w-full px-3 py-1.5 text-sm font-medium transition-colors bg-primary/10 text-primary'
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Workspace
+              </button>
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -121,6 +126,7 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
 
         <UserProfile />
       </div>
+      <WorkspaceDialog open={open} onOpenChange={setOpen} />
     </div>
   )
 }

@@ -21,14 +21,13 @@ export default async function WorkspaceLayout({ children, params }: WorkspaceLay
     workspace = await caller.workspace.getBySlug({ slug });
   } catch (error) {
     if (error instanceof TRPCError) {
-      if (error.code === "NOT_FOUND") {
-        redirect("/w");
-      }
+      if (error.code === "NOT_FOUND") redirect("/w");
+      else console.error(error);
     }
   }
-  if (!workspace) {
-    redirect("/w");
-  }
+
+  if (!workspace) redirect("/w");
+  
   return (
     <div className="flex min-h-screen">
       <WorkspaceSidebar slug={slug} currentWokspace={workspace} />

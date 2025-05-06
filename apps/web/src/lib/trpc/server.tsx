@@ -16,8 +16,3 @@ export const caller = createCallerFactory(appRouter)(async () => {
   const session = await auth.getSession(accessToken);
   return { session, accessToken, resHeaders: new Headers() };
 });
-
-// export const { trpc, HydrateClient } = createHydrationHelpers<typeof appRouter>(
-//   caller,
-//   getQueryClient,
-// );

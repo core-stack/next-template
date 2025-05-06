@@ -14,7 +14,7 @@ export function CreateWorkspaceButton() {
     <>
       <Button onClick={() => setOpen(true)}>
         <Building className="mr-2 h-4 w-4" />
-        Nova Organização
+        Novo Workspace
       </Button>
       <WorkspaceDialog open={open} onOpenChange={setOpen} />
     </>
