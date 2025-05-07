@@ -1,16 +1,15 @@
 "use client";
 
-import { useRef, useState } from 'react';
-import Cropper from 'react-easy-crop';
-
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
-} from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { trpc } from '@/lib/trpc/client';
-import { getCroppedImg } from '@/utils/cropImage';
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { trpc } from "@/lib/trpc/client";
+import { getCroppedImg } from "@/utils/cropImage";
+import { useRef, useState } from "react";
+import Cropper from "react-easy-crop";
 
 interface ProfileImageUploaderProps {
   user: {
@@ -28,6 +27,7 @@ export function ProfileImageUploader({ user }: ProfileImageUploaderProps) {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [showCropDialog, setShowCropDialog] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const getPresignedUrl = trpc.user.getUpdateImagePresignedUrl.useMutation();
   const confirmUpload = trpc.user.confirmUpload.useMutation();
@@ -52,6 +52,45 @@ export function ProfileImageUploader({ user }: ProfileImageUploaderProps) {
     setCroppedAreaPixels(croppedPixels);
   };
 
+  const uploadFileWithProgress = (
+    file: Blob,
+    signedUrl: string,
+    signal: AbortSignal
+  ): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+
+      xhr.open('PUT', signedUrl)
+      xhr.setRequestHeader('Content-Type', file.type)
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100
+          setUploadProgress(percentComplete)
+        }
+      }
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          resolve()
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`))
+        }
+      }
+
+      xhr.onerror = () => {
+        reject(new Error('Upload failed'))
+      }
+
+      xhr.send(file)
+
+      signal.addEventListener('abort', () => {
+        xhr.abort()
+        reject(new Error('Upload cancelled'))
+      })
+    })
+  }
+
   const handleUpload = async () => {
     if (!imageSrc || !croppedAreaPixels) return;
 
@@ -70,12 +109,10 @@ export function ProfileImageUploader({ user }: ProfileImageUploaderProps) {
 
       const uploadRes = await fetch(url, {
         method: "PUT",
-        headers: {
-          "Content-Type": fileType,
-        },
         body: croppedBlob,
       });
-
+      const controller = new AbortController();
+      uploadFileWithProgress(croppedBlob, url, controller.signal);
       if (!uploadRes.ok) throw new Error("Falha no upload");
 
       await confirmUpload.mutateAsync({ key });

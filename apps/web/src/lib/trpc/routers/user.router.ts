@@ -1,16 +1,16 @@
-import { z } from 'zod';
-
-import { comparePassword, hashPassword } from '@/lib/authz';
-import { getPreSignedUrl } from '@/lib/upload';
-import { prisma } from '@packages/prisma';
-import { addInQueue, EmailTemplate, QueueName } from '@packages/queue';
-import { TRPCError } from '@trpc/server';
+import { env } from "@/env";
+import { comparePassword, hashPassword } from "@/lib/authz";
+import { getPreSignedUrl } from "@/lib/upload";
+import { prisma } from "@packages/prisma";
+import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import {
   confirmUploadProfileImageSchema, selfUserSchema, updatePasswordSchema, updateProfileSchema,
   updateUserPictureSchema
-} from '../schema/user';
-import { protectedProcedure, router } from '../trpc';
+} from "../schema/user";
+import { protectedProcedure, router } from "../trpc";
 
 export const userRouter = router({
   self: protectedProcedure
@@ -44,14 +44,14 @@ export const userRouter = router({
       const user = await prisma.user.findUnique({ where: { id: session.user.id } });
       if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Usuário não encontrado" });
       console.log(input);
-      
+
       if (user.password) {
         if (!input.currentPassword)
           throw new TRPCError({ code: "BAD_REQUEST", message: "Por favor, informe sua senha atual" });
         if (!await comparePassword(input.currentPassword, user.password))
           throw new TRPCError({ code: "BAD_REQUEST", message: "Senha incorreta" });
       }
-      
+
       await prisma.user.update({
         where: { id: session.user.id },
         data: { password: await hashPassword(input.newPassword) }
@@ -93,7 +93,7 @@ export const userRouter = router({
       const { key } = input;
       await prisma.user.update({
         where: { id: session.user.id },
-        data: { image: `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${key}` },
+        data: { image: `${env.AWS_PUBLIC_BUCKET_BASE_URL}/${key}` },
       });
     }),
 });

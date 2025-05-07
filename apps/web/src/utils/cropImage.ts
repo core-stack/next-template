@@ -21,7 +21,7 @@ export async function getCroppedImg(imageSrc: string, pixelCrop: any): Promise<B
   return new Promise((resolve) => {
     canvas.toBlob((blob) => {
       resolve(blob!);
-    }, "image/jpeg", 0.9); // compressão aqui
+    }, "image/jpeg", 0.9);
   });
 }
 
