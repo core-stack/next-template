@@ -1,27 +1,18 @@
-import { AdminRole, UserRole, WorkspaceAdminRole, WorkspaceMemberRole } from './roles';
-import {
-  Permission, UserRoleName, UserRoleType, WorkspaceRoleName, WorkspaceRoleType
-} from './types';
+import { AdminRole, UserRole, WorkspaceAdminRole, WorkspaceMemberRole } from "./roles";
+import { Permission, UserRoleName, WorkspaceRoleName } from "./types";
 
-export const getRolePermissions = (role: UserRoleType | WorkspaceRoleType) => {
-  if (role.scope === "workspace") {
-    switch (role.name) {
-      case WorkspaceRoleName.WORKSPACE_ADMIN:
-        return WorkspaceAdminRole.permissions;
-      case WorkspaceRoleName.WORKSPACE_MEMBER:
-        return WorkspaceMemberRole.permissions;
-      default:
-        return [];
-    }
-  } else {
-    switch (role.name) {
-      case UserRoleName.ADMIN:
-        return AdminRole.permissions;
-      case UserRoleName.USER:
-        return UserRole.permissions;
-      default:
-        return [];
-    }
+export const getRolePermissions = (role: WorkspaceRoleName | UserRoleName) => {
+  switch (role) {
+    case WorkspaceRoleName.WORKSPACE_ADMIN:
+      return WorkspaceAdminRole.permissions;
+    case WorkspaceRoleName.WORKSPACE_MEMBER:
+      return WorkspaceMemberRole.permissions;
+    case UserRoleName.ADMIN:
+      return AdminRole.permissions;
+    case UserRoleName.USER:
+      return UserRole.permissions;
+    default:
+      return [];
   }
 }
 
