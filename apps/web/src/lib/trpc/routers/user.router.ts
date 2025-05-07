@@ -1,14 +1,16 @@
-import { comparePassword, hashPassword } from "@/lib/authz";
-import { getPresignedUrl } from "@/lib/upload";
-import { prisma } from "@packages/prisma";
-import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import { z } from 'zod';
+
+import { comparePassword, hashPassword } from '@/lib/authz';
+import { getPreSignedUrl } from '@/lib/upload';
+import { prisma } from '@packages/prisma';
+import { addInQueue, EmailTemplate, QueueName } from '@packages/queue';
+import { TRPCError } from '@trpc/server';
 
 import {
-  selfUserSchema, updatePasswordSchema, updateProfileSchema, updateUserPictureSchema
-} from "../schema/user";
-import { protectedProcedure, router } from "../trpc";
+  confirmUploadProfileImageSchema, selfUserSchema, updatePasswordSchema, updateProfileSchema,
+  updateUserPictureSchema
+} from '../schema/user';
+import { protectedProcedure, router } from '../trpc';
 
 export const userRouter = router({
   self: protectedProcedure
@@ -41,12 +43,15 @@ export const userRouter = router({
       const { session } = ctx;
       const user = await prisma.user.findUnique({ where: { id: session.user.id } });
       if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Usuário não encontrado" });
+      console.log(input);
+      
       if (user.password) {
         if (!input.currentPassword)
-          throw new TRPCError({ code: "FORBIDDEN", message: "Por favor, informe sua senha atual" });
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Por favor, informe sua senha atual" });
         if (!await comparePassword(input.currentPassword, user.password))
-          throw new TRPCError({ code: "FORBIDDEN", message: "Senha incorreta" });
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Senha incorreta" });
       }
+      
       await prisma.user.update({
         where: { id: session.user.id },
         data: { password: await hashPassword(input.newPassword) }
@@ -71,11 +76,24 @@ export const userRouter = router({
         where: { id: session.user.id },
         data: { name: input.name },
       });
+      return { name: input.name };
     }),
 
-  updateImage: protectedProcedure
+  getUpdateImagePresignedUrl: protectedProcedure
     .input(updateUserPictureSchema)
     .mutation(async ({ input, ctx }) => {
-      return await getPresignedUrl(input.fileName, input.contentType);
-    })
+      const key = `${ctx.session.user.id}/profile.${input.fileName.split(".").pop()}`;
+      const url = await getPreSignedUrl(key, input.contentType);
+      return { url, key, publicUrl: `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${key}` };
+    }),
+  confirmUpload: protectedProcedure
+    .input(confirmUploadProfileImageSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { session } = ctx;
+      const { key } = input;
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { image: `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${key}` },
+      });
+    }),
 });

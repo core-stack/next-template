@@ -1,13 +1,14 @@
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Building, User } from "lucide-react";
-import Link from "next/link";
+import { Building, User } from 'lucide-react';
+import Link from 'next/link';
 
-import { UserProfile } from "../user/profile";
+import { ThemeToggle } from '@/components/theme-toggle';
+
+import { UserProfile } from '../user/profile';
 
 export function WorkspacesHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-16 items-center m-auto justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
             <Building className="h-6 w-6" />

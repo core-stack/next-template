@@ -1,11 +1,11 @@
 import type { Metadata } from "next"
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { caller } from "@/lib/trpc/server";
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { caller } from '@/lib/trpc/server';
 
-import { General } from "./general";
-import { UpdateSettings } from "./notification";
-import { UpdatePassword } from "./password";
+import { General } from './general';
+import { UpdateSettings } from './notification';
+import { UpdatePassword } from './password';
 
 export const metadata: Metadata = {
   title: "Perfil",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default async function ProfilePage() {
   const user = await caller.user.self();
   return (
-    <div className="container py-10">
+    <div className="container py-10 m-auto">
       <div className="flex flex-col gap-6 max-w-3xl mx-auto">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Perfil</h1>

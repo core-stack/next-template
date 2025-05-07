@@ -1,6 +1,7 @@
-import { passwordSchema } from "@/validation/password";
-import { UserRole, WorkspaceRole } from "@packages/prisma";
-import { z } from "zod";
+import { z } from 'zod';
+
+import { passwordSchema } from '@/validation/password';
+import { UserRole, WorkspaceRole } from '@packages/prisma';
 
 export const selfUserSchema = z.object({
   id: z.string(),
@@ -53,8 +54,10 @@ export const updateUserPictureSchema = z.object({
     message: 'Formato inválido',
   }),
   fileSize: z.number().max(5 * 1024 * 1024, 'Máx 5MB'),
-  width: z.number().min(100).max(1000),
-  height: z.number().min(100).max(1000),
 });
-
 export type UpdateUserPictureSchema = z.infer<typeof updateUserPictureSchema>;
+
+export const confirmUploadProfileImageSchema = z.object({
+  key: z.string(),
+})
+export type ConfirmUploadProfileImageSchema = z.infer<typeof confirmUploadProfileImageSchema>;

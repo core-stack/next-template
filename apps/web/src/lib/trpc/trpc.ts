@@ -1,8 +1,9 @@
-import { auth } from "@/lib/auth";
-import { initTRPC, TRPCError } from "@trpc/server";
-import cookie from "cookie";
+import cookie from 'cookie';
 
-import { Context } from "./context";
+import { auth } from '@/lib/auth';
+import { initTRPC, TRPCError } from '@trpc/server';
+
+import { Context } from './context';
 
 const t = initTRPC.context<Context>().create();
 export const { createCallerFactory } = t;
@@ -13,7 +14,7 @@ export const publicProcedure = t.procedure;
 
 const authMiddleware = middleware(async ({ ctx, next }) => {
   let session = ctx.session;
-  const hasRefreshToken = !!ctx.refreshToken;
+  const hasRefreshToken = !!ctx.refreshToken;  
   try {
     if (!session && hasRefreshToken) {
       const refreshResult = await auth.refreshToken(ctx.refreshToken);

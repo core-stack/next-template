@@ -1,10 +1,10 @@
-import { env } from "@/env";
+import { env } from '@/env';
 import {
   CopyObjectCommand, DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-import { redis } from "./redis";
+import { redis } from './redis';
 
 export const s3 = new S3Client({
   region: "auto",
@@ -16,14 +16,14 @@ export const s3 = new S3Client({
 });
 
 
-export async function getPresignedUrl(
+export async function getTempPresignedUrl(
   filename: string,
   contentType: string,
 ) {
 
   const key = `tmp/${Date.now()}-${filename}`;
   const command = new PutObjectCommand({
-    Bucket: process.env.R2_BUCKET!,
+    Bucket: env.AWS_BUCKET,
     Key: key,
     ContentType: contentType,
   });
@@ -34,7 +34,7 @@ export async function getPresignedUrl(
 
 export async function getPresignedGetUrl(key: string, expiresIn = 60) {
   const command = new GetObjectCommand({
-    Bucket: process.env.R2_BUCKET!,
+    Bucket: env.AWS_BUCKET,
     Key: key,
   });
 
@@ -51,13 +51,13 @@ export async function confirmUpload(key: string) {
   const newKey = key.replace(/^tmp\//, "uploads/");
 
   await s3.send(new CopyObjectCommand({
-    Bucket: process.env.R2_BUCKET!,
-    CopySource: `${process.env.R2_BUCKET!}/${key}`,
+    Bucket: env.AWS_BUCKET,
+    CopySource: `${env.AWS_BUCKET}/${key}`,
     Key: newKey,
   }));
 
   await s3.send(new DeleteObjectCommand({
-    Bucket: process.env.R2_BUCKET!,
+    Bucket: env.AWS_BUCKET,
     Key: key,
   }));
 
@@ -68,3 +68,15 @@ export async function isConfirmed(key: string): Promise<boolean> {
   const status = await redis.get(`upload:${key}`);
   return status === "confirmed";
 }
+
+export async function getPreSignedUrl(key: string, contentType: string, publicAccess: boolean = false) {
+  const command = new PutObjectCommand({
+    Bucket: env.AWS_BUCKET,
+    Key: key,
+    ContentType: contentType,
+    ACL: publicAccess ? "public-read" : "private",
+  });
+
+  return await getSignedUrl(s3, command, { expiresIn: 300 });
+
+} 

@@ -73,7 +73,6 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
       }
     });
   });
-  console.log(form.formState.errors);
   
   return (
     <Card>
@@ -163,13 +162,13 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
                                         variant="outline"
                                         className={cn("w-[240px] justify-start text-left font-normal")}
                                       >
-                                        <div className="h-4 w-4 rounded mr-2" style={{ background: field.value }} />
+                                        <div className="h-4 w-4 rounded mr-2" style={{ background: field.value ?? undefined }} />
                                         <span>{field.value}</span>
                                       </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-auto p-0" align="start">
                                       <ChromePicker
-                                        color={field.value}
+                                        color={field.value ?? undefined}
                                         onChange={(color) => {
                                           field.onChange(color.hex)
                                         }}
@@ -192,7 +191,7 @@ export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps)
                             <FormItem>
                               <FormControl>
                                 <div className="grid gap-4">
-                                  <div className="h-20 w-full rounded-md" style={{ background: field.value }} />
+                                  <div className="h-20 w-full rounded-md" style={{ background: field.value ?? undefined }} />
                                   <div className="grid grid-cols-3 gap-2">
                                     <Button
                                       type="button"
