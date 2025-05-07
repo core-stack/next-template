@@ -1,15 +1,16 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { useRef, useState } from 'react';
+import Cropper from 'react-easy-crop';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
-} from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { trpc } from "@/lib/trpc/client";
-import { getCroppedImg } from "@/utils/cropImage";
-import { useRef, useState } from "react";
-import Cropper from "react-easy-crop";
+} from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { trpc } from '@/lib/trpc/client';
+import { getCroppedImg } from '@/utils/cropImage';
 
 interface ProfileImageUploaderProps {
   user: {
@@ -27,7 +28,6 @@ export function ProfileImageUploader({ user }: ProfileImageUploaderProps) {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [showCropDialog, setShowCropDialog] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   const getPresignedUrl = trpc.user.getUpdateImagePresignedUrl.useMutation();
   const confirmUpload = trpc.user.confirmUpload.useMutation();
@@ -62,13 +62,6 @@ export function ProfileImageUploader({ user }: ProfileImageUploaderProps) {
 
       xhr.open('PUT', signedUrl)
       xhr.setRequestHeader('Content-Type', file.type)
-
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percentComplete = (event.loaded / event.total) * 100
-          setUploadProgress(percentComplete)
-        }
-      }
 
       xhr.onload = () => {
         if (xhr.status === 200) {

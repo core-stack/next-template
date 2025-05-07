@@ -1,8 +1,8 @@
-import { Queue } from "bullmq";
+import { Queue } from 'bullmq';
 
-import { EmailPayload, emailPayloadSchema } from "./email";
-import { CompressImagePayload } from "./image-compressor";
-import { redisConnection } from "./redis";
+import { EmailPayload, emailPayloadSchema } from './email';
+import { CompressImagePayload, compressImageSchema } from './image-compressor';
+import { redisConnection } from './redis';
 
 export enum QueueName {
   EMAIL = 'email',
@@ -11,7 +11,7 @@ export enum QueueName {
 
 const schemaMap = {
   [QueueName.EMAIL]: emailPayloadSchema,
-  [QueueName.COMPRESS_IMAGE]: emailPayloadSchema,
+  [QueueName.COMPRESS_IMAGE]: compressImageSchema,
 };
 
 export type QueuesMap = {

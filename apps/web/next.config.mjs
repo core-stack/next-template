@@ -5,6 +5,14 @@ const nextConfig = {
   experimental: {
     nodeMiddleware: true,
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = config.externals.filter(
+        (external) => !external.includes('@aws-sdk/client-s3')
+      );
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

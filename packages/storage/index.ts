@@ -1,6 +1,6 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { env } from "@packages/env";
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { env } from '@packages/env';
 
 export const s3 = new S3Client({
   region: "auto",
@@ -11,18 +11,23 @@ export const s3 = new S3Client({
   },
 });
 
-export async function getPreSignedUploadUrl(key: string, contentType: string, publicAccess: boolean = false) {
+export async function getPreSignedUploadUrl(
+  key: string,
+  contentType: string,
+  publicAccess: boolean = false,
+  temporary: boolean = false
+) {
   const command = new PutObjectCommand({
     Bucket: env.AWS_BUCKET,
     Key: key,
     ContentType: contentType,
     ACL: publicAccess ? "public-read" : "private",
   });
-
+  
   return await getSignedUrl(s3, command, { expiresIn: 300 });
 }
 
-export async function getPreSignedDownloadUrl(key: string) {
+export async function getPreSignedDownloadUrl(key: string, temporary: boolean = false) {
   const command = new GetObjectCommand({
     Bucket: env.AWS_BUCKET,
     Key: key,
@@ -31,7 +36,7 @@ export async function getPreSignedDownloadUrl(key: string) {
   return await getSignedUrl(s3, command, { expiresIn: 300 });
 }
 
-export async function getObject(key: string) {
+export async function getObject(key: string, temporary: boolean = false) {
   const getCmd = new GetObjectCommand({
     Bucket: env.AWS_BUCKET,
     Key: key,
@@ -41,7 +46,7 @@ export async function getObject(key: string) {
   return s3Obj.Body
 }
 
-export async function putObject(key: string, body: Buffer, contentType: string) {
+export async function putObject(key: string, body: Buffer, contentType: string, temporary: boolean = false) {
   const getCmd = new PutObjectCommand({
     Bucket: env.AWS_BUCKET,
     Key: key,
@@ -52,6 +57,6 @@ export async function putObject(key: string, body: Buffer, contentType: string) 
   await s3.send(getCmd);
 }
 
-export function buildPublicUrl(key: string) {
+export function buildPublicUrl(key: string, temporary: boolean = false) {
   return `${env.AWS_PUBLIC_BUCKET_BASE_URL}/${key}`
 }

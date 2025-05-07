@@ -1,15 +1,16 @@
-import { comparePassword, hashPassword } from "@/lib/authz";
-import { prisma } from "@packages/prisma";
-import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
-import { buildPublicUrl, getPreSignedUploadUrl } from "@packages/storage";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import { z } from 'zod';
+
+import { comparePassword, hashPassword } from '@/lib/authz';
+import { prisma } from '@packages/prisma';
+import { addInQueue, EmailTemplate, QueueName } from '@packages/queue';
+import { buildPublicUrl, getPreSignedUploadUrl } from '@packages/storage';
+import { TRPCError } from '@trpc/server';
 
 import {
   confirmUploadProfileImageSchema, selfUserSchema, updatePasswordSchema, updateProfileSchema,
   updateUserPictureSchema
-} from "../schema/user";
-import { protectedProcedure, router } from "../trpc";
+} from '../schema/user';
+import { protectedProcedure, router } from '../trpc';
 
 export const userRouter = router({
   self: protectedProcedure
@@ -82,8 +83,8 @@ export const userRouter = router({
     .input(updateUserPictureSchema)
     .mutation(async ({ input, ctx }) => {
       const key = `user-profile/${ctx.session.user.id}.${input.fileName.split(".").pop()}`;
-      const url = await getPreSignedUploadUrl(key, input.contentType, true);
-      return { url, key, publicUrl: buildPublicUrl(key) };
+      const url = await getPreSignedUploadUrl(key, input.contentType, true, true);
+      return { url, key, publicUrl: buildPublicUrl(key, true) };
     }),
   confirmUpload: protectedProcedure
     .input(confirmUploadProfileImageSchema)
