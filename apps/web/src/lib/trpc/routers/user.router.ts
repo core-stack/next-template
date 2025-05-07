@@ -84,7 +84,7 @@ export const userRouter = router({
     .mutation(async ({ input, ctx }) => {
       const key = `${ctx.session.user.id}/profile.${input.fileName.split(".").pop()}`;
       const url = await getPreSignedUrl(key, input.contentType);
-      return { url, key, publicUrl: `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${key}` };
+      return { url, key, publicUrl: `${env.AWS_PUBLIC_BUCKET_BASE_URL}/${key}` };
     }),
   confirmUpload: protectedProcedure
     .input(confirmUploadProfileImageSchema)
