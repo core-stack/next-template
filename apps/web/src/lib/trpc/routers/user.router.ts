@@ -1,8 +1,7 @@
-import { env } from "@/env";
 import { comparePassword, hashPassword } from "@/lib/authz";
-import { getPreSignedUrl } from "@/lib/upload";
 import { prisma } from "@packages/prisma";
 import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
+import { buildPublicUrl, getPreSignedUploadUrl } from "@packages/storage";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -82,9 +81,9 @@ export const userRouter = router({
   getUpdateImagePresignedUrl: protectedProcedure
     .input(updateUserPictureSchema)
     .mutation(async ({ input, ctx }) => {
-      const key = `${ctx.session.user.id}/profile.${input.fileName.split(".").pop()}`;
-      const url = await getPreSignedUrl(key, input.contentType);
-      return { url, key, publicUrl: `${env.AWS_PUBLIC_BUCKET_BASE_URL}/${key}` };
+      const key = `user-profile/${ctx.session.user.id}.${input.fileName.split(".").pop()}`;
+      const url = await getPreSignedUploadUrl(key, input.contentType, true);
+      return { url, key, publicUrl: buildPublicUrl(key) };
     }),
   confirmUpload: protectedProcedure
     .input(confirmUploadProfileImageSchema)
@@ -93,7 +92,15 @@ export const userRouter = router({
       const { key } = input;
       await prisma.user.update({
         where: { id: session.user.id },
-        data: { image: `${env.AWS_PUBLIC_BUCKET_BASE_URL}/${key}` },
+        data: { image: buildPublicUrl(key) },
       });
+      await addInQueue(
+        QueueName.COMPRESS_IMAGE,
+        {
+          key: key,
+          height: 200,
+          width: 200
+        }
+      )
     }),
 });
