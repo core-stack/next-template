@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { caller } from '@/lib/trpc/server';
 
 import { General } from './general';
-import { UpdateSettings } from './notification';
 import { UpdatePassword } from './password';
 
 export const metadata: Metadata = {
@@ -23,10 +22,9 @@ export default async function ProfilePage() {
         </div>
         <Separator />
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="general">Geral</TabsTrigger>
             <TabsTrigger value="password">Senha</TabsTrigger>
-            <TabsTrigger value="notifications">Notificações</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">
@@ -35,10 +33,6 @@ export default async function ProfilePage() {
 
           <TabsContent value="password">
             <UpdatePassword />
-          </TabsContent>
-
-          <TabsContent value="notifications">
-            <UpdateSettings />
           </TabsContent>
         </Tabs>
       </div>
