@@ -1,16 +1,20 @@
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { trpc } from "@/lib/trpc/client";
-import { cn } from "@/lib/utils";
-import { ChevronDown, HelpCircle, LogOut, Moon, Sun, User } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ChevronDown, HelpCircle, LogOut, Moon, Sun, User } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
-import { useTheme } from "../theme-provider";
-import { Button } from "../ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { trpc } from '@/lib/trpc/client';
+import { cn } from '@/lib/utils';
 
+import { NotificationsSheet } from '../notifications';
+import { useTheme } from '../theme-provider';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+
+const unreadCount = 2;
 type Props = {
   showDarkModeToggle?: boolean
   expanded?: boolean
@@ -38,6 +42,14 @@ export const UserProfile = ({ showDarkModeToggle = true, expanded = true }: Prop
             <AvatarImage src={user?.image || undefined} />
             <AvatarFallback>{user?.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
+          {unreadCount > 0 && (
+            <Badge
+              variant="destructive"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse"
+            >
+              {unreadCount}
+            </Badge>
+          )}
           {
             expanded &&
             <>
@@ -65,6 +77,7 @@ export const UserProfile = ({ showDarkModeToggle = true, expanded = true }: Prop
         </div>
 
         <div className="grid gap-1 py-2">
+          <NotificationsSheet />
           <Link
             href="/profile"
             className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
