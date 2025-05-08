@@ -43,8 +43,8 @@ export const MembersTable = () => {
         return (
           <div className="flex items-center gap-3">
             <Avatar>
-              <AvatarImage src={member.user.image || undefined} />
-              <AvatarFallback>{member.user.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+              <AvatarImage src={member.user.image || undefined} className='rounded-full w-10 h-10' />
+              <AvatarFallback className='rounded-full w-10 h-10'>{member.user.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
               <div className="font-medium">{member.user.name}</div>
