@@ -29,6 +29,7 @@ export function ProfileImageUploader({ user }: ProfileImageUploaderProps) {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [showCropDialog, setShowCropDialog] = useState(false);
 
+  const utils = trpc.useUtils();
   const getPresignedUrl = trpc.user.getUpdateImagePresignedUrl.useMutation();
   const confirmUpload = trpc.user.confirmUpload.useMutation();
 
@@ -48,14 +49,13 @@ export function ProfileImageUploader({ user }: ProfileImageUploaderProps) {
     reader.readAsDataURL(file);
   };
 
-  const handleCropComplete = (croppedArea: any, croppedPixels: any) => {
+  const handleCropComplete = (_: any, croppedPixels: any) => {
     setCroppedAreaPixels(croppedPixels);
   };
 
-  const uploadFileWithProgress = (
+  const uploadFile = (
     file: Blob,
-    signedUrl: string,
-    signal: AbortSignal
+    signedUrl: string
   ): Promise<void> => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
@@ -76,11 +76,6 @@ export function ProfileImageUploader({ user }: ProfileImageUploaderProps) {
       }
 
       xhr.send(file)
-
-      signal.addEventListener('abort', () => {
-        xhr.abort()
-        reject(new Error('Upload cancelled'))
-      })
     })
   }
 
@@ -100,18 +95,22 @@ export function ProfileImageUploader({ user }: ProfileImageUploaderProps) {
         fileSize,
       });
 
-      const uploadRes = await fetch(url, {
-        method: "PUT",
-        body: croppedBlob,
+      await uploadFile(croppedBlob, url);
+
+      confirmUpload.mutate({ key }, {
+        onSuccess: () => {
+          setPreviewUrl(publicUrl);
+          setShowCropDialog(false);
+          utils.user.self.invalidate();
+        },
+        onError: () => {
+          toast({
+            title: "Erro ao enviar imagem",
+            description: "Tente novamente.",
+            variant: "destructive",
+          });
+        }
       });
-      const controller = new AbortController();
-      uploadFileWithProgress(croppedBlob, url, controller.signal);
-      if (!uploadRes.ok) throw new Error("Falha no upload");
-
-      await confirmUpload.mutateAsync({ key });
-
-      setPreviewUrl(publicUrl);
-      setShowCropDialog(false);
     } catch (err) {
       console.error(err);
       toast({

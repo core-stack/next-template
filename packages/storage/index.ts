@@ -14,8 +14,7 @@ export const s3 = new S3Client({
 export async function getPreSignedUploadUrl(
   key: string,
   contentType: string,
-  publicAccess: boolean = false,
-  temporary: boolean = false
+  publicAccess: boolean = false
 ) {
   const command = new PutObjectCommand({
     Bucket: env.AWS_BUCKET,
@@ -27,7 +26,7 @@ export async function getPreSignedUploadUrl(
   return await getSignedUrl(s3, command, { expiresIn: 300 });
 }
 
-export async function getPreSignedDownloadUrl(key: string, temporary: boolean = false) {
+export async function getPreSignedDownloadUrl(key: string) {
   const command = new GetObjectCommand({
     Bucket: env.AWS_BUCKET,
     Key: key,
@@ -36,7 +35,7 @@ export async function getPreSignedDownloadUrl(key: string, temporary: boolean = 
   return await getSignedUrl(s3, command, { expiresIn: 300 });
 }
 
-export async function getObject(key: string, temporary: boolean = false) {
+export async function getObject(key: string) {
   const getCmd = new GetObjectCommand({
     Bucket: env.AWS_BUCKET,
     Key: key,
@@ -46,7 +45,7 @@ export async function getObject(key: string, temporary: boolean = false) {
   return s3Obj.Body
 }
 
-export async function putObject(key: string, body: Buffer, contentType: string, temporary: boolean = false) {
+export async function putObject(key: string, body: Buffer, contentType: string) {
   const getCmd = new PutObjectCommand({
     Bucket: env.AWS_BUCKET,
     Key: key,
@@ -57,6 +56,6 @@ export async function putObject(key: string, body: Buffer, contentType: string, 
   await s3.send(getCmd);
 }
 
-export function buildPublicUrl(key: string, temporary: boolean = false) {
+export function buildPublicUrl(key: string) {
   return `${env.AWS_PUBLIC_BUCKET_BASE_URL}/${key}`
 }

@@ -11,12 +11,12 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 const envSchema = z.object({
   REDIS_URL: z.string().url(),
 
-  SMTP_ENABLED: z.coerce.boolean().default(false),
+  SMTP_ENABLED: z.string().transform((val) => val === "true").default("false"),
   SMTP_HOST: z.string(),
   SMTP_PORT: z.coerce.number(),
   SMTP_USER: z.string(),
   SMTP_PASSWORD: z.string(),
-  SMTP_SECURE: z.coerce.boolean().default(false),
+  SMTP_SECURE: z.string().transform((val) => val === "true").default("false"),
 
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),

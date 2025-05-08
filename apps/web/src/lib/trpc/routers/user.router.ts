@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 
 import { comparePassword, hashPassword } from '@/lib/authz';
@@ -78,13 +79,12 @@ export const userRouter = router({
       });
       return { name: input.name };
     }),
-
   getUpdateImagePresignedUrl: protectedProcedure
     .input(updateUserPictureSchema)
-    .mutation(async ({ input, ctx }) => {
-      const key = `user-profile/${ctx.session.user.id}.${input.fileName.split(".").pop()}`;
-      const url = await getPreSignedUploadUrl(key, input.contentType, true, true);
-      return { url, key, publicUrl: buildPublicUrl(key, true) };
+    .mutation(async ({ input }) => {
+      const key = `user-profile/${randomUUID()}.${input.fileName.split(".").pop()}`;
+      const url = await getPreSignedUploadUrl(key, input.contentType, true);
+      return { url, key, publicUrl: buildPublicUrl(key) };
     }),
   confirmUpload: protectedProcedure
     .input(confirmUploadProfileImageSchema)
