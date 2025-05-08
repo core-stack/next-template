@@ -1,6 +1,8 @@
 import { WorkspaceRole } from "@packages/prisma";
 import { z } from "zod";
 
+import { workspaceSchema } from "./workspace";
+
 export const inviteSchema = z.object({
   id: z.string().uuid(),
   workspaceId: z.string().uuid(),
@@ -25,3 +27,8 @@ export const inviteMemberSchema = z.object({
 });
 
 export type InviteMemberSchema = z.infer<typeof inviteMemberSchema>;
+
+export const inviteWithWorkspaceSchema = inviteSchema.extend({
+  workspace: workspaceSchema,
+});
+export type InviteWithWorkspaceSchema = z.infer<typeof inviteWithWorkspaceSchema>;

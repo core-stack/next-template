@@ -14,6 +14,9 @@ model Member {
   workspaceId  String  @map("workspace_id")
   workspace  Workspace    @relation(fields: [workspaceId], references: [id])
 
+  notifications      Notification[]  @relation("destination")
+  createdNotifications Notification[]  @relation("createdBy")
+
   role               WorkspaceRole @default(WORKSPACE_MEMBER)
 
   owner              Boolean @default(false)
@@ -37,6 +40,7 @@ model Workspace {
 
   members            Member[]
   invites            Invite[]
+  notifications      Notification[]
 
   disabledAt         DateTime?
 

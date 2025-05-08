@@ -1,13 +1,11 @@
 
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { InviteWithWorkspaceSchema } from "@/lib/trpc/schema/invite";
+import { caller } from "@/lib/trpc/server";
+import { TRPCError } from "@trpc/server";
+import { redirect } from "next/navigation";
 
-import { auth } from '@/lib/auth';
-import { prisma } from '@packages/prisma';
+import { InviteAcceptance } from "./invite-acceptance";
 
-import { InviteAcceptance } from './invite-acceptance';
-
-// preciso pegar a sessão do usuario
 type Props = {
   params: Promise<{
     code: string
@@ -15,24 +13,20 @@ type Props = {
 }
 export default async function InvitePage({ params }: Props) {
   const { code } = await params;
-  const cookieStore = await cookies();
-  const session = await auth.getSession(cookieStore.get("access-token")?.value);
-  if (!session) redirect("/auth/login");
-  const invite = await prisma.invite.findUnique({
-    where: { id: code },
-    include: { workspace: { include: { members: true } } },
-  });
-
-  if (!invite) redirect("/");
-  if (invite.email !== session.user.email) redirect("/");
-  if (invite.workspace.members.some((member) => member.userId === session.user.id)) {
-    await prisma.invite.delete({ where: { id: code } });
-    redirect(`/w/${invite.workspace.slug}`);
+  let invite: InviteWithWorkspaceSchema | null = null;
+  try {
+    invite = await caller.invite.getByIdWithWorkspace({ id: code });
+    if (!invite) redirect("/");
+  } catch (error) {
+    if (error instanceof TRPCError) {
+      if (error.code === "NOT_FOUND") redirect("/");
+      if (error.code === "FORBIDDEN") redirect("/");
+    }
   }
 
   return (
     <div className="container flex items-center justify-center min-h-screen py-10">
-      <InviteAcceptance invite={invite} />
+      <InviteAcceptance invite={invite!} />
     </div>
   )
 }

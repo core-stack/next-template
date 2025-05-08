@@ -1,14 +1,13 @@
 "use client"
 
-import { Bell } from 'lucide-react';
-import { useState } from 'react';
-
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+import { Info } from "lucide-react";
+import moment from "moment";
+import { createContext, useContext, useState } from "react";
 
 // Tipos para as notificações
 interface Notification {
@@ -25,7 +24,6 @@ interface Notification {
   link?: string
 }
 
-// Dados de exemplo para notificações
 const mockNotifications: Notification[] = [
   {
     id: "1",
@@ -90,14 +88,33 @@ const mockNotifications: Notification[] = [
   },
 ]
 
-// Hook para usar notificações em qualquer componente
-export function useNotifications() {
+type NotificationContextType = {
+  notifications: Notification[]
+  unreadCount: number
+  markAllAsRead: () => void
+  markAsRead: (id: string) => void
+  showNotifications: () => void
+  hideNotifications: () => void
+}
+const NotificationContext = createContext<NotificationContextType>({
+  notifications: [],
+  unreadCount: 0,
+  markAllAsRead: () => {},
+  markAsRead: () => {},
+  showNotifications: () => {},
+  hideNotifications: () => {},
+})
+type Props = {
+  children: React.ReactNode
+}
+export function NotificationsProvider({ children }: Props) {
+  const [open, setOpen] = useState(false)
+  const showNotifications = () => setOpen(true)
+  const hideNotifications = () => setOpen(false)
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
 
-  // Contar notificações não lidas
   const unreadCount = notifications.filter((notification) => !notification.read).length
 
-  // Marcar todas as notificações como lidas
   const markAllAsRead = () => {
     setNotifications(
       notifications.map((notification) => ({
@@ -107,7 +124,6 @@ export function useNotifications() {
     )
   }
 
-  // Marcar uma notificação específica como lida
   const markAsRead = (id: string) => {
     setNotifications(
       notifications.map((notification) =>
@@ -121,129 +137,75 @@ export function useNotifications() {
     )
   }
 
-  return {
-    notifications,
-    unreadCount,
-    markAllAsRead,
-    markAsRead,
-  }
-}
-
-// Formatar data relativa
-export function formatRelativeTime(date: Date) {
-  const now = new Date()
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-
-  if (diffInSeconds < 60) {
-    return "agora mesmo"
-  } else if (diffInSeconds < 3600) {
-    const minutes = Math.floor(diffInSeconds / 60)
-    return `${minutes} ${minutes === 1 ? "minuto" : "minutos"} atrás`
-  } else if (diffInSeconds < 86400) {
-    const hours = Math.floor(diffInSeconds / 3600)
-    return `${hours} ${hours === 1 ? "hora" : "horas"} atrás`
-  } else {
-    const days = Math.floor(diffInSeconds / 86400)
-    return `${days} ${days === 1 ? "dia" : "dias"} atrás`
-  }
-}
-
-// Obter ícone baseado no tipo de notificação
-export function getNotificationIcon(type: Notification["type"]) {
-  switch (type) {
-    case "invite":
-      return "👥"
-    case "mention":
-      return "💬"
-    case "system":
-      return "🔔"
-    case "update":
-      return "📋"
-    default:
-      return "📩"
-  }
-}
-
-export function NotificationsSheet() {
-  const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotifications()
-  const [open, setOpen] = useState(false)
-
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" className="w-full justify-start px-2 py-1.5 text-sm">
-          <Bell className="mr-2 h-4 w-4" />
-          <span>Notificações</span>
-          {unreadCount > 0 && (
-            <Badge variant="destructive" className="ml-auto">
-              {unreadCount}
-            </Badge>
-          )}
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md">
-        <SheetHeader className="pb-4 border-b">
-          <div className="flex items-center justify-between">
-            <SheetTitle>Notificações</SheetTitle>
-            {unreadCount > 0 && (
-              <Button variant="ghost" size="sm" onClick={markAllAsRead}>
-                Marcar todas como lidas
-              </Button>
-            )}
-          </div>
-        </SheetHeader>
+    <NotificationContext.Provider value={{ notifications, unreadCount, markAllAsRead, markAsRead, showNotifications, hideNotifications }}>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent className="w-full sm:max-w-md">
+          <SheetHeader className="pb-4 border-b">
+            <div className="flex items-center justify-between">
+              <SheetTitle>Notificações</SheetTitle>
+              {unreadCount > 0 && (
+                <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+                  Marcar todas como lidas
+                </Button>
+              )}
+            </div>
+          </SheetHeader>
 
-        <Tabs defaultValue="all" className="mt-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="all">Todas</TabsTrigger>
-            <TabsTrigger value="unread">Não lidas {unreadCount > 0 && `(${unreadCount})`}</TabsTrigger>
-            <TabsTrigger value="invites">Convites</TabsTrigger>
-          </TabsList>
+          <Tabs defaultValue="all" className="mt-4">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="all">Todas</TabsTrigger>
+              <TabsTrigger value="unread">Não lidas {unreadCount > 0 && `(${unreadCount})`}</TabsTrigger>
+              <TabsTrigger value="invites">Convites</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="all" className="mt-4 space-y-4">
-            {notifications.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>Nenhuma notificação</p>
-              </div>
-            ) : (
-              notifications.map((notification) => (
-                <NotificationItem key={notification.id} notification={notification} onRead={markAsRead} />
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="unread" className="mt-4 space-y-4">
-            {notifications.filter((n) => !n.read).length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>Nenhuma notificação não lida</p>
-              </div>
-            ) : (
-              notifications
-                .filter((n) => !n.read)
-                .map((notification) => (
+            <TabsContent value="all" className="mt-4 space-y-4">
+              {notifications.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>Nenhuma notificação</p>
+                </div>
+              ) : (
+                notifications.map((notification) => (
                   <NotificationItem key={notification.id} notification={notification} onRead={markAsRead} />
                 ))
-            )}
-          </TabsContent>
+              )}
+            </TabsContent>
 
-          <TabsContent value="invites" className="mt-4 space-y-4">
-            {notifications.filter((n) => n.type === "invite").length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>Nenhum convite</p>
-              </div>
-            ) : (
-              notifications
-                .filter((n) => n.type === "invite")
-                .map((notification) => (
-                  <NotificationItem key={notification.id} notification={notification} onRead={markAsRead} />
-                ))
-            )}
-          </TabsContent>
-        </Tabs>
-      </SheetContent>
-    </Sheet>
+            <TabsContent value="unread" className="mt-4 space-y-4">
+              {notifications.filter((n) => !n.read).length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>Nenhuma notificação não lida</p>
+                </div>
+              ) : (
+                notifications
+                  .filter((n) => !n.read)
+                  .map((notification) => (
+                    <NotificationItem key={notification.id} notification={notification} onRead={markAsRead} />
+                  ))
+              )}
+            </TabsContent>
+
+            <TabsContent value="invites" className="mt-4 space-y-4">
+              {notifications.filter((n) => n.type === "invite").length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>Nenhum convite</p>
+                </div>
+              ) : (
+                notifications
+                  .filter((n) => n.type === "invite")
+                  .map((notification) => (
+                    <NotificationItem key={notification.id} notification={notification} onRead={markAsRead} />
+                  ))
+              )}
+            </TabsContent>
+          </Tabs>
+        </SheetContent>
+      </Sheet>
+      {children}
+    </NotificationContext.Provider>
   )
 }
+export const useNotifications = () => useContext(NotificationContext)
 
 interface NotificationItemProps {
   notification: Notification
@@ -269,7 +231,7 @@ function NotificationItem({ notification, onRead }: NotificationItemProps) {
           </Avatar>
         ) : (
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
-            <span className="text-lg">{getNotificationIcon(notification.type)}</span>
+            <span className="text-lg"><Info /></span>
           </div>
         )}
         <div className="flex-1 space-y-1">
@@ -278,7 +240,7 @@ function NotificationItem({ notification, onRead }: NotificationItemProps) {
             {!notification.read && <div className="h-2 w-2 rounded-full bg-primary"></div>}
           </div>
           <p className="text-sm text-muted-foreground">{notification.message}</p>
-          <p className="text-xs text-muted-foreground">{formatRelativeTime(notification.date)}</p>
+          <p className="text-xs text-muted-foreground">{moment(notification.date).fromNow()}</p>
         </div>
       </div>
     </a>

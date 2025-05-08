@@ -1,26 +1,17 @@
 "use client"
 
-import { Building, Calendar, Check, Loader2, Users, X } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
-} from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-
-interface InviteData {
-  code: string
-  workspaceName: string
-  inviterName: string
-  role: "ADMIN" | "MEMBER"
-  expiresAt: Date
-}
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { trpc } from "@/lib/trpc/client";
+import { InviteWithWorkspaceSchema } from "@/lib/trpc/schema/invite";
+import { Building, Calendar, Check, Users, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface InviteAcceptanceProps {
-  invite: InviteData
+  invite: InviteWithWorkspaceSchema
 }
 
 export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
@@ -28,20 +19,20 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
   const { toast } = useToast()
   const [status, setStatus] = useState<"pending" | "accepted" | "rejected" | "error">("pending")
   const router = useRouter()
-
+  const { mutateAsync: acceptInvite } = trpc.invite.accept.useMutation()
+  const { mutateAsync: rejectInvite } = trpc.invite.reject.useMutation()
   const handleAccept = async () => {
     setIsLoading(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
+      await acceptInvite({ id: invite.id })
       setStatus("accepted")
       toast({
         title: "Convite aceito",
-        description: `Você agora é membro do workspace ${invite.workspaceName}`,
+        description: `Você agora é membro do workspace ${invite.workspace.name}`,
       })
 
       setTimeout(() => {
-        router.push(`/workspaces/${invite.workspaceName.toLowerCase().replace(/\s+/g, "-")}`)
+        router.push(`/workspaces/${invite.workspace.slug}`)
       }, 2000)
     } catch (error) {
       console.error("Erro ao aceitar convite:", error)
@@ -59,7 +50,7 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
   const handleReject = async () => {
     setIsLoading(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await rejectInvite({ id: invite.id })
 
       setStatus("rejected")
       toast({
@@ -83,7 +74,7 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
     }
   }
 
-  const isExpired = new Date() > invite.expiresAt
+  const isExpired = new Date() > invite.expiresAt;
 
   const formatExpirationDate = (date: Date) => {
     return new Intl.DateTimeFormat("pt-BR", {
@@ -101,7 +92,7 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
         </div>
         <CardTitle className="text-2xl">Convite para Workspace</CardTitle>
         <CardDescription>
-          {invite.inviterName} convidou você para participar do workspace <strong>{invite.workspaceName}</strong>
+          Você foi convidado para participar do workspace <strong>{invite.workspace.name}</strong>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -111,14 +102,14 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
               <Building className="h-4 w-4 text-muted-foreground" />
               <span>Workspace:</span>
             </div>
-            <span className="font-medium">{invite.workspaceName}</span>
+            <span className="font-medium">{invite.workspace.name}</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
               <Users className="h-4 w-4 text-muted-foreground" />
               <span>Função:</span>
             </div>
-            <Badge variant="outline">{invite.role === "ADMIN" ? "Administrador" : "Membro"}</Badge>
+            <Badge variant="outline">{invite.role === "WORKSPACE_ADMIN" ? "Administrador" : "Membro"}</Badge>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
@@ -155,12 +146,12 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
       <CardFooter className="flex gap-2">
         {status === "pending" && !isExpired && (
           <>
-            <Button variant="outline" className="flex-1" onClick={handleReject} disabled={isLoading}>
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <X className="mr-2 h-4 w-4" />}
+            <Button variant="outline" className="flex-1" onClick={handleReject} disabled={isLoading} isLoading={isLoading}>
+              <X className="mr-2 h-4 w-4" />
               Recusar
             </Button>
-            <Button className="flex-1" onClick={handleAccept} disabled={isLoading}>
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+            <Button className="flex-1" onClick={handleAccept} disabled={isLoading} isLoading={isLoading}>
+              <Check className="mr-2 h-4 w-4" />
               Aceitar
             </Button>
           </>

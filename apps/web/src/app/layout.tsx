@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
-import './globals.css';
-
-import { ThemeProvider } from '@/components/theme-provider';
-import { Toaster } from '@/components/ui/toaster';
-
-import { TRPCProvider } from './provider';
+import "./globals.css";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -19,12 +15,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body suppressHydrationWarning>
-          <TRPCProvider>
-            <ThemeProvider defaultTheme="system" storageKey="saas-theme">
-              {children}
-            </ThemeProvider>
-          </TRPCProvider>
-          <Toaster />
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

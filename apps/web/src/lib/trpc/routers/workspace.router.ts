@@ -1,22 +1,21 @@
-import { z } from 'zod';
-
-import { auth } from '@/lib/auth';
-import { comparePassword } from '@/lib/authz';
-import { prisma, Workspace } from '@packages/prisma';
-import { TRPCError } from '@trpc/server';
+import { auth } from "@/lib/auth";
+import { comparePassword } from "@/lib/authz";
+import { prisma, Workspace } from "@packages/prisma";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import {
-  createWorkspaceSchema, disableWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema,
-  workspaceSchema, workspaceWithCountSchema
-} from '../schema/workspace';
-import { protectedProcedure, router } from '../trpc';
+  createWorkspaceSchema, disableWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema, workspaceSchema,
+  workspaceWithCountSchema
+} from "../schema/workspace";
+import { protectedProcedure, router } from "../trpc";
 
 const slugInUse = async (slug: string) => {
   const workspace = await prisma.workspace.findUnique({ where: { slug } });
   return !!workspace;
 }
 
-const formatWorkspace = (workspace: Workspace) => {
+export const formatWorkspace = (workspace: Workspace) => {
   return {
     ...workspace,
     backgroundType: workspace.backgroundImage.startsWith("#") ? "color" : "gradient",
