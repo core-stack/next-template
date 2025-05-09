@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 
+import { NotificationsProvider } from '@/components/notifications';
 import { WorkspaceSchema } from '@/lib/trpc/schema/workspace';
 import { caller } from '@/lib/trpc/server';
 import { TRPCError } from '@trpc/server';
@@ -29,9 +30,11 @@ export default async function WorkspaceLayout({ children, params }: WorkspaceLay
   if (!workspace) redirect("/w");
   
   return (
-    <div className="flex min-h-screen">
-      <WorkspaceSidebar slug={slug} currentWokspace={workspace} />
-      <div className="flex-1 overflow-auto">{children}</div>
-    </div>
+    <NotificationsProvider>
+      <div className="flex min-h-screen">
+        <WorkspaceSidebar slug={slug} currentWokspace={workspace} />
+        <div className="flex-1 overflow-auto">{children}</div>
+      </div>
+    </NotificationsProvider>
   )
 }

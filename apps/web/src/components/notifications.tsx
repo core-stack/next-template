@@ -1,106 +1,36 @@
 "use client"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
-import { Info } from "lucide-react";
-import moment from "moment";
-import { createContext, useContext, useState } from "react";
+import { Info } from 'lucide-react';
+import moment from 'moment';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { createContext, useContext, useState } from 'react';
 
-// Tipos para as notificações
-interface Notification {
-  id: string
-  title: string
-  message: string
-  type: "invite" | "mention" | "system" | "update"
-  read: boolean
-  date: Date
-  sender?: {
-    name: string
-    avatar?: string
-  }
-  link?: string
-}
-
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    title: "Convite para workspace",
-    message: "João Silva convidou você para participar do workspace 'Agência Digital'",
-    type: "invite",
-    read: false,
-    date: new Date(Date.now() - 1000 * 60 * 30), // 30 minutos atrás
-    sender: {
-      name: "João Silva",
-      avatar: undefined,
-    },
-    link: "/invite/abc123",
-  },
-  {
-    id: "2",
-    title: "Menção em comentário",
-    message: "Maria Oliveira mencionou você em um comentário no projeto 'Website Redesign'",
-    type: "mention",
-    read: false,
-    date: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 horas atrás
-    sender: {
-      name: "Maria Oliveira",
-      avatar: undefined,
-    },
-    link: "/workspaces/agencia-digital/projects/website-redesign",
-  },
-  {
-    id: "3",
-    title: "Atualização do sistema",
-    message: "Uma nova versão do sistema está disponível. Veja as novidades!",
-    type: "system",
-    read: true,
-    date: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 dia atrás
-    link: "/updates",
-  },
-  {
-    id: "4",
-    title: "Tarefa atribuída",
-    message: "Carlos Santos atribuiu a tarefa 'Revisar design' para você",
-    type: "update",
-    read: true,
-    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 dias atrás
-    sender: {
-      name: "Carlos Santos",
-      avatar: undefined,
-    },
-    link: "/tasks/123",
-  },
-  {
-    id: "5",
-    title: "Convite para workspace",
-    message: "Ana Pereira convidou você para participar do workspace 'Estúdio Design'",
-    type: "invite",
-    read: true,
-    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 dias atrás
-    sender: {
-      name: "Ana Pereira",
-      avatar: undefined,
-    },
-    link: "/invite/def456",
-  },
-]
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+  Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle
+} from '@/components/ui/sheet';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { trpc } from '@/lib/trpc/client';
+import { NotificationSchema } from '@/lib/trpc/schema/notification';
+import { cn } from '@/lib/utils';
 
 type NotificationContextType = {
-  notifications: Notification[]
+  notifications: NotificationSchema[]
+  unreadNotifications: boolean
   unreadCount: number
-  markAllAsRead: () => void
-  markAsRead: (id: string) => void
+  markAllAsRead: () => Promise<void>
+  markAsRead: (id: string) => Promise<void>
   showNotifications: () => void
   hideNotifications: () => void
 }
 const NotificationContext = createContext<NotificationContextType>({
   notifications: [],
+  unreadNotifications: false,
   unreadCount: 0,
-  markAllAsRead: () => {},
-  markAsRead: () => {},
+  markAllAsRead: () => Promise.resolve(),
+  markAsRead: () => Promise.resolve(),
   showNotifications: () => {},
   hideNotifications: () => {},
 })
@@ -111,52 +41,62 @@ export function NotificationsProvider({ children }: Props) {
   const [open, setOpen] = useState(false)
   const showNotifications = () => setOpen(true)
   const hideNotifications = () => setOpen(false)
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
+  const { slug } = useParams<{ slug: string }>()
+  
+  const utils = trpc.useUtils()
+  const { data: notificationsData } = trpc.notification.getNotifications.useQuery({ slug }, { initialData: []})
+  const notifications = notificationsData.map(notification => ({
+    ...notification,
+    createdAt: new Date(notification.createdAt),
+    readAt: notification.readAt ? new Date(notification.readAt) : null,
+    createdBy: notification.createdBy ? {
+      ...notification.createdBy,
+      createdAt: new Date(notification.createdBy.createdAt),
+      updatedAt: new Date(notification.createdBy.updatedAt)
+    } : null,
+    destination: {
+      ...notification.destination,
+      createdAt: new Date(notification.destination.createdAt),
+      updatedAt: new Date(notification.destination.updatedAt)
+    }
+  }))
+  const { mutateAsync: markAllAsReadMutation } = trpc.notification.markAllAsRead.useMutation()
+  const { mutateAsync: markAsReadMutation } = trpc.notification.markAsRead.useMutation()
+  const unreadNotifications = notifications?.some((notification) => !notification.read)
+  const unreadCount = notifications?.filter((notification) => !notification.read).length
 
-  const unreadCount = notifications.filter((notification) => !notification.read).length
-
-  const markAllAsRead = () => {
-    setNotifications(
-      notifications.map((notification) => ({
-        ...notification,
-        read: true,
-      })),
-    )
+  const markAllAsRead = async () => {
+    await markAllAsReadMutation({ slug })
+    await utils.notification.getNotifications.invalidate({ slug })
   }
-
-  const markAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((notification) =>
-        notification.id === id
-          ? {
-              ...notification,
-              read: true,
-            }
-          : notification,
-      ),
-    )
+  const markAsRead = async (id: string) => {
+    await markAsReadMutation({ slug, id })
+    await utils.notification.getNotifications.invalidate({ slug })
   }
 
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, markAllAsRead, markAsRead, showNotifications, hideNotifications }}>
+    <NotificationContext.Provider value={
+      { notifications, unreadNotifications, unreadCount, markAllAsRead, markAsRead, showNotifications, hideNotifications }
+    }>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent className="w-full sm:max-w-md">
+        <SheetContent className="w-full sm:max-w-md" hideCloseButton>
           <SheetHeader className="pb-4 border-b">
             <div className="flex items-center justify-between">
               <SheetTitle>Notificações</SheetTitle>
-              {unreadCount > 0 && (
-                <Button variant="ghost" size="sm" onClick={markAllAsRead}>
-                  Marcar todas como lidas
-                </Button>
-              )}
+              <SheetDescription>
+                {unreadNotifications && (
+                  <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+                    Marcar todas como lidas
+                  </Button>
+                )}
+              </SheetDescription>
             </div>
           </SheetHeader>
 
           <Tabs defaultValue="all" className="mt-4">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="all">Todas</TabsTrigger>
-              <TabsTrigger value="unread">Não lidas {unreadCount > 0 && `(${unreadCount})`}</TabsTrigger>
-              <TabsTrigger value="invites">Convites</TabsTrigger>
+              <TabsTrigger value="unread">Não lidas {unreadNotifications && `(${unreadCount})`}</TabsTrigger> 
             </TabsList>
 
             <TabsContent value="all" className="mt-4 space-y-4">
@@ -184,20 +124,6 @@ export function NotificationsProvider({ children }: Props) {
                   ))
               )}
             </TabsContent>
-
-            <TabsContent value="invites" className="mt-4 space-y-4">
-              {notifications.filter((n) => n.type === "invite").length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Nenhum convite</p>
-                </div>
-              ) : (
-                notifications
-                  .filter((n) => n.type === "invite")
-                  .map((notification) => (
-                    <NotificationItem key={notification.id} notification={notification} onRead={markAsRead} />
-                  ))
-              )}
-            </TabsContent>
           </Tabs>
         </SheetContent>
       </Sheet>
@@ -208,14 +134,14 @@ export function NotificationsProvider({ children }: Props) {
 export const useNotifications = () => useContext(NotificationContext)
 
 interface NotificationItemProps {
-  notification: Notification
+  notification: NotificationSchema
   onRead: (id: string) => void
 }
 
 function NotificationItem({ notification, onRead }: NotificationItemProps) {
   return (
-    <a
-      href={notification.link}
+    <Link
+      href={notification.link || ''}
       className={cn(
         "block p-4 rounded-lg transition-colors",
         notification.read ? "bg-background hover:bg-muted/50" : "bg-muted/50 hover:bg-muted",
@@ -224,10 +150,10 @@ function NotificationItem({ notification, onRead }: NotificationItemProps) {
       onClick={() => onRead(notification.id)}
     >
       <div className="flex items-start gap-4">
-        {notification.sender ? (
+        {notification.createdBy ? (
           <Avatar>
-            <AvatarImage src={notification.sender.avatar || undefined} />
-            <AvatarFallback>{notification.sender.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={notification.createdBy?.user.image || undefined} />
+            <AvatarFallback>{notification.createdBy?.user.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
         ) : (
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
@@ -239,10 +165,10 @@ function NotificationItem({ notification, onRead }: NotificationItemProps) {
             <p className={cn("text-sm font-medium", !notification.read && "font-semibold")}>{notification.title}</p>
             {!notification.read && <div className="h-2 w-2 rounded-full bg-primary"></div>}
           </div>
-          <p className="text-sm text-muted-foreground">{notification.message}</p>
-          <p className="text-xs text-muted-foreground">{moment(notification.date).fromNow()}</p>
+          <p className="text-sm text-muted-foreground">{notification.description}</p>
+          <p className="text-xs text-muted-foreground">{moment(notification.createdAt).fromNow()}</p>
         </div>
       </div>
-    </a>
+    </Link>
   )
 }

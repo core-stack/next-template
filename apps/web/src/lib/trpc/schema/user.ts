@@ -40,13 +40,6 @@ export const updatePasswordSchema = z.object({
 });
 export type UpdatePasswordSchema = z.infer<typeof updatePasswordSchema>;
 
-export const notificationsSchema = z.object({
-  emailNotifications: z.boolean(),
-  marketingEmails: z.boolean(),
-  securityAlerts: z.boolean(),
-});
-export type NotificationsSchema = z.infer<typeof notificationsSchema>;
-
 export const updateUserPictureSchema = z.object({
   fileName: z.string(),
   contentType: z.string().refine((v) =>

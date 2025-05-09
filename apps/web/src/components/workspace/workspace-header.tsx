@@ -31,8 +31,7 @@ export function WorkspacesHeader() {
         </div>
         <div className="flex items-center gap-4">
           <ThemeToggle />
-
-          <UserProfile showDarkModeToggle={false} expanded={false} />
+          <UserProfile />
         </div>
       </div>
     </header>

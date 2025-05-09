@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import {
   Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue
 } from '@/components/ui/select';
-import { UserProfile } from '@/components/user/profile';
 import { WorkspaceDialog } from '@/components/workspace/create-or-update-dialog';
+import { MemberInfo } from '@/components/workspace/member-info';
 import { trpc } from '@/lib/trpc/client';
 import { WorkspaceSchema } from '@/lib/trpc/schema/workspace';
 import { cn } from '@/lib/utils';
@@ -124,7 +124,7 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
           </Button>
         </div>
 
-        <UserProfile />
+        <MemberInfo />
       </div>
       <WorkspaceDialog open={open} onOpenChange={setOpen} />
     </div>

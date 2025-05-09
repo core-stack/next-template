@@ -45,7 +45,6 @@ model User {
   accounts      Account[]
   invites       Invite[]
   members       Member[]
-  notifications Notification[]
   verificationToken VerificationToken[]
 
   @@map("users")
