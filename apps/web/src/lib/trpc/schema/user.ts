@@ -16,6 +16,7 @@ export const selfUserSchema = z.object({
     role: z.nativeEnum(WorkspaceRole),
     createdAt: z.date(),
     updatedAt: z.date(),
+    owner: z.boolean(),
     workspace: z.object({
       id: z.string(),
       slug: z.string(),

@@ -1,14 +1,15 @@
-import { auth } from "@/lib/auth";
-import { comparePassword } from "@/lib/authz";
-import { prisma, Workspace } from "@packages/prisma";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import { z } from 'zod';
+
+import { auth } from '@/lib/auth';
+import { comparePassword } from '@/lib/authz';
+import { prisma, Workspace } from '@packages/prisma';
+import { TRPCError } from '@trpc/server';
 
 import {
-  createWorkspaceSchema, disableWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema, workspaceSchema,
-  workspaceWithCountSchema
-} from "../schema/workspace";
-import { protectedProcedure, router } from "../trpc";
+  createWorkspaceSchema, disableWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema,
+  workspaceSchema, workspaceWithCountSchema
+} from '../schema/workspace';
+import { protectedProcedure, router } from '../trpc';
 
 const slugInUse = async (slug: string) => {
   const workspace = await prisma.workspace.findUnique({ where: { slug } });
@@ -71,10 +72,10 @@ export const workspaceRouter = router({
       return formatWorkspace(workspace);
     }),
   getBySlug: protectedProcedure
-    .input(z.object({ slug: z.string() }))
+    .input(z.object({ slug: z.string(), ignoreDisabled: z.boolean().optional() }))
     .output(workspaceSchema)
     .query(async ({ input }) => {
-      const workspace = await prisma.workspace.findUnique({ where: { slug: input.slug, disabledAt: null } });
+      const workspace = await prisma.workspace.findUnique({ where: { slug: input.slug, disabledAt: input.ignoreDisabled ? undefined : null } });
       if (!workspace) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
       }

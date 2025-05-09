@@ -2,7 +2,7 @@ import { CreateWorkspaceButton } from '@/components/workspace/create-button';
 import { WorkspaceList } from '@/components/workspace/list';
 import { WorkspacesHeader } from '@/components/workspace/workspace-header';
 
-export default async function Home() {
+export default async function Workspaces() {
   return (
     <>
       <WorkspacesHeader />

@@ -16,7 +16,7 @@ import { Badge } from '../ui/badge';
 import { WorkspaceDialog } from './create-or-update-dialog';
 
 type WorkspaceWithCount = Omit<WorkspaceWithCountSchema, "disabledAt"> & {
-  disabledAt?: string;
+  disabledAt?: string | null;
 }
 export function WorkspaceList() {
   const { data: workspaces = [] } = trpc.workspace.get.useQuery();
@@ -54,7 +54,7 @@ export function WorkspaceList() {
         onOpenChange={setIsDialogOpen}
         workspace={{
           ...selectedWorkspace!,
-          disabledAt: selectedWorkspace?.disabledAt ? new Date(selectedWorkspace.disabledAt) : undefined
+          disabledAt: selectedWorkspace?.disabledAt ? new Date(selectedWorkspace.disabledAt) : null
         }}
       />
     </>
@@ -67,7 +67,7 @@ type WorkspaceCardProps = {
   owner?: boolean;
 }
 function WorkspaceCard({ workspace, onEdit, role, owner }: WorkspaceCardProps) {
-  const cardStyle = { background: workspace.backgroundColor || workspace.backgroundGradient }
+  const cardStyle = { background: workspace.backgroundColor || workspace.backgroundGradient || '' }
   
   return (
     <Card className={cn("overflow-hidden border-2 hover:border-primary/50 transition-all", workspace.disabledAt && "opacity-50")}>
@@ -100,10 +100,10 @@ function WorkspaceCard({ workspace, onEdit, role, owner }: WorkspaceCardProps) {
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="outline" size="sm" className={!workspace.disabledAt ? "" : "pointer-events-none"} disabled={!!workspace.disabledAt} asChild>
-          <Link href={`/w/${workspace.slug}`}>
+        <Button variant="outline" size="sm" disabled={!!workspace.disabledAt} asChild>
+          <Link href={workspace.disabledAt ? `/w/reactivate/${workspace.slug}` : `/w/${workspace.slug}`}>
             <ArrowBigRight className="mr-2 h-4 w-4" />
-            Entrar
+            {workspace.disabledAt ? "Reativar" : "Entrar"}
           </Link>
         </Button>
         <Button variant="outline" size="sm" disabled={!!workspace.disabledAt} onClick={onEdit}>
