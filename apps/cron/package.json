@@ -2,9 +2,30 @@
   "name": "cron",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
+  "main": "./index.ts",
+  "module": "./index.ts",
+  "types": "./index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
+    "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@packages/env": "workspace:*",
+    "@packages/prisma": "workspace:*",
+    "@packages/queue": "workspace:*",
+    "dotenv": "^16.5.0",
+    "node-cron": "^3.0.3",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.24",
+    "@types/node-cron": "^3.0.11",
+    "typescript": "5.8.3"
+  },
+  "exports": {
+    ".": "./index.ts"
   },
   "keywords": [],
   "author": "",

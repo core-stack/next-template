@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export enum EmailTemplate {
   FORGOT_PASSWORD = 'forgot-password',
@@ -6,18 +6,18 @@ export enum EmailTemplate {
   ACTIVE_ACCOUNT = 'active-account',
   CHANGE_PASSWORD = 'change-password',
   CHANGE_EMAIL = 'change-email',
-
+  WORKSPACE_DELETED = 'workspace-deleted',
+  WORKSPACE_REACTIVATED = 'workspace-reactivated',
+  WORKSPACE_WILL_BE_DELETED = 'workspace-will-be-deleted', // 90 days before deletion
 }
 
 const forgotPasswordSchema = z.object({
   resetUrl: z.string().url(),
 });
-
 const inviteSchema = z.object({
   workspaceName: z.string(),
   inviteUrl: z.string().url(),
 });
-
 const activeAccountSchema = z.object({
   activationUrl: z.string().url(),
 });
@@ -27,6 +27,15 @@ const changePasswordSchema = z.object({
 const changeEmailSchema = z.object({
   name: z.string().nullable(),
   newEmail: z.string().email(),
+});
+const workspaceDeletedSchema = z.object({
+  workspaceName: z.string(),
+});
+const workspaceReactivatedSchema = z.object({
+  workspaceName: z.string(),
+});
+const workspaceWillBeDeletedSchema = z.object({
+  workspaceName: z.string(),
 });
 
 export const emailPayloadSchema = z.discriminatedUnion('template', [
@@ -64,6 +73,27 @@ export const emailPayloadSchema = z.discriminatedUnion('template', [
     from: z.string().optional(),
     template: z.literal(EmailTemplate.CHANGE_EMAIL),
     context: changeEmailSchema,
+  }),
+  z.object({
+    to: z.string().email(),
+    subject: z.string(),
+    from: z.string().optional(),
+    template: z.literal(EmailTemplate.WORKSPACE_DELETED),
+    context: workspaceDeletedSchema,
+  }),
+  z.object({
+    to: z.string().email(),
+    subject: z.string(),
+    from: z.string().optional(),
+    template: z.literal(EmailTemplate.WORKSPACE_REACTIVATED),
+    context: workspaceReactivatedSchema,
+  }),
+  z.object({
+    to: z.string().email(),
+    subject: z.string(),
+    from: z.string().optional(),
+    template: z.literal(EmailTemplate.WORKSPACE_WILL_BE_DELETED),
+    context: workspaceWillBeDeletedSchema,
   }),
 ]);
 

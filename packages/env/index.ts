@@ -39,6 +39,8 @@ const envSchema = z.object({
   WORKSPACE_INVITE_EXPIRES: z.coerce.number().default(60 * 60 * 24 * 7), // 7 days
 
   APP_URL: z.string().url().default('http://localhost:3000'),
+
+  DISABLED_WORKSPACES_DELETE_AFTER: z.coerce.number().default(60 * 60 * 24 * 90), // 90 days
 })
 
 export const env = envSchema.parse(process.env);
