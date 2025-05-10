@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-import { auth } from "./lib/auth";
-import { AccessToken, verifyToken } from "./lib/authz/jwt";
+import { auth } from './lib/auth';
+import { AccessToken, verifyToken } from './lib/authz/jwt';
 
 export const config = {
   matcher: [
@@ -22,6 +22,7 @@ const REDIRECT_WHEN_NOT_AUTHENTICATED_PATH = "/auth/login";
 const publicRoutes = [
   { path: '/auth/login', whenAuthneticated: "redirect" },
   { path: '/auth/create-account', whenAuthneticated: "redirect" },
+  { path: '/auth/activate', whenAuthneticated: "redirect" },
   { path: '/pricing', whenAuthneticated: "next" },
 ] as const
 
@@ -29,7 +30,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get('access-token')?.value;
 
-  const publicRoute = publicRoutes.find(route => route.path === pathname);
+  const publicRoute = publicRoutes.find(route => pathname.startsWith(route.path));
 
   if (!token && publicRoute) {
     return NextResponse.next();

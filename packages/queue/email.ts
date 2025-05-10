@@ -1,11 +1,11 @@
 import { z } from 'zod';
 
 export enum EmailTemplate {
-  FORGOT_PASSWORD = 'forgot-password',
-  INVITE = 'invite',
   ACTIVE_ACCOUNT = 'active-account',
   CHANGE_PASSWORD = 'change-password',
-  CHANGE_EMAIL = 'change-email',
+  FORGOT_PASSWORD = 'forgot-password',
+  INVITE = 'invite',
+  NOTIFICATION = 'notification',
   WORKSPACE_DELETED = 'workspace-deleted',
   WORKSPACE_REACTIVATED = 'workspace-reactivated',
   WORKSPACE_WILL_BE_DELETED = 'workspace-will-be-deleted', // 90 days before deletion
@@ -13,6 +13,7 @@ export enum EmailTemplate {
 
 const forgotPasswordSchema = z.object({
   resetUrl: z.string().url(),
+  name: z.string().nullable(),
 });
 const inviteSchema = z.object({
   workspaceName: z.string(),
@@ -20,22 +21,27 @@ const inviteSchema = z.object({
 });
 const activeAccountSchema = z.object({
   activationUrl: z.string().url(),
+  name: z.string().nullable(),
 });
 const changePasswordSchema = z.object({
   name: z.string().nullable(),
 });
-const changeEmailSchema = z.object({
-  name: z.string().nullable(),
-  newEmail: z.string().email(),
+const notificationSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  link: z.string().url().optional(),
+  workspaceName: z.string(),
 });
 const workspaceDeletedSchema = z.object({
   workspaceName: z.string(),
 });
 const workspaceReactivatedSchema = z.object({
   workspaceName: z.string(),
+  workspaceUrl: z.string().url(),
 });
 const workspaceWillBeDeletedSchema = z.object({
   workspaceName: z.string(),
+  workspaceReactivateUrl: z.string().url(),
 });
 
 export const emailPayloadSchema = z.discriminatedUnion('template', [
@@ -71,13 +77,6 @@ export const emailPayloadSchema = z.discriminatedUnion('template', [
     to: z.string().email(),
     subject: z.string(),
     from: z.string().optional(),
-    template: z.literal(EmailTemplate.CHANGE_EMAIL),
-    context: changeEmailSchema,
-  }),
-  z.object({
-    to: z.string().email(),
-    subject: z.string(),
-    from: z.string().optional(),
     template: z.literal(EmailTemplate.WORKSPACE_DELETED),
     context: workspaceDeletedSchema,
   }),
@@ -94,6 +93,13 @@ export const emailPayloadSchema = z.discriminatedUnion('template', [
     from: z.string().optional(),
     template: z.literal(EmailTemplate.WORKSPACE_WILL_BE_DELETED),
     context: workspaceWillBeDeletedSchema,
+  }),
+  z.object({
+    to: z.string().email(),
+    subject: z.string(),
+    from: z.string().optional(),
+    template: z.literal(EmailTemplate.NOTIFICATION),
+    context: notificationSchema,
   }),
 ]);
 

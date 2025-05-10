@@ -15,7 +15,10 @@ const envSchema = z.object({
   SMTP_HOST: z.string(),
   SMTP_PORT: z.coerce.number(),
   SMTP_USER: z.string(),
+  SMTP_FROM: z.string(),
   SMTP_PASSWORD: z.string(),
+  SMTP_ENV: z.enum(["development", "production"]).default("development"),
+  SMTP_TEST_EMAIL: z.string().email().default("delivered@resend.dev"),
   SMTP_SECURE: z.string().transform((val) => val === "true").default("false"),
 
   GOOGLE_CLIENT_ID: z.string(),
@@ -41,6 +44,8 @@ const envSchema = z.object({
   APP_URL: z.string().url().default('http://localhost:3000'),
 
   DISABLED_WORKSPACES_DELETE_AFTER: z.coerce.number().default(60 * 60 * 24 * 90), // 90 days
+
+  ACTIVE_ACCOUNT_TOKEN_EXPIRES: z.coerce.number().default(60 * 60 * 24 * 1000), // 1 day
 })
 
 export const env = envSchema.parse(process.env);

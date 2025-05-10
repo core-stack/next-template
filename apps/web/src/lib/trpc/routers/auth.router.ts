@@ -1,11 +1,31 @@
-import { auth } from "@/lib/auth";
-import { comparePassword, hashPassword } from "@/lib/authz";
-import { prisma } from "@packages/prisma";
-import { TRPCError } from "@trpc/server";
-import { cookies } from "next/headers";
+import moment from 'moment';
+import { cookies } from 'next/headers';
+import { z } from 'zod';
 
-import { createAccountSchema, loginSchema } from "../schema/auth";
-import { publicProcedure, router } from "../trpc";
+import { auth } from '@/lib/auth';
+import { comparePassword, hashPassword } from '@/lib/authz';
+import { env } from '@packages/env';
+import { prisma } from '@packages/prisma';
+import { addInQueue, EmailTemplate, QueueName } from '@packages/queue';
+import { TRPCError } from '@trpc/server';
+
+import { createAccountSchema, loginSchema } from '../schema/auth';
+import { publicProcedure, router } from '../trpc';
+
+const sendActiveAccountEmail = async (to: string, name: string | null, token: string) => {
+  await addInQueue(
+    QueueName.EMAIL,
+    {
+      to,
+      subject: "Ative sua conta",
+      template: EmailTemplate.ACTIVE_ACCOUNT,
+      context: {
+        activationUrl: `${env.APP_URL}/auth/activate/${token}`,
+        name,
+      }
+    }
+  );
+};
 
 export const authRouter = router({
   login: publicProcedure
@@ -61,18 +81,57 @@ export const authRouter = router({
           email, name, password: hashedPassword,
           verificationToken: {
             create: {
-              expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-              type: "ACTIVE_ACCOUNT"
+              expires: moment().add(env.ACTIVE_ACCOUNT_TOKEN_EXPIRES, 'ms').toDate(),
+              type: "ACTIVE_ACCOUNT",
+              token: crypto.randomUUID()
             }
           }
         },
-        include: { members: { include: { workspace: { select: { id: true, slug: true } }} } }
+        include: { verificationToken: true }
       });
-      const { token } = await auth.createSessionAndTokens(user);
-      const cookie = await cookies();
-      cookie.set("access-token", token.accessToken, { maxAge: token.accessTokenDuration });
-      cookie.set("refresh-token", token.refreshToken, { maxAge: token.refreshTokenDuration });
-      return { redirect: "/w" };
+      await sendActiveAccountEmail(
+        user.email!,
+        user.name!,
+        user.verificationToken.find(token => token.type === "ACTIVE_ACCOUNT")?.token!
+      );
+    }),
+
+  activateAccount: publicProcedure
+    .input(z.object({ token: z.string() }))
+    .mutation(async ({ input }) => {
+      const { token } = input;
+      const verificationToken = await prisma.verificationToken.findFirst({
+        where: { token, type: "ACTIVE_ACCOUNT" },
+        include: { user: true }
+      });
+      if (!verificationToken) throw new TRPCError({ code: "BAD_REQUEST", message: "Token de ativação inválido" });
+      if (verificationToken.expires < new Date()) {
+        await prisma.verificationToken.deleteMany({ where: { userId: verificationToken.userId, type: "ACTIVE_ACCOUNT" } });
+        await prisma.user.update({ where: { id: verificationToken.userId }, data: { emailVerified: null } });
+        const newToken = await prisma.verificationToken.create({
+          data: {
+            userId: verificationToken.userId,
+            type: "ACTIVE_ACCOUNT",
+            token: crypto.randomUUID(),
+            expires: moment().add(env.ACTIVE_ACCOUNT_TOKEN_EXPIRES, 'ms').toDate()
+          }
+        });
+        await sendActiveAccountEmail(
+          verificationToken.user.email!,
+          verificationToken.user.name!,
+          newToken.token
+        );
+        console.log("O link de ativação expirou. Um novo link foi enviado para o seu email.");
+        throw new TRPCError({ 
+          code: "BAD_REQUEST", 
+          message: "O link de ativação expirou. Um novo link foi enviado para o seu email."
+        });
+      }
+      const user = verificationToken.user;
+      console.log(user);
+
+      await prisma.user.update({ where: { id: user.id }, data: { emailVerified: new Date() } });
+      await prisma.verificationToken.deleteMany({ where: { userId: user.id, type: "ACTIVE_ACCOUNT" } });
     }),
 
   logout: publicProcedure.mutation(async () => {

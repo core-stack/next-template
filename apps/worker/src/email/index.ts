@@ -1,9 +1,10 @@
-import { env } from "@packages/env";
-import { EmailPayload, QueueName } from "@packages/queue";
-import { redisConnection } from "@packages/queue/redis";
-import { Job, Worker } from "bullmq";
+import { Job, Worker } from 'bullmq';
 
-import { MailOptionsWithTemplate, Transporter } from "./types";
+import { env } from '@packages/env';
+import { EmailPayload, QueueName } from '@packages/queue';
+import { redisConnection } from '@packages/queue/redis';
+
+import { MailOptionsWithTemplate, Transporter } from './types';
 
 const lazyTransporter: Promise<Transporter> | undefined = env.SMTP_ENABLED ?
   import("./transporter").then((m) => m.nodemailerTransporter) : undefined;
@@ -14,13 +15,16 @@ const emailWorker = new Worker<EmailPayload>(
 
     const opts: MailOptionsWithTemplate = {
       ...job.data,
-      from: job.data.from ?? env.SMTP_USER,
+      to: env.SMTP_ENV === "development" ? env.SMTP_TEST_EMAIL : job.data.to,
+      from: job.data.from ?? env.SMTP_FROM,
     }
+    
     const transporter = await lazyTransporter
     if (!transporter) {
       console.warn("SMTP is disabled");
       console.log(job.data);
     } else {
+      console.log(opts);
       await transporter.sendMail(opts);
     }
   },

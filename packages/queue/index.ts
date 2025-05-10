@@ -1,4 +1,4 @@
-import { Queue } from 'bullmq';
+import { JobsOptions, Queue } from 'bullmq';
 
 import { EmailPayload, emailPayloadSchema } from './email';
 import { CompressImagePayload, compressImageSchema } from './image-compressor';
@@ -28,8 +28,12 @@ const queues: Record<QueueName, Queue> = {
 export function getQueue(queue: QueueName) {
   return queues[queue];
 }
-export function addInQueue<T extends QueueName>(queue: T, payload: QueuesMap[T]) {
-  return getQueue(queue).add(queue, schemaMap[queue].parse(payload));
+export function addInQueue<T extends QueueName>(
+  queue: T,
+  payload: QueuesMap[T],
+  opts: JobsOptions = { backoff: { type: "fixed", delay: 1000 * 60 } } // repeat every minute if fails
+) {
+  return getQueue(queue).add(queue, schemaMap[queue].parse(payload), opts);
 }
 
 export * from "./email";

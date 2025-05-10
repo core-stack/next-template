@@ -9,7 +9,9 @@
   "scripts": {
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "dev": "pnpm tsx --watch index.ts",
+    "start": "pnpm tsx index.ts"
   },
   "dependencies": {
     "@packages/env": "workspace:*",
