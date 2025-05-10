@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { ProfileImageUploader } from '@/components/user/profile-image-uploader';
+import { toast } from '@/hooks/use-toast';
 import { trpc } from '@/lib/trpc/client';
 import { SelfUserSchema, updateProfileSchema, UpdateUserNameSchema } from '@/lib/trpc/schema/user';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,15 +36,15 @@ export const General = ({ user }: Props) => {
       {
         onSuccess: ({ name }) => {
           form.reset({ name });
+          toast({ title: "Nome atualizado com sucesso" });
         },
-      }
+        onError: ({ message }) => toast({ title: "Erro ao atualizar nome", description: message, variant: "destructive" })
+      },
     )
-  })
-  const reset = () => {
-    form.reset({
-      name: user.name ?? "",
-    })
-  }
+  });
+
+  const reset = () => form.reset({ name: user.name ?? "" });
+  
   return (
     <Card>
       <CardHeader>

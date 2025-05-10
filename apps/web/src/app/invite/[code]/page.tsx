@@ -1,10 +1,10 @@
 
-import { InviteWithWorkspaceSchema } from "@/lib/trpc/schema/invite";
-import { caller } from "@/lib/trpc/server";
-import { TRPCError } from "@trpc/server";
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation';
 
-import { InviteAcceptance } from "./invite-acceptance";
+import { InviteWithWorkspaceSchema } from '@/lib/trpc/schema/invite';
+import { caller } from '@/lib/trpc/server';
+
+import { InviteAcceptance } from './invite-acceptance';
 
 type Props = {
   params: Promise<{
@@ -16,16 +16,14 @@ export default async function InvitePage({ params }: Props) {
   let invite: InviteWithWorkspaceSchema | null = null;
   try {
     invite = await caller.invite.getByIdWithWorkspace({ id: code });
-    if (!invite) redirect("/");
+    if (!invite) redirect("/w");
   } catch (error) {
-    if (error instanceof TRPCError) {
-      if (error.code === "NOT_FOUND") redirect("/");
-      if (error.code === "FORBIDDEN") redirect("/");
-    }
+    redirect("/w");
   }
+  if (!invite) redirect("/w");
 
   return (
-    <div className="container flex items-center justify-center min-h-screen py-10">
+    <div className="container flex items-center justify-center min-h-screen py-10 m-auto">
       <InviteAcceptance invite={invite!} />
     </div>
   )

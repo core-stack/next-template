@@ -1,10 +1,11 @@
-import { WorkspaceRole } from "@packages/prisma";
-import { z } from "zod";
+import { z } from 'zod';
 
-import { workspaceSchema } from "./workspace";
+import { WorkspaceRole } from '@packages/prisma';
+
+import { workspaceSchema } from './workspace';
 
 export const inviteSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().cuid(),
   workspaceId: z.string().uuid(),
   email: z.string().email(),
   role: z.nativeEnum(WorkspaceRole),

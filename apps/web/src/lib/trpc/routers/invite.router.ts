@@ -1,16 +1,16 @@
-import { env } from "@/env";
-import { sendNotification } from "@/lib/notification";
-import { hasAccess } from "@/lib/utils";
-import { prisma } from "@packages/prisma";
-import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
-import { TRPCError } from "@trpc/server";
-import moment from "moment";
-import { z } from "zod";
+import moment from 'moment';
+import { z } from 'zod';
 
-import { inviteMemberSchema, inviteWithWorkspaceSchema } from "../schema/invite";
-import { protectedProcedure, router } from "../trpc";
+import { env } from '@/env';
+import { hasAccess } from '@/lib/utils';
+import { Permission } from '@packages/permission';
+import { prisma } from '@packages/prisma';
+import { addInQueue, EmailTemplate, QueueName } from '@packages/queue';
+import { TRPCError } from '@trpc/server';
 
-import { formatWorkspace } from "./workspace.router";
+import { inviteMemberSchema, inviteWithWorkspaceSchema } from '../schema/invite';
+import { protectedProcedure, rbacProcedure, router } from '../trpc';
+import { formatWorkspace } from './workspace.router';
 
 export const inviteRouter = router({
   getByIdWithWorkspace: protectedProcedure
@@ -33,7 +33,7 @@ export const inviteRouter = router({
       return invites;
     }),
 
-  invite: protectedProcedure
+  invite: rbacProcedure([Permission.CREATE_INVITE])
     .input(inviteMemberSchema)
     .mutation(async ({ input, ctx }) => {
       if (!hasAccess(ctx.session, input.slug)) throw new TRPCError({ code: 'FORBIDDEN', message: "Você não tem acesso a esse workspace" });
@@ -67,12 +67,25 @@ export const inviteRouter = router({
                 userId: userWithEmail.id,
               }
             });
-            sendNotification({
-              tx,
-              userId: userWithEmail.id,
-              title: "Convite para o workspace",
-              description: `Voce foi convidado para o workspace ${workspace.name}`,
-              link: `/invite?code=${invite.id}`,
+            await addInQueue(QueueName.EMAIL, {
+              to: email,
+              subject: "Convite para o workspace",
+              template: EmailTemplate.INVITE,
+              context: {
+                workspaceName: workspace.name,
+                inviteUrl: `${env.APP_URL}/invite/${invite.id}`,
+              },
+            });
+          })
+        } else {
+          prisma.$transaction(async (tx) => {
+            const invite = await tx.invite.create({
+              data: {
+                workspaceId: workspace.id,
+                email,
+                role,
+                expiresAt: moment().add(env.WORKSPACE_INVITE_EXPIRES, "seconds").toDate(),
+              }
             });
             await addInQueue(QueueName.EMAIL, {
               to: email,
@@ -80,27 +93,10 @@ export const inviteRouter = router({
               template: EmailTemplate.INVITE,
               context: {
                 workspaceName: workspace.name,
-                inviteUrl: `${env.APP_URL}/invite?code=${invite.id}`,
+                inviteUrl: `${env.APP_URL}/invite/${invite.id}`,
               },
             });
           })
-        } else {
-          const invite = await prisma.invite.create({
-            data: {
-              workspaceId: workspace.id,
-              email,
-              expiresAt: moment().add(env.WORKSPACE_INVITE_EXPIRES, "seconds").toDate(),
-            }
-          });
-          await addInQueue(QueueName.EMAIL, {
-            to: email,
-            subject: "Convite para o workspace",
-            template: EmailTemplate.INVITE,
-            context: {
-              workspaceName: workspace.name,
-              inviteUrl: `${env.APP_URL}/invite?code=${invite.id}`,
-            },
-          });
         }
       }
     }),
@@ -110,7 +106,8 @@ export const inviteRouter = router({
     .mutation(async ({ input, ctx }) => {
       const invite = await prisma.invite.findUnique({ where: { id: input.id } });
       if (!invite) throw new TRPCError({ code: 'NOT_FOUND', message: "Convite não encontrado" });
-
+      if (invite.expiresAt < new Date())
+        throw new TRPCError({ code: 'BAD_REQUEST', message: "Convite expirado" });
       if (invite.email !== ctx.session.user.email)
         throw new TRPCError({ code: 'FORBIDDEN', message: "Você não tem acesso a esse convite" });
 
@@ -138,7 +135,7 @@ export const inviteRouter = router({
       await prisma.invite.delete({ where: { id: input.id } });
     }),
 
-  delete: protectedProcedure
+  delete: rbacProcedure([Permission.DELETE_INVITE])
     .input(z.object({ id: z.string(), slug: z.string() }))
     .mutation(async ({ input, ctx }) => {
       if (!hasAccess(ctx.session, input.slug)) throw new TRPCError({ code: 'FORBIDDEN', message: "Você não tem acesso a esse workspace" });

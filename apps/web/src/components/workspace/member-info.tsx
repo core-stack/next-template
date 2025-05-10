@@ -65,7 +65,13 @@ export const MemberInfo = () => {
         </div>
 
         <div className="grid gap-1 py-2">
-          <Button onClick={showNotifications} variant="ghost" className='justify-start rounded-md'>
+          <Button onClick={showNotifications} variant="ghost" className='justify-start rounded-md relative'>
+            {unreadNotifications && (
+              <span className="absolute -top-0.5 -left-0.5 flex size-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
+                <span className="relative inline-flex size-2 rounded-full bg-sky-500 text-xs"></span>
+              </span>
+            )}
             <Bell className="h-4 w-4" />
             <span>Notificações</span>
           </Button>

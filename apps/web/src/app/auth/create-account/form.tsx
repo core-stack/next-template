@@ -11,11 +11,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 import { trpc } from '@/lib/trpc/client';
 import { createAccountSchema, CreateAccountSchema } from '@/lib/trpc/schema/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 export function CreateAccountForm() {
+  const { toast } = useToast();
   const form = useForm<CreateAccountSchema>({
     resolver: zodResolver(createAccountSchema),
     defaultValues: {
@@ -29,9 +31,23 @@ export function CreateAccountForm() {
   const isLoading = form.formState.isSubmitting;
   const { mutate } = trpc.auth.createAccount.useMutation();
   const onSubmit = form.handleSubmit(async (data) => {
-    mutate(data, { onSuccess: data => window.location.href = data.redirect });
+    mutate(data, {
+      onSuccess: () => {
+        toast({
+          title: "Conta criada com sucesso",
+          description: "Um email de ativação foi enviado para você. Por favor, verifique sua caixa de entrada.",
+        })
+      },
+      onError: (error) => {
+        toast({
+          title: "Erro ao criar conta",
+          description: error.message,
+          variant: "destructive",
+        })
+      }
+    });
   })
- 
+
   return (
     <div className="grid gap-6">
       <Form {...form}>

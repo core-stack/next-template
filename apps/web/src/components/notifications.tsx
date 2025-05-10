@@ -85,7 +85,7 @@ export function NotificationsProvider({ children }: Props) {
               <SheetTitle>Notificações</SheetTitle>
               <SheetDescription>
                 {unreadNotifications && (
-                  <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+                  <Button variant="outline" size="sm" onClick={markAllAsRead}>
                     Marcar todas como lidas
                   </Button>
                 )}
@@ -140,8 +140,7 @@ interface NotificationItemProps {
 
 function NotificationItem({ notification, onRead }: NotificationItemProps) {
   return (
-    <Link
-      href={notification.link || ''}
+    <div
       className={cn(
         "block p-4 rounded-lg transition-colors",
         notification.read ? "bg-background hover:bg-muted/50" : "bg-muted/50 hover:bg-muted",
@@ -166,9 +165,36 @@ function NotificationItem({ notification, onRead }: NotificationItemProps) {
             {!notification.read && <div className="h-2 w-2 rounded-full bg-primary"></div>}
           </div>
           <p className="text-sm text-muted-foreground">{notification.description}</p>
-          <p className="text-xs text-muted-foreground">{moment(notification.createdAt).fromNow()}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">{moment(notification.createdAt).locale("pt-br").fromNow()}</p>
+            <div className="flex items-center gap-2">
+              {!notification.read && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onRead(notification.id);
+                  }}
+                >
+                  Marcar como lida
+                </Button>
+              )}
+              {notification.link && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  asChild
+                >
+                  <Link href={notification.link}>
+                    Acessar
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-    </Link>
+    </div>
   )
 }

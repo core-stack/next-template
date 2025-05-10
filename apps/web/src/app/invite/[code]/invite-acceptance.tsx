@@ -1,14 +1,17 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { trpc } from "@/lib/trpc/client";
-import { InviteWithWorkspaceSchema } from "@/lib/trpc/schema/invite";
-import { Building, Calendar, Check, Users, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Building, Calendar, Check, Users, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
+} from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
+import { trpc } from '@/lib/trpc/client';
+import { InviteWithWorkspaceSchema } from '@/lib/trpc/schema/invite';
 
 interface InviteAcceptanceProps {
   invite: InviteWithWorkspaceSchema
@@ -16,7 +19,6 @@ interface InviteAcceptanceProps {
 
 export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
   const [status, setStatus] = useState<"pending" | "accepted" | "rejected" | "error">("pending")
   const router = useRouter()
   const { mutateAsync: acceptInvite } = trpc.invite.accept.useMutation()
@@ -32,7 +34,7 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
       })
 
       setTimeout(() => {
-        router.push(`/workspaces/${invite.workspace.slug}`)
+        router.push(`/w/${invite.workspace.slug}`)
       }, 2000)
     } catch (error) {
       console.error("Erro ao aceitar convite:", error)
@@ -59,8 +61,8 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
       })
 
       setTimeout(() => {
-        router.push("/workspaces")
-      }, 2000)
+        router.push(`/w`)
+      }, 2000);
     } catch (error) {
       console.error("Erro ao rejeitar convite:", error)
       setStatus("error")

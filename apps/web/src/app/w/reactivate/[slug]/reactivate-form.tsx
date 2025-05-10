@@ -73,7 +73,7 @@ export function ReactivateWorkspaceForm({ workspace }: ReactivateWorkspaceFormPr
 
   return (
     <div className="space-y-6">
-      <Button variant="ghost" onClick={() => router.push("/workspaces")} className="mb-4">
+      <Button variant="ghost" onClick={() => router.push("/w")} className="mb-4">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Voltar para Workspaces
       </Button>

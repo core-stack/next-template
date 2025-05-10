@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import { NotificationsProvider } from '@/components/notifications';
 import { WorkspaceSchema } from '@/lib/trpc/schema/workspace';
 import { caller } from '@/lib/trpc/server';
-import { TRPCError } from '@trpc/server';
 
 import { WorkspaceSidebar } from './workspace-sidebar';
 
@@ -21,15 +20,11 @@ export default async function WorkspaceLayout({ children, params }: WorkspaceLay
   try {
     workspace = await caller.workspace.getBySlug({ slug, ignoreDisabled: true });
   } catch (error) {
-    if (error instanceof TRPCError) {
-      if (error.code === "NOT_FOUND") redirect("/w");
-      else console.error(error);
-    }
+    redirect("/w");
   }
   if (!workspace) redirect("/w");
-  if (workspace.disabledAt) {
-    redirect(`/w/reactivate/${slug}`);
-  }
+  if (workspace.disabledAt) redirect(`/w/reactivate/${slug}`);
+
   return (
     <NotificationsProvider>
       <div className="flex min-h-screen">

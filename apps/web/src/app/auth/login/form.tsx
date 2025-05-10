@@ -2,7 +2,7 @@
 
 import { Mail } from 'lucide-react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { FcGoogle } from 'react-icons/fc';
 
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { toast } from '@/hooks/use-toast';
 import { trpc } from '@/lib/trpc/client';
 import { LoginSchema, loginSchema } from '@/lib/trpc/schema/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,10 +28,16 @@ export function LoginForm() {
   });
 
   const isLoading = form.formState.isSubmitting;
-  
+  const router = useRouter();
   const { mutate, error } = trpc.auth.login.useMutation();
   const onSubmit = form.handleSubmit(async (data) => {
-    mutate({ ...data, redirect: searchParams.get("redirect") || undefined }, { onSuccess: data => window.location.href = data.redirect }); 
+    mutate(
+      { ...data, redirect: searchParams.get("redirect") || undefined },
+      {
+        onSuccess: () => router.push(data.redirect ?? "/w"),
+        onError: ({ message }) => toast({ title: "Erro ao fazer login", description: message, variant: "destructive" })
+      }
+    );
   })
 
   return (

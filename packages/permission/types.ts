@@ -10,15 +10,22 @@ export enum Permission {
   DELETE_USER = "global:user:delete",
   BAN_USER = "global:user:ban",
 
+  // ---------------------------------------------------
   // workspace scope
   WORKSPACE_ALL = "workspace:workspace:*",
   UPDATE_WORKSPACE = "workspace:workspace:update",
   DELETE_WORKSPACE = "workspace:workspace:delete",
+
+  // member
   MEMBER_ALL = "workspace:member:*",
   GET_MEMBERS = "workspace:member:read",
-  INVITE_MEMBER = "workspace:member:invite",
   UPDATE_MEMBER = "workspace:member:update",
   DELETE_MEMBER = "workspace:member:delete",
+
+  // invite
+  INVITE_ALL = "invite:invite:*",
+  CREATE_INVITE = "invite:invite:create",
+  DELETE_INVITE = "invite:invite:delete",
 }
 
 export type WorkspaceRoleType = {

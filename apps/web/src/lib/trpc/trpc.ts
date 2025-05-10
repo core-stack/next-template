@@ -1,9 +1,10 @@
-import { auth } from "@/lib/auth";
-import { can, getRolePermissions, Permission } from "@packages/permission";
-import { initTRPC, TRPCError } from "@trpc/server";
-import cookie from "cookie";
+import cookie from 'cookie';
 
-import { Context } from "./context";
+import { auth } from '@/lib/auth';
+import { can, getRolePermissions, Permission } from '@packages/permission';
+import { initTRPC, TRPCError } from '@trpc/server';
+
+import { Context } from './context';
 
 const t = initTRPC.context<Context>().create();
 export const { createCallerFactory } = t;
@@ -42,12 +43,13 @@ const authMiddleware = middleware(async ({ ctx, next }) => {
 export const rbacMiddleware = (requiredPermissions: Permission[]) => {
   return middleware(async ({ ctx, next, getRawInput }) => {
     const rawInput = await getRawInput();
-    if (!ctx.session) throw new TRPCError({ code: 'UNAUTHORIZED' });
+    const { session } = ctx;
+    if (!session) throw new TRPCError({ code: 'UNAUTHORIZED' });
 
-    const userPermissions = getRolePermissions(ctx.session.user.role);
+    const userPermissions = getRolePermissions(session.user.role);
 
     if (rawInput && typeof rawInput === 'object' && 'workspaceSlug' in rawInput) {
-      const workspace = ctx.session.workspaces.find(
+      const workspace = session.workspaces.find(
         (w) => w.slug === (rawInput as { workspaceSlug: string }).workspaceSlug
       );
 
@@ -60,7 +62,7 @@ export const rbacMiddleware = (requiredPermissions: Permission[]) => {
       throw new TRPCError({ code: 'FORBIDDEN' });
     }
 
-    return next({ ctx: { ...ctx, userPermissions } });
+    return next({ ctx: { ...ctx, session, userPermissions } });
   });
 };
 

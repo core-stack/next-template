@@ -36,19 +36,12 @@ export const UpdatePassword = () => {
         form.reset()
         toast({ title: "Senha atualizada com sucesso" })
       },
-      onError: ({ message }) => {
-        toast({ title: "Erro ao atualizar senha", variant: "destructive", description: message })
-      }
+      onError: ({ message }) => toast({ title: "Erro ao atualizar senha", variant: "destructive", description: message })
     })
   });
 
-  const reset = () => {
-    form.reset({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    })
-  }
+  const reset = () => form.reset({ currentPassword: "", newPassword: "", confirmPassword: "" });
+
   return (
     <Card>
       <CardHeader>
