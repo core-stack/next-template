@@ -21,6 +21,10 @@ const envSchema = z.object({
   SMTP_TEST_EMAIL: z.string().email().default("delivered@resend.dev"),
   SMTP_SECURE: z.string().transform((val) => val === "true").default("false"),
 
+  STRIPE_PUBLIC_KEY: z.string(),
+  STRIPE_SECRET_KEY: z.string(),
+  STRIPE_WEBHOOK_SECRET: z.string(),
+
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
   GOOGLE_REDIRECT_URL: z.string(),
