@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -21,15 +22,15 @@ const envSchema = z.object({
   SMTP_TEST_EMAIL: z.string().email().default("delivered@resend.dev"),
   SMTP_SECURE: z.string().transform((val) => val === "true").default("false"),
 
-  STRIPE_PUBLIC_KEY: z.string(),
-  STRIPE_SECRET_KEY: z.string(),
-  STRIPE_WEBHOOK_SECRET: z.string(),
+  STRIPE_PUBLIC_KEY: z.string().optional(),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
 
-  GOOGLE_CLIENT_ID: z.string(),
-  GOOGLE_CLIENT_SECRET: z.string(),
-  GOOGLE_REDIRECT_URL: z.string(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_REDIRECT_URL: z.string().optional(),
 
-  JWT_SECRET: z.string(),
+  JWT_SECRET: z.string().default(randomBytes(32).toString('hex')),
   JWT_ACCESS_TOKEN_DURATION: z.coerce.number().default(60 * 5), // 5 minutes
   JWT_REFRESH_TOKEN_DURATION: z.coerce.number().default(60 * 60 * 24 * 7), // 7 days
 

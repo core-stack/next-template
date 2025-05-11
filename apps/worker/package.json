@@ -9,23 +9,20 @@
   "types": "./src/index.ts",
   "scripts": {
     "dev": "pnpm tsx --watch src/index.ts",
-    "start": "pnpm tsx src/index.ts",
+    "start": "node dist/index.js",
+    "build": "rm -rf dist && tsc",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.800.0",
-    "@aws-sdk/s3-request-presigner": "^3.800.0",
     "@bull-board/api": "^6.9.6",
     "@bull-board/express": "^6.9.6",
     "@packages/env": "workspace:*",
     "@packages/queue": "workspace:*",
     "@packages/storage": "workspace:*",
-    "@prisma/client": "^5.22.0",
     "bullmq": "^5.51.1",
     "express": "^5.1.0",
-    "next-connect": "^1.0.0",
     "nodemailer": "^6.10.1",
     "nodemailer-express-handlebars": "^7.0.0",
     "sharp": "^0.34.1"
@@ -35,7 +32,6 @@
     "@types/node": "^20.17.24",
     "@types/nodemailer": "^6.4.17",
     "@types/nodemailer-express-handlebars": "^4.0.5",
-    "prisma": "^5.22.0",
     "tsx": "^4.19.4",
     "typescript": "5.8.3"
   },
