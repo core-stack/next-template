@@ -1,10 +1,11 @@
 "use client"
 
+import { getMessaging, onMessage } from 'firebase/messaging';
 import { Info } from 'lucide-react';
 import moment from 'moment';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle
 } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import firebaseApp from '@/lib/firebase';
 import { trpc } from '@/lib/trpc/client';
 import { NotificationSchema } from '@/lib/trpc/schema/notification';
 import { cn } from '@/lib/utils';
@@ -73,6 +75,18 @@ export function NotificationsProvider({ children }: Props) {
     await markAsReadMutation({ slug, id })
     await utils.notification.getNotifications.invalidate({ slug })
   }
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      const messaging = getMessaging(firebaseApp);
+      const unsubscribe = onMessage(messaging, (payload) => {
+        console.log('Foreground push notification received:', payload);
+      });
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, []);
 
   return (
     <NotificationContext.Provider value={
