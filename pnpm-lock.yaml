@@ -90,9 +90,6 @@ importers:
       '@packages/storage':
         specifier: workspace:*
         version: link:../../packages/storage
-      '@prisma/client':
-        specifier: ^5.22.0
-        version: 5.22.0(prisma@5.22.0)
       '@radix-ui/react-avatar':
         specifier: ^1.1.3
         version: 1.1.7(@types/react-dom@18.3.6(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -280,12 +277,6 @@ importers:
 
   apps/worker:
     dependencies:
-      '@aws-sdk/client-s3':
-        specifier: ^3.800.0
-        version: 3.800.0
-      '@aws-sdk/s3-request-presigner':
-        specifier: ^3.800.0
-        version: 3.800.0
       '@bull-board/api':
         specifier: ^6.9.6
         version: 6.9.6(@bull-board/ui@6.9.6)
@@ -301,18 +292,12 @@ importers:
       '@packages/storage':
         specifier: workspace:*
         version: link:../../packages/storage
-      '@prisma/client':
-        specifier: ^5.22.0
-        version: 5.22.0(prisma@5.22.0)
       bullmq:
         specifier: ^5.51.1
         version: 5.51.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
-      next-connect:
-        specifier: ^1.0.0
-        version: 1.0.0
       nodemailer:
         specifier: ^6.10.1
         version: 6.10.1
@@ -335,9 +320,6 @@ importers:
       '@types/nodemailer-express-handlebars':
         specifier: ^4.0.5
         version: 4.0.5
-      prisma:
-        specifier: ^5.22.0
-        version: 5.22.0
       tsx:
         specifier: ^4.19.4
         version: 4.19.4
@@ -4191,10 +4173,6 @@ packages:
   neo-async@2.6.2:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
 
-  next-connect@1.0.0:
-    resolution: {integrity: sha512-FeLURm9MdvzY1SDUGE74tk66mukSqL6MAzxajW7Gqh6DZKBZLrXmXnGWtHJZXkfvoi+V/DUe9Hhtfkl4+nTlYA==}
-    engines: {node: '>=16'}
-
   next@15.4.0-canary.17:
     resolution: {integrity: sha512-AH14xNNvz+6S33AB3TR+VHkS+cnhrzkNeh8TnYpSbtouQqhJtm0lTYjnQTGqa3cHGKMgLI1h13MU724HiJGbcg==}
     engines: {node: ^18.18.0 || ^19.8.0 || >= 20.0.0}
@@ -4617,10 +4595,6 @@ packages:
   regexp.prototype.flags@1.5.4:
     resolution: {integrity: sha512-dYqgNSZbDwkaJ2ceRd9ojCGjBq+mOm9LmtXnAnEGyHhN/5R7iDW2TRw3h+o/jCFxus3P2LfWIIiwowAjANm7IA==}
     engines: {node: '>= 0.4'}
-
-  regexparam@2.0.2:
-    resolution: {integrity: sha512-A1PeDEYMrkLrfyOwv2jwihXbo9qxdGD3atBYQA9JJgreAx8/7rC6IUkWOw2NQlOxLp2wL0ifQbh1HuidDfYA6w==}
-    engines: {node: '>=8'}
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
@@ -7945,7 +7919,8 @@ snapshots:
   '@tsconfig/node14@1.0.3':
     optional: true
 
-  '@tsconfig/node16@1.0.4': {}
+  '@tsconfig/node16@1.0.4':
+    optional: true
 
   '@tybys/wasm-util@0.9.0':
     dependencies:
@@ -9786,11 +9761,6 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  next-connect@1.0.0:
-    dependencies:
-      '@tsconfig/node16': 1.0.4
-      regexparam: 2.0.2
-
   next@15.4.0-canary.17(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
       '@next/env': 15.4.0-canary.17
@@ -10209,8 +10179,6 @@ snapshots:
       get-proto: 1.0.1
       gopd: 1.2.0
       set-function-name: 2.0.2
-
-  regexparam@2.0.2: {}
 
   require-directory@2.1.1: {}
 
