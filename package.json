@@ -16,6 +16,7 @@
     "db:studio": "cd packages/prisma && pnpm studio"
   },
   "devDependencies": {
-    "dotenv-cli": "^7.4.4"
+    "dotenv-cli": "^7.4.4",
+    "require-in-the-middle": "^7.5.2"
   }
 }

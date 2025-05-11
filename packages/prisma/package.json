@@ -13,7 +13,6 @@
     "push": "dotenv -e ../../.env -- prisma db push --schema=./schema",
     "studio": "dotenv -e ../../.env -- prisma studio --schema=./schema --browser none",
     "prebuild": "pnpm run generate",
-    "postinstall": "pnpm run generate",
     "predev": "pnpm run generate",
     "format": "prisma format --schema=./schema"
   },
