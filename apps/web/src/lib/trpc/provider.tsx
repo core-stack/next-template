@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from "react";
+import superJSON from "superjson";
+
 import { trpc } from "@/lib/trpc/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, httpLink, isNonJsonSerializable, splitLink } from "@trpc/client";
-import { useState } from "react";
 
 const url = "/api/trpc";
 export function TRPCProvider(
@@ -19,8 +21,9 @@ export function TRPCProvider(
           condition: (op) => isNonJsonSerializable(op.input),
           true: httpLink({
             url,
+            transformer: superJSON,
           }),
-          false: httpBatchLink({ url }),
+          false: httpBatchLink({ url, transformer: superJSON }),
         })
       ],
     }),

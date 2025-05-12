@@ -1,21 +1,21 @@
 "use client"
 
-import { Mail } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { FcGoogle } from 'react-icons/fc';
+import { Mail } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { FcGoogle } from "react-icons/fc";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Form, FormControl, FormError, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { toast } from '@/hooks/use-toast';
-import { trpc } from '@/lib/trpc/client';
-import { LoginSchema, loginSchema } from '@/lib/trpc/schema/auth';
-import { zodResolver } from '@hookform/resolvers/zod';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "@/hooks/use-toast";
+import { trpc } from "@/lib/trpc/client";
+import { LoginSchema, loginSchema } from "@/lib/trpc/schema/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export function LoginForm() {
   const searchParams = useSearchParams();

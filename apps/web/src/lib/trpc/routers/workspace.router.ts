@@ -1,30 +1,30 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { auth } from '@/lib/auth';
-import { comparePassword } from '@/lib/authz';
-import { Permission } from '@packages/permission';
-import { prisma, Workspace } from '@packages/prisma';
-import { TRPCError } from '@trpc/server';
+import { auth } from "@/lib/auth";
+import { comparePassword } from "@/lib/authz";
+import { Permission } from "@packages/permission";
+import { prisma, Workspace } from "@packages/prisma";
+import { TRPCError } from "@trpc/server";
 
 import {
   createWorkspaceSchema, disableWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema,
   workspaceSchema, workspaceWithCountSchema
-} from '../schema/workspace';
-import { protectedProcedure, rbacProcedure, router } from '../trpc';
+} from "../schema/workspace";
+import { protectedProcedure, rbacProcedure, router } from "../trpc";
 
 const slugInUse = async (slug: string) => {
   const workspace = await prisma.workspace.findUnique({ where: { slug } });
   return !!workspace;
 }
 
-export const formatWorkspace = (workspace: Workspace) => {
-  return {
+export const formatWorkspace = (workspace: Workspace): WorkspaceSchema => {
+  return workspaceSchema.parse({
     ...workspace,
     backgroundType: workspace.backgroundImage.startsWith("#") ? "color" : "gradient",
     description: workspace.description ?? null,
     backgroundColor: workspace.backgroundImage.startsWith("#") ? workspace.backgroundImage : null,
     backgroundGradient: workspace.backgroundImage.startsWith("#") ? null : workspace.backgroundImage,
-  } as WorkspaceSchema;
+  });
 }
 export const workspaceRouter = router({
   get: protectedProcedure
@@ -81,9 +81,9 @@ export const workspaceRouter = router({
     .input(z.object({ slug: z.string(), ignoreDisabled: z.boolean().optional() }))
     .output(workspaceSchema)
     .query(async ({ input, ctx }) => {
-      const workspace = await prisma.workspace.findUnique({ 
-        where: { 
-          slug: input.slug, 
+      const workspace = await prisma.workspace.findUnique({
+        where: {
+          slug: input.slug,
           disabledAt: input.ignoreDisabled ? undefined : null,
           members: {
             some: {

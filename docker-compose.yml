@@ -1,4 +1,35 @@
 services:
+  # Cron
+  cron:
+    build:
+      context: .
+      dockerfile: apps/cron/Dockerfile
+    depends_on:
+      - db
+
+  # Web
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
+
+  # Worker
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    ports:
+      - "4000:4000"
+    depends_on:
+      - redis
+      - db
+
+  # Database
   db:
     image: postgres:14
     environment:
@@ -11,6 +42,7 @@ services:
       - "5432:5432"
     restart: unless-stopped
 
+  # Redis
   redis:
     image: redis
     ports:
@@ -19,6 +51,7 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
 
+  # Overvability
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     command: ["--config=/etc/otel-collector-config.yaml"]

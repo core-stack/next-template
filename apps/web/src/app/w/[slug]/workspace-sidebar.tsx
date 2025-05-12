@@ -1,19 +1,19 @@
 "use client"
 
-import { CreditCard, LayoutDashboard, Plus, Settings, Users, Zap } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { CreditCard, LayoutDashboard, Plus, Settings, Users, Zap } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue
-} from '@/components/ui/select';
-import { WorkspaceDialog } from '@/components/workspace/create-or-update-dialog';
-import { MemberInfo } from '@/components/workspace/member-info';
-import { trpc } from '@/lib/trpc/client';
-import { WorkspaceSchema } from '@/lib/trpc/schema/workspace';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/select";
+import { WorkspaceDialog } from "@/components/workspace/create-or-update-dialog";
+import { MemberInfo } from "@/components/workspace/member-info";
+import { trpc } from "@/lib/trpc/client";
+import { WorkspaceSchema } from "@/lib/trpc/schema/workspace";
+import { cn } from "@/lib/utils";
 
 interface WorkspaceSidebarProps {
   slug: string
@@ -61,7 +61,7 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
     <div
       className={cn(
         "flex flex-col border-r bg-background h-screen sticky top-0 overflow-y-auto",
-         "w-[280px]",
+        "w-[280px]",
       )}
     >
       <div className="p-4 border-b">
@@ -72,7 +72,7 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Seus workspaces</SelectLabel>
-              {workspaces.filter(w => w.disabledAt === null).map((ws) => (
+              {workspaces.filter(w => w.disabledAt === null).map(ws => (
                 <SelectItem key={ws.id} value={ws.slug}>
                   {ws.name}
                 </SelectItem>
@@ -80,7 +80,7 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
             </SelectGroup>
             <SelectGroup>
               <button
-                onClick={() => setOpen(true)} 
+                onClick={() => setOpen(true)}
                 className='flex items-center gap-3 rounded-md w-full px-3 py-1.5 text-sm font-medium transition-colors bg-primary/10 text-primary'
               >
                 <Plus className="mr-2 h-4 w-4" />

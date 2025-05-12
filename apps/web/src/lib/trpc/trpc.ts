@@ -1,12 +1,15 @@
-import cookie from 'cookie';
+import cookie from "cookie";
+import superJSON from "superjson";
 
-import { auth } from '@/lib/auth';
-import { can, getRolePermissions, Permission } from '@packages/permission';
-import { initTRPC, TRPCError } from '@trpc/server';
+import { auth } from "@/lib/auth";
+import { can, getRolePermissions, Permission } from "@packages/permission";
+import { initTRPC, TRPCError } from "@trpc/server";
 
-import { Context } from './context';
+import { Context } from "./context";
 
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({
+  transformer: superJSON,
+});
 export const { createCallerFactory } = t;
 
 export const middleware = t.middleware;

@@ -1,22 +1,22 @@
 "use client"
 
-import { getMessaging, onMessage } from 'firebase/messaging';
-import { Info } from 'lucide-react';
-import moment from 'moment';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { getMessaging, onMessage } from "firebase/messaging";
+import { Info } from "lucide-react";
+import moment from "moment";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { createContext, useContext, useEffect, useState } from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle
-} from '@/components/ui/sheet';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import firebaseApp from '@/lib/firebase';
-import { trpc } from '@/lib/trpc/client';
-import { NotificationSchema } from '@/lib/trpc/schema/notification';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import firebaseApp from "@/lib/firebase";
+import { trpc } from "@/lib/trpc/client";
+import { NotificationSchema } from "@/lib/trpc/schema/notification";
+import { cn } from "@/lib/utils";
 
 type NotificationContextType = {
   notifications: NotificationSchema[]
@@ -33,8 +33,8 @@ const NotificationContext = createContext<NotificationContextType>({
   unreadCount: 0,
   markAllAsRead: () => Promise.resolve(),
   markAsRead: () => Promise.resolve(),
-  showNotifications: () => {},
-  hideNotifications: () => {},
+  showNotifications: () => { },
+  hideNotifications: () => { },
 })
 type Props = {
   children: React.ReactNode
@@ -44,10 +44,10 @@ export function NotificationsProvider({ children }: Props) {
   const showNotifications = () => setOpen(true)
   const hideNotifications = () => setOpen(false)
   const { slug } = useParams<{ slug: string }>()
-  
+
   const utils = trpc.useUtils()
-  const { data: notificationsData } = trpc.notification.getNotifications.useQuery({ slug }, { initialData: []})
-  const notifications = notificationsData.map(notification => ({
+  const { data: notificationsData } = trpc.notification.getNotifications.useQuery({ slug }, { initialData: [] })
+  const notifications = notificationsData.map((notification: NotificationSchema) => ({
     ...notification,
     createdAt: new Date(notification.createdAt),
     readAt: notification.readAt ? new Date(notification.readAt) : null,
@@ -64,8 +64,8 @@ export function NotificationsProvider({ children }: Props) {
   }))
   const { mutateAsync: markAllAsReadMutation } = trpc.notification.markAllAsRead.useMutation()
   const { mutateAsync: markAsReadMutation } = trpc.notification.markAsRead.useMutation()
-  const unreadNotifications = notifications?.some((notification) => !notification.read)
-  const unreadCount = notifications?.filter((notification) => !notification.read).length
+  const unreadNotifications = notifications?.some((notification: NotificationSchema) => !notification.read)
+  const unreadCount = notifications?.filter((notification: NotificationSchema) => !notification.read).length
 
   const markAllAsRead = async () => {
     await markAllAsReadMutation({ slug })
@@ -110,7 +110,7 @@ export function NotificationsProvider({ children }: Props) {
           <Tabs defaultValue="all" className="mt-4">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="all">Todas</TabsTrigger>
-              <TabsTrigger value="unread">Não lidas {unreadNotifications && `(${unreadCount})`}</TabsTrigger> 
+              <TabsTrigger value="unread">Não lidas {unreadNotifications && `(${unreadCount})`}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="all" className="mt-4 space-y-4">
@@ -126,14 +126,14 @@ export function NotificationsProvider({ children }: Props) {
             </TabsContent>
 
             <TabsContent value="unread" className="mt-4 space-y-4">
-              {notifications.filter((n) => !n.read).length === 0 ? (
+              {notifications.filter((n: NotificationSchema) => !n.read).length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <p>Nenhuma notificação não lida</p>
                 </div>
               ) : (
                 notifications
-                  .filter((n) => !n.read)
-                  .map((notification) => (
+                  .filter((n: NotificationSchema) => !n.read)
+                  .map((notification: NotificationSchema) => (
                     <NotificationItem key={notification.id} notification={notification} onRead={markAsRead} />
                   ))
               )}

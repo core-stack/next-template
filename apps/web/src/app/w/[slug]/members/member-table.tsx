@@ -1,31 +1,27 @@
-import { ArrowUpDown, MoreHorizontal } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { useState } from "react";
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from '@/components/ui/table';
-import { useWorkspace } from '@/hooks/use-workspace';
-import { trpc } from '@/lib/trpc/client';
-import { MemberSchema } from '@/lib/trpc/schema/member';
-import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
+} from "@/components/ui/table";
+import { useWorkspace } from "@/hooks/use-workspace";
+import { trpc } from "@/lib/trpc/client";
+import { MemberSchema } from "@/lib/trpc/schema/member";
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from '@radix-ui/react-select';
+} from "@radix-ui/react-select";
 import {
   ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel,
   getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState
-} from '@tanstack/react-table';
+} from "@tanstack/react-table";
 
-type MemberTableRow = Omit<MemberSchema, "createdAt" | "updatedAt"> & {
-  createdAt: string
-  updatedAt: string
-}
 export const MembersTable = () => {
   const { isOwner, slug } = useWorkspace();
   const { data: members = [] } = trpc.member.getInWorkspace.useQuery({ slug });
@@ -34,7 +30,7 @@ export const MembersTable = () => {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
 
-  const memberColumns: ColumnDef<MemberTableRow>[] = [
+  const memberColumns: ColumnDef<MemberSchema>[] = [
     {
       accessorKey: "user.name",
       header: "Usuário",

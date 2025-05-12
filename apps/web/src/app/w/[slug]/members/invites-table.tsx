@@ -1,20 +1,18 @@
+import { ArrowUpDown } from "lucide-react";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
+} from "@/components/ui/table";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { trpc } from "@/lib/trpc/client";
 import { InviteSchema } from "@/lib/trpc/schema/invite";
 import {
-  ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel,
-  getSortedRowModel, SortingState, useReactTable, VisibilityState
+  ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel,
+  getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState
 } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
-import { useState } from "react";
 
-type InviteTableRow = Omit<InviteSchema, "createdAt" | "updatedAt" | "expiresAt"> & {
-  createdAt: string
-  updatedAt: string
-  expiresAt: string
-}
 export const InvitesTable = () => {
   const { isOwner, slug } = useWorkspace();
   const { data: invites = [] } = trpc.invite.getByWorkspace.useQuery({ slug });
@@ -25,7 +23,7 @@ export const InvitesTable = () => {
   const utils = trpc.useUtils();
   const { mutate } = trpc.invite.delete.useMutation();
 
-  const inviteColumns: ColumnDef<InviteTableRow>[] = [
+  const inviteColumns: ColumnDef<InviteSchema>[] = [
     {
       accessorKey: "email",
       header: "Email",

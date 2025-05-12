@@ -1,33 +1,60 @@
-FROM node:18-alpine AS builder
+FROM node:20.11.1-alpine AS base
+FROM base AS builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
+ENV SHELL=/bin/sh
+ENV ENV=/etc/profile
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PATH="${PNPM_HOME}:${PATH}"
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm setup
+RUN pnpm add -g typescript@5.8.3 turbo@2.5.2
 
 COPY . .
 
-RUN pnpm build
+RUN pnpm turbo prune web --docker
 
-FROM node:18-alpine AS runner
+FROM base AS installer
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 
 WORKDIR /app
 
-COPY --from=builder /app/package.json ./ 
-COPY --from=builder /app/pnpm-lock.yaml ./ 
-# COPY --from=builder /app/.npmrc ./ 
-RUN pnpm install --prod --frozen-lockfile
+ENV SHELL=/bin/sh
+ENV ENV=/etc/profile
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PATH="${PNPM_HOME}:${PATH}"
 
-COPY --from=builder /app/.next .next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.mjs ./
-COPY --from=builder /app/tsconfig.json ./
+RUN pnpm setup
+RUN pnpm add dotenv-cli
+
+# First install the dependencies (as they change less often)
+COPY --from=builder /app/out/json/ .
+RUN pnpm install
+
+# Build the project
+COPY --from=builder /app/out/full/ .
+
+RUN pnpm add -g typescript@5.8.3 turbo@2.5.2
+RUN pnpm add -D @opentelemetry/winston-transport @opentelemetry/exporter-jaeger --workspace-root
+RUN tsc -v
+RUN pnpm turbo run build
+
+FROM base AS runner
+
+WORKDIR /app
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+USER nextjs
+
+COPY --from=installer --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
 EXPOSE 3000
 
-CMD ["pnpm", "start"]
+CMD ["node", "apps/web/server.js"]

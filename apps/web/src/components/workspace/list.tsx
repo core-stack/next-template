@@ -1,31 +1,28 @@
 "use client"
 
-import { ArrowBigRight, Building, Settings, Users } from 'lucide-react';
-import Link from 'next/link';
-import { useState } from 'react';
+import { ArrowBigRight, Building, Settings, Users } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
-} from '@/components/ui/card';
-import { trpc } from '@/lib/trpc/client';
-import { WorkspaceWithCountSchema } from '@/lib/trpc/schema/workspace';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/card";
+import { trpc } from "@/lib/trpc/client";
+import { WorkspaceWithCountSchema } from "@/lib/trpc/schema/workspace";
+import { cn } from "@/lib/utils";
 
-import { Badge } from '../ui/badge';
-import { WorkspaceDialog } from './create-or-update-dialog';
+import { Badge } from "../ui/badge";
+import { WorkspaceDialog } from "./create-or-update-dialog";
 
-type WorkspaceWithCount = Omit<WorkspaceWithCountSchema, "disabledAt"> & {
-  disabledAt?: string | null;
-}
 export function WorkspaceList() {
   const { data: workspaces = [] } = trpc.workspace.get.useQuery();
   const { data: user } = trpc.user.self.useQuery();
 
-  const [selectedWorkspace, setSelectedWorkspace] = useState<WorkspaceWithCount | undefined>(undefined)
+  const [selectedWorkspace, setSelectedWorkspace] = useState<WorkspaceWithCountSchema | undefined>(undefined)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const handleEditWorkspace = (workspace: WorkspaceWithCount) => {
+  const handleEditWorkspace = (workspace: WorkspaceWithCountSchema) => {
     setSelectedWorkspace(workspace)
     setIsDialogOpen(true)
   }
@@ -38,7 +35,7 @@ export function WorkspaceList() {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {workspaces.map((workspace) => (
-          <WorkspaceCard 
+          <WorkspaceCard
             key={workspace.id}
             workspace={workspace}
             onEdit={() => handleEditWorkspace(workspace)}
@@ -60,21 +57,22 @@ export function WorkspaceList() {
     </>
   )
 }
+
 type WorkspaceCardProps = {
-  workspace: WorkspaceWithCount;
+  workspace: WorkspaceWithCountSchema;
   onEdit: () => void;
   role?: string;
   owner?: boolean;
 }
 function WorkspaceCard({ workspace, onEdit, role, owner }: WorkspaceCardProps) {
   const cardStyle = { background: workspace.backgroundColor || workspace.backgroundGradient || '' }
-  
+
   return (
     <Card className={cn("overflow-hidden border-2 hover:border-primary/50 transition-all", workspace.disabledAt && "opacity-50")}>
       <div className="h-32 w-full relative" style={cardStyle}>
         <div className="absolute top-2 right-2 flex gap-2">
           {
-            owner && 
+            owner &&
             <Badge variant="secondary" className="bg-green-300 hover:bg-green-400 text-black">
               Proprietario
             </Badge>

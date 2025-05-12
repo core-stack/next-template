@@ -1,9 +1,9 @@
-import axios from 'axios';
-import { NextRequest } from 'next/server';
+import axios from "axios";
+import { NextRequest } from "next/server";
 
-import { prisma } from '@packages/prisma';
+import { prisma } from "@packages/prisma";
 
-import { AccountWithMembers, Provider } from './types';
+import { AccountWithMembers, Provider } from "./types";
 
 type Opts = {
   GOOGLE_CLIENT_ID: string;
@@ -15,15 +15,15 @@ export const GoogleProvider = ({ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIREC
   return {
     path,
     getAuthUrl: (): string => {
-        const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-        url.searchParams.set('client_id', GOOGLE_CLIENT_ID);
-        url.searchParams.set('redirect_uri', REDIRECT_URI);
-        url.searchParams.set('response_type', 'code');
-        url.searchParams.set('scope', 'openid email profile');
-        url.searchParams.set('prompt', 'consent');
-        return url.toString();
+      const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+      url.searchParams.set('client_id', GOOGLE_CLIENT_ID);
+      url.searchParams.set('redirect_uri', REDIRECT_URI);
+      url.searchParams.set('response_type', 'code');
+      url.searchParams.set('scope', 'openid email profile');
+      url.searchParams.set('prompt', 'consent');
+      return url.toString();
     },
-    callback: async (req: NextRequest, code: string): Promise<AccountWithMembers> => {
+    callback: async (_: NextRequest, code: string): Promise<AccountWithMembers> => {
       const tokenRes = await axios.post('https://oauth2.googleapis.com/token', {
         code,
         client_id: GOOGLE_CLIENT_ID,
@@ -41,7 +41,7 @@ export const GoogleProvider = ({ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIREC
       const profile = profileRes.data;
 
       const account = await prisma.account.upsert({
-        where: { provider_providerAccountId: { provider: path, providerAccountId: profile.sub} },
+        where: { provider_providerAccountId: { provider: path, providerAccountId: profile.sub } },
         update: {},
         create: {
           provider: path,
@@ -84,7 +84,7 @@ export const GoogleProvider = ({ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIREC
         }
       });
 
-      return account;
+      return account as AccountWithMembers;
     }
   } as Provider
 }

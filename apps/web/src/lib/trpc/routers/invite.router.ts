@@ -1,27 +1,26 @@
-import moment from 'moment';
-import { z } from 'zod';
+import moment from "moment";
+import { z } from "zod";
 
-import { env } from '@/env';
-import { hasAccess } from '@/lib/utils';
-import { Permission } from '@packages/permission';
-import { prisma } from '@packages/prisma';
-import { addInQueue, EmailTemplate, QueueName } from '@packages/queue';
-import { TRPCError } from '@trpc/server';
+import { env } from "@/env";
+import { hasAccess } from "@/lib/utils";
+import { Permission } from "@packages/permission";
+import { prisma } from "@packages/prisma";
+import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
+import { TRPCError } from "@trpc/server";
 
-import { inviteMemberSchema, inviteWithWorkspaceSchema } from '../schema/invite';
-import { protectedProcedure, rbacProcedure, router } from '../trpc';
-import { formatWorkspace } from './workspace.router';
+import { inviteMemberSchema, inviteWithWorkspaceSchema } from "../schema/invite";
+import { protectedProcedure, rbacProcedure, router } from "../trpc";
+import { formatWorkspace } from "./workspace.router";
 
 export const inviteRouter = router({
   getByIdWithWorkspace: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .output(inviteWithWorkspaceSchema)
     .query(async ({ input, ctx }) => {
       const invite = await prisma.invite.findUnique({ where: { id: input.id }, include: { workspace: true } });
       if (!invite) throw new TRPCError({ code: 'NOT_FOUND', message: "Convite não encontrado" });
       if (invite.email !== ctx.session.user.email)
         throw new TRPCError({ code: 'FORBIDDEN', message: "Você não tem acesso a esse convite" });
-      return { ...invite, workspace: formatWorkspace(invite.workspace) };
+      return inviteWithWorkspaceSchema.parse({ ...invite, workspace: formatWorkspace(invite.workspace) });
     }),
 
   getByWorkspace: protectedProcedure
@@ -38,23 +37,23 @@ export const inviteRouter = router({
     .mutation(async ({ input, ctx }) => {
       if (!hasAccess(ctx.session, input.slug)) throw new TRPCError({ code: 'FORBIDDEN', message: "Você não tem acesso a esse workspace" });
 
-      const workspace = await prisma.workspace.findUnique({ where: { slug: input.slug, disabledAt: null }});
+      const workspace = await prisma.workspace.findUnique({ where: { slug: input.slug, disabledAt: null } });
       if (!workspace) throw new TRPCError({ code: 'NOT_FOUND', message: "Workspace não encontrado" });
 
       for (const { email, role } of input.emails) {
         // verify if exists member with email
-        const memberWithEmail = await prisma.member.findUnique({ where: { email_workspaceId: { email, workspaceId: workspace.id } }});
+        const memberWithEmail = await prisma.member.findUnique({ where: { email_workspaceId: { email, workspaceId: workspace.id } } });
         if (memberWithEmail) continue;
 
         // verify if exists invite with email
-        const invite = await prisma.invite.findUnique({where: { workspaceId_email: { email, workspaceId: workspace.id } }});
+        const invite = await prisma.invite.findUnique({ where: { workspaceId_email: { email, workspaceId: workspace.id } } });
         if (invite) {
           invite.expiresAt = new Date(Date.now() + env.WORKSPACE_INVITE_EXPIRES);
-          await prisma.invite.update({where: { id: invite.id }, data: { expiresAt: invite.expiresAt }});
+          await prisma.invite.update({ where: { id: invite.id }, data: { expiresAt: invite.expiresAt } });
           continue;
         }
 
-        const userWithEmail = await prisma.user.findUnique({where: { email }});
+        const userWithEmail = await prisma.user.findUnique({ where: { email } });
 
         if (userWithEmail) {
           prisma.$transaction(async (tx) => {

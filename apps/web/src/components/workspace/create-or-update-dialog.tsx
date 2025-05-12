@@ -1,27 +1,27 @@
-import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { ChromePicker } from 'react-color';
-import { useForm } from 'react-hook-form';
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChromePicker } from "react-color";
+import { useForm } from "react-hook-form";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { trpc } from '@/lib/trpc/client';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { trpc } from "@/lib/trpc/client";
 import {
   CreateWorkspaceSchema, createWorkspaceSchema, WorkspaceSchema
-} from '@/lib/trpc/schema/workspace';
-import { cn } from '@/lib/utils';
-import { zodResolver } from '@hookform/resolvers/zod';
+} from "@/lib/trpc/schema/workspace";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea } from "../ui/scroll-area";
 
 const generateSlug = (name: string) => {
   return name
@@ -52,16 +52,12 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
       backgroundGradient: workspace?.backgroundGradient || "linear-gradient(to right, #6366f1, #a855f7)",
     }
   });
-  
+
   const isLoading = form.formState.isSubmitting;
   const utils = trpc.useUtils();
   const { mutate } = isEditing ? trpc.workspace.update.useMutation() : trpc.workspace.create.useMutation();
   const onSubmit = form.handleSubmit(async (data) => {
-
-    mutate({
-      ...data,
-      id: workspace?.id || "",
-    }, {
+    mutate({ ...data, id: workspace?.id || "" }, {
       onSuccess: () => {
         utils.workspace.get.invalidate();
         utils.user.self.invalidate();

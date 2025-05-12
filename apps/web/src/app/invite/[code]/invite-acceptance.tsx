@@ -1,80 +1,80 @@
-"use client"
+"use client";
 
-import { Building, Calendar, Check, Users, X } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { Building, Calendar, Check, Users, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
-} from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
-import { trpc } from '@/lib/trpc/client';
-import { InviteWithWorkspaceSchema } from '@/lib/trpc/schema/invite';
+} from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
+import { trpc } from "@/lib/trpc/client";
+import { InviteWithWorkspaceSchema } from "@/lib/trpc/schema/invite";
 
-interface InviteAcceptanceProps {
-  invite: InviteWithWorkspaceSchema
+type InviteAcceptanceProps = {
+  invite: InviteWithWorkspaceSchema;
 }
 
 export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [status, setStatus] = useState<"pending" | "accepted" | "rejected" | "error">("pending")
-  const router = useRouter()
-  const { mutateAsync: acceptInvite } = trpc.invite.accept.useMutation()
-  const { mutateAsync: rejectInvite } = trpc.invite.reject.useMutation()
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState<"pending" | "accepted" | "rejected" | "error">("pending");
+  const router = useRouter();
+  const { mutateAsync: acceptInvite } = trpc.invite.accept.useMutation();
+  const { mutateAsync: rejectInvite } = trpc.invite.reject.useMutation();
   const handleAccept = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await acceptInvite({ id: invite.id })
-      setStatus("accepted")
+      await acceptInvite({ id: invite.id as string });
+      setStatus("accepted");
       toast({
         title: "Convite aceito",
         description: `Você agora é membro do workspace ${invite.workspace.name}`,
-      })
+      });
 
       setTimeout(() => {
-        router.push(`/w/${invite.workspace.slug}`)
-      }, 2000)
+        router.push(`/w/${invite.workspace.slug}`);
+      }, 2000);
     } catch (error) {
-      console.error("Erro ao aceitar convite:", error)
-      setStatus("error")
+      console.error("Erro ao aceitar convite:", error);
+      setStatus("error");
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao aceitar o convite. Tente novamente.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleReject = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await rejectInvite({ id: invite.id })
+      await rejectInvite({ id: invite.id });
 
-      setStatus("rejected")
+      setStatus("rejected");
       toast({
         title: "Convite rejeitado",
         description: "Você rejeitou o convite para o workspace",
-      })
+      });
 
       setTimeout(() => {
-        router.push(`/w`)
+        router.push(`/w`);
       }, 2000);
     } catch (error) {
-      console.error("Erro ao rejeitar convite:", error)
-      setStatus("error")
+      console.error("Erro ao rejeitar convite:", error);
+      setStatus("error");
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao rejeitar o convite. Tente novamente.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const isExpired = new Date() > invite.expiresAt;
 
@@ -83,8 +83,8 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
-    }).format(date)
-  }
+    }).format(date);
+  };
 
   return (
     <Card className="w-full max-w-md">
@@ -111,7 +111,9 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
               <Users className="h-4 w-4 text-muted-foreground" />
               <span>Função:</span>
             </div>
-            <Badge variant="outline">{invite.role === "WORKSPACE_ADMIN" ? "Administrador" : "Membro"}</Badge>
+            <Badge variant="outline">
+              {invite.role === "WORKSPACE_ADMIN" ? "Administrador" : "Membro"}
+            </Badge>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
@@ -148,11 +150,22 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
       <CardFooter className="flex gap-2">
         {status === "pending" && !isExpired && (
           <>
-            <Button variant="outline" className="flex-1" onClick={handleReject} disabled={isLoading} isLoading={isLoading}>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={handleReject}
+              disabled={isLoading}
+              isLoading={isLoading}
+            >
               <X className="mr-2 h-4 w-4" />
               Recusar
             </Button>
-            <Button className="flex-1" onClick={handleAccept} disabled={isLoading} isLoading={isLoading}>
+            <Button
+              className="flex-1"
+              onClick={handleAccept}
+              disabled={isLoading}
+              isLoading={isLoading}
+            >
               <Check className="mr-2 h-4 w-4" />
               Aceitar
             </Button>
@@ -172,5 +185,5 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
         )}
       </CardFooter>
     </Card>
-  )
+  );
 }
