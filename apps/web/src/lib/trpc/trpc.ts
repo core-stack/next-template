@@ -1,4 +1,4 @@
-import cookie from "cookie";
+import { serialize as cookieSerialize } from "cookie";
 import superJSON from "superjson";
 
 import { auth } from "@/lib/auth";
@@ -23,11 +23,11 @@ const authMiddleware = middleware(async ({ ctx, next }) => {
     if (!session && hasRefreshToken) {
       const refreshResult = await auth.refreshToken(ctx.refreshToken);
       session = refreshResult.session;
-      const accessToken = cookie.serialize('access-token', refreshResult.token.accessToken, {
+      const accessToken = cookieSerialize('access-token', refreshResult.token.accessToken, {
         maxAge: refreshResult.token.accessTokenDuration,
         httpOnly: true,
       });
-      const refreshToken = cookie.serialize('refresh-token', refreshResult.token.refreshToken, {
+      const refreshToken = cookieSerialize('refresh-token', refreshResult.token.refreshToken, {
         maxAge: refreshResult.token.refreshTokenDuration,
         httpOnly: true,
       });

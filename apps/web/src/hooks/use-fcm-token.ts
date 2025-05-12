@@ -1,12 +1,17 @@
-import { getMessaging, getToken } from 'firebase/messaging';
-import { useEffect, useState } from 'react';
+import { getMessaging, getToken } from "firebase/messaging";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import firebaseApp from '../lib/firebase';
+import { trpc } from "@/lib/trpc/client";
+
+import firebaseApp from "../lib/firebase.client";
 
 const useFcmToken = () => {
+  const { slug } = useParams<{ slug: string }>();
   const [token, setToken] = useState('');
   const [notificationPermissionStatus, setNotificationPermissionStatus] = useState('');
-  console.log(token);
+
+  const { mutate: syncFcmToken } = trpc.notification.sync.useMutation();
 
   useEffect(() => {
     const retrieveToken = async () => {
@@ -21,8 +26,8 @@ const useFcmToken = () => {
           // Check if permission is granted before retrieving the token
           if (permission === 'granted') {
             const currentToken = await getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY });
+            syncFcmToken({ token: currentToken, slug });
             if (currentToken) {
-              console.log('FCM token:', currentToken);
               setToken(currentToken);
             } else {
               console.log(

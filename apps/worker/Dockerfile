@@ -38,7 +38,7 @@ RUN pnpm install
 COPY --from=builder /app/out/full/ .
 
 RUN pnpm add -g typescript@5.8.3 turbo@2.5.2
-RUN pnpm db:generate
+RUN cd packages/prisma && pnpm run generate
 RUN pnpm turbo run build --filter=worker
 
 FROM base AS runner

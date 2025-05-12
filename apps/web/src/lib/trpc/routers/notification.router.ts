@@ -1,10 +1,10 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { prisma } from '@packages/prisma';
-import { TRPCError } from '@trpc/server';
+import { prisma } from "@packages/prisma";
+import { TRPCError } from "@trpc/server";
 
-import { notificationSchema } from '../schema/notification';
-import { protectedProcedure, router } from '../trpc';
+import { notificationSchema } from "../schema/notification";
+import { protectedProcedure, router } from "../trpc";
 
 const findMemberAndThrowIfNotExists = async (userId: string, slug: string) => {
   const member = await prisma.member.findFirst({
@@ -15,6 +15,19 @@ const findMemberAndThrowIfNotExists = async (userId: string, slug: string) => {
 };
 
 export const notificationRouter = router({
+  sync: protectedProcedure
+    .input(z.object({
+      token: z.string().nullable(),
+      slug: z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      console.log("sync", input);
+
+      const member = await findMemberAndThrowIfNotExists(ctx.session.user.id, input.slug);
+      if (member.fcmToken !== input.token) {
+        await prisma.member.update({ where: { id: member.id }, data: { fcmToken: input.token } });
+      }
+    }),
   getNotifications: protectedProcedure
     .input(z.object({
       slug: z.string(),
@@ -22,8 +35,8 @@ export const notificationRouter = router({
     .output(z.array(notificationSchema))
     .query(async ({ ctx, input }) => {
       const member = await findMemberAndThrowIfNotExists(ctx.session.user.id, input.slug);
-      const notifications = await prisma.notification.findMany({ 
-        where: { destinationId: member.id }, 
+      const notifications = await prisma.notification.findMany({
+        where: { destinationId: member.id },
         include: { createdBy: { include: { user: true } }, destination: { include: { user: true } } },
         orderBy: { createdAt: 'desc' }
       });

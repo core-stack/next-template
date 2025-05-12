@@ -52,6 +52,25 @@ const envSchema = z.object({
   DISABLED_WORKSPACES_DELETE_AFTER: z.coerce.number().default(60 * 60 * 24 * 90), // 90 days
 
   ACTIVE_ACCOUNT_TOKEN_EXPIRES: z.coerce.number().default(60 * 60 * 24 * 1000), // 1 day
-})
 
-export const env = envSchema.parse(process.env);
+  FIREBASE_PROJECT_ID: z.string(),
+  FIREBASE_PRIVATE_KEY: z.string(),
+  FIREBASE_CLIENT_EMAIL: z.string(),
+})
+type Env = z.infer<typeof envSchema>;
+
+let env: Env
+
+const shouldSkipValidation = () => {
+  const skip = process.env.SKIP_ENV_VALIDATION;
+  return skip === "true" || skip === "1" || skip === "yes" || skip;
+};
+
+if (shouldSkipValidation()) {
+  console.log("SKIP_ENV_VALIDATION is set, skipping env validation");
+  env = process.env as unknown as Env;
+} else {
+  env = envSchema.parse(process.env);
+}
+
+export { env };

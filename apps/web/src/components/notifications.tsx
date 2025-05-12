@@ -13,7 +13,8 @@ import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import firebaseApp from "@/lib/firebase";
+import useFcmToken from "@/hooks/use-fcm-token";
+import firebaseApp from "@/lib/firebase.client";
 import { trpc } from "@/lib/trpc/client";
 import { NotificationSchema } from "@/lib/trpc/schema/notification";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,7 @@ type Props = {
   children: React.ReactNode
 }
 export function NotificationsProvider({ children }: Props) {
+  useFcmToken();
   const [open, setOpen] = useState(false)
   const showNotifications = () => setOpen(true)
   const hideNotifications = () => setOpen(false)

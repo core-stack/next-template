@@ -5,24 +5,29 @@ enum WorkspaceRole {
 }
 
 model Member {
-  id                 String  @id @default(uuid())
+  id String @id @default(uuid())
 
-  email              String
-  userId             String  @map("user_id")
-  user               User    @relation(fields: [userId], references: [id])
+  email String
+  image String?
+  name  String?
 
-  workspaceId  String  @map("workspace_id")
-  workspace  Workspace    @relation(fields: [workspaceId], references: [id])
+  fcmToken String? @map("fcm_token")
 
-  notifications      Notification[]  @relation("destination")
-  createdNotifications Notification[]  @relation("createdBy")
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
 
-  role               WorkspaceRole @default(WORKSPACE_MEMBER)
+  workspaceId String    @map("workspace_id")
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  owner              Boolean @default(false)
+  notifications        Notification[] @relation("destination")
+  createdNotifications Notification[] @relation("createdBy")
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  role WorkspaceRole @default(WORKSPACE_MEMBER)
+
+  owner Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, workspaceId])
   @@unique([email, workspaceId])
@@ -30,41 +35,41 @@ model Member {
 }
 
 model Workspace {
-  id                 String  @id @default(uuid())
+  id String @id @default(uuid())
 
-  slug               String  @unique
-  name               String
-  description        String?
+  slug        String  @unique
+  name        String
+  description String?
 
-  backgroundImage    String // url | color
+  backgroundImage String // url | color
 
-  members            Member[]
-  invites            Invite[]
-  notifications      Notification[]
+  members       Member[]
+  invites       Invite[]
+  notifications Notification[]
 
-  disabledAt         DateTime?
+  disabledAt DateTime?
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("workspaces")
 }
 
 model Invite {
-  id                 String  @id @default(cuid())
+  id String @id @default(cuid())
 
-  workspaceId  String  @map("workspace_id")
-  workspace  Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String    @map("workspace_id")
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  email              String
-  role               WorkspaceRole @default(WORKSPACE_MEMBER)
+  email String
+  role  WorkspaceRole @default(WORKSPACE_MEMBER)
 
   userId String? @map("user_id")
-  user User? @relation(fields: [userId], references: [id])
+  user   User?   @relation(fields: [userId], references: [id])
 
-  expiresAt          DateTime
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([workspaceId, email])
 }

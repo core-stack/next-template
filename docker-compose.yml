@@ -12,6 +12,8 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+    environment:
+      - SKIP_ENV_VALIDATION=true
     ports:
       - "3000:3000"
     depends_on:
@@ -54,7 +56,7 @@ services:
   # Overvability
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
-    command: ["--config=/etc/otel-collector-config.yaml"]
+    command: [ "--config=/etc/otel-collector-config.yaml" ]
     volumes:
       - ./overvability/otel-collector-config.yaml:/etc/otel-collector-config.yaml
     ports:

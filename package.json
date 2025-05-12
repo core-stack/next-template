@@ -9,11 +9,11 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "start": "turbo run start",
-    "db:generate": "cd packages/prisma && pnpm generate",
-    "db:migrate": "cd packages/prisma && pnpm migrate",
-    "db:migrate:dev": "cd packages/prisma && pnpm migrate:dev",
-    "db:push": "cd packages/prisma && pnpm push",
-    "db:studio": "cd packages/prisma && pnpm studio"
+    "db:generate": "cd packages/prisma && pnpm run generate",
+    "db:migrate": "cd packages/prisma && pnpm run migrate",
+    "db:migrate:dev": "cd packages/prisma && pnpm run migrate:dev",
+    "db:push": "cd packages/prisma && pnpm run push",
+    "db:studio": "cd packages/prisma && pnpm run studio"
   },
   "devDependencies": {
     "dotenv-cli": "^7.4.4",
