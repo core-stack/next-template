@@ -1,25 +1,26 @@
-import { randomBytes } from 'crypto';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { z } from 'zod';
+import { randomBytes } from "crypto";
+import dotenv from "dotenv";
+import dotenvExpand from "dotenv-expand";
+import path from "path";
+import { fileURLToPath } from "url";
+import { z } from "zod";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenvExpand.expand(dotenv.config({ path: path.resolve(__dirname, '../../.env') }));
 
 const envSchema = z.object({
   REDIS_URL: z.string().url(),
 
   SMTP_ENABLED: z.string().transform((val) => val === "true").default("false"),
-  SMTP_HOST: z.string(),
-  SMTP_PORT: z.coerce.number(),
-  SMTP_USER: z.string(),
-  SMTP_FROM: z.string(),
-  SMTP_PASSWORD: z.string(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.string().transform((val) => parseInt(val)),
+  SMTP_USER: z.string().optional(),
+  SMTP_FROM: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
   SMTP_ENV: z.enum(["development", "production"]).default("development"),
-  SMTP_TEST_EMAIL: z.string().email().default("delivered@resend.dev"),
+  SMTP_TEST_EMAIL: z.string().email().default("delivered@resend.dev").optional(),
   SMTP_SECURE: z.string().transform((val) => val === "true").default("false"),
 
   STRIPE_PUBLIC_KEY: z.string().optional(),
