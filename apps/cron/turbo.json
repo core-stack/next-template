@@ -1,10 +1,15 @@
 {
-  "$schema": "https://turbo.build/schema.json",
+  "extends": [
+    "//"
+  ],
   "tasks": {
     "build": {
-      "cache": false,
-      "persistent": true,
-      "outputs": ["./dist/**"]
+      "env": [
+        "PORT"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
     }
   }
 }

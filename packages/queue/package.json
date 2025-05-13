@@ -1,15 +1,41 @@
 {
   "name": "@packages/queue",
   "version": "1.0.0",
-  "description": "",
   "type": "module",
-  "main": "./index.ts",
-  "module": "./index.ts",
-  "types": "./index.ts",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/es/index.js",
+  "module": "./dist/es/index.js",
+  "types": "./dist/es/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/es/index.d.ts",
+        "default": "./dist/es/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
+    },
+    "./redis": {
+      "import": {
+        "types": "./dist/es/redis.d.ts",
+        "default": "./dist/es/redis.js"
+      },
+      "require": {
+        "types": "./dist/cjs/redis.d.cts",
+        "default": "./dist/cjs/redis.cjs"
+      }
+    }
+  },
   "scripts": {
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
-    "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
-    "typecheck": "tsc --noEmit"
+    "build": "bunchee",
+    "dev": "bunchee --watch",
+    "lint": "eslint src/",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "bullmq": "^5.51.1",
@@ -19,13 +45,13 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
+    "@packages/config-eslint": "workspace:*",
+    "@packages/config-typescript": "workspace:*",
+    "bunchee": "^6.4.0",
+    "eslint": "^9.26.0",
     "@types/node": "^20.17.24",
     "prisma": "^5.22.0",
     "typescript": "5.8.3"
-  },
-  "exports": {
-    ".": "./index.ts",
-    "./redis": "./redis.ts"
   },
   "keywords": [],
   "author": "",

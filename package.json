@@ -1,12 +1,12 @@
 {
   "name": "next-template",
-  "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@9.15.9+sha512.68046141893c66fad01c079231128e9afb89ef87e2691d69e4d40eee228988295fd4682181bae55b58418c3a253bde65a505ec7c5f9403ece5cc3cd37dcf2531",
   "scripts": {
-    "dev": "turbo dev",
     "build": "turbo run build",
+    "clean": "turbo run clean",
+    "dev": "turbo dev",
     "test": "turbo run test",
+    "check-types": "turbo run check-types",
     "lint": "turbo run lint",
     "start": "turbo run start",
     "db:generate": "cd packages/prisma && pnpm run generate",
@@ -17,6 +17,11 @@
   },
   "devDependencies": {
     "dotenv-cli": "^7.4.4",
-    "require-in-the-middle": "^7.5.2"
+    "prettier": "^3.5.3",
+    "turbo": "^2.5.3"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=18"
   }
 }

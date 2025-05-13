@@ -1,12 +1,31 @@
 {
   "name": "@packages/prisma",
   "version": "1.0.0",
-  "description": "",
   "type": "module",
-  "main": "./index.ts",
-  "module": "./index.ts",
-  "types": "./index.ts",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/es/index.js",
+  "module": "./dist/es/index.js",
+  "types": "./dist/es/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/es/index.d.ts",
+        "default": "./dist/es/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
+    }
+  },
   "scripts": {
+    "build": "bunchee",
+    "dev": "bunchee --watch",
+    "lint": "eslint src/",
+    "check-types": "tsc --noEmit",
     "generate": "dotenv -e ../../.env -- prisma generate --schema=./schema",
     "migrate": "dotenv -e ../../.env -- prisma migrate deploy --schema=./schema",
     "migrate:dev": "dotenv -e ../../.env -- prisma migrate dev --schema=./schema",
@@ -20,14 +39,14 @@
     "@prisma/client": "^5.22.0"
   },
   "devDependencies": {
+    "@packages/config-eslint": "workspace:*",
+    "@packages/config-typescript": "workspace:*",
+    "bunchee": "^6.4.0",
+    "eslint": "^9.26.0",
     "@types/node": "^20.17.24",
     "dotenv-cli": "^7.4.4",
     "prisma": "^5.22.0",
     "typescript": "5.8.3"
-  },
-  "exports": {
-    ".": "./index.ts",
-    "./client": "./client.ts"
   },
   "keywords": [],
   "author": "",
