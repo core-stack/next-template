@@ -8,15 +8,15 @@ services:
       - db
 
   # Web
-  # web:
-  #   build:
-  #     context: .
-  #     dockerfile: apps/web/Dockerfile
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - db
-  #     - redis
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
 
   # Worker
   worker:

@@ -8,6 +8,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   serverExternalPackages: ["@prisma/client"],
+  output: "standalone",
 };
 
 export default nextConfig;
