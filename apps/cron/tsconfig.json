@@ -1,12 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Default",
   "compilerOptions": {
     "composite": false,
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
     "inlineSources": false,
     "isolatedModules": true,
     "module": "ESNext",
@@ -16,12 +16,10 @@
     "preserveWatchOutput": true,
     "skipLibCheck": true,
     "strict": true,
+    "noEmit": true,
+    "strictNullChecks": true,
+    "lib": ["ES2015"],
     "outDir": "./dist"
   },
-  "include": [
-    "**/*.ts",
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

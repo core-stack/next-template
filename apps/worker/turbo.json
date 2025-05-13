@@ -1,0 +1,10 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "cache": false,
+      "persistent": true,
+      "outputs": ["./dist/**"]
+    }
+  }
+}

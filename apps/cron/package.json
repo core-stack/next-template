@@ -10,9 +10,9 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "start": "node dist/index.js",
-    "build": "rm -rf dist && tsc",
-    "typecheck": "tsc --noEmit",
-    "dev": "pnpm tsx --watch index.ts"
+    "dev": "tsup index.ts --watch --onSuccess \"node dist/index.cjs\"",
+    "build": "tsup index.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@packages/env": "workspace:*",
@@ -20,6 +20,7 @@
     "@packages/queue": "workspace:*",
     "dotenv": "^16.5.0",
     "node-cron": "^3.0.3",
+    "tsup": "^8.4.0",
     "zod": "^3.24.3"
   },
   "devDependencies": {
