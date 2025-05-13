@@ -11,7 +11,7 @@ ENV PNPM_HOME=/root/.local/share/pnpm
 ENV PATH="${PNPM_HOME}:${PATH}"
 
 RUN pnpm setup
-RUN pnpm add -g typescript@5.8.3 turbo@2.5.2
+RUN pnpm add -g turbo@2.5.2
 
 COPY . .
 
@@ -31,12 +31,12 @@ ENV PATH="${PNPM_HOME}:${PATH}"
 RUN pnpm setup
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
 # Build the project
 COPY --from=builder /app/out/full/ .
 
-RUN pnpm add -g typescript@5.8.3 turbo@2.5.2
+RUN pnpm add -g turbo@2.5.2
 RUN pnpm db:generate
 RUN pnpm turbo run build --filter=cron
 

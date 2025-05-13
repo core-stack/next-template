@@ -8,17 +8,15 @@ services:
       - db
 
   # Web
-  web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
-    environment:
-      - SKIP_ENV_VALIDATION=true
-    ports:
-      - "3000:3000"
-    depends_on:
-      - db
-      - redis
+  # web:
+  #   build:
+  #     context: .
+  #     dockerfile: apps/web/Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - db
+  #     - redis
 
   # Worker
   worker:
@@ -66,7 +64,7 @@ services:
     ports:
       - "6831:6831/udp" # UDP port for Jaeger agent
       - "16686:16686" # Web UI
-      - "14268:14268" # HTTP port for spans 
+      - "14268:14268" # HTTP port for spans
   prometheus:
     image: prom/prometheus:latest
     volumes:

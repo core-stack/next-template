@@ -11,7 +11,7 @@ ENV PNPM_HOME=/root/.local/share/pnpm
 ENV PATH="${PNPM_HOME}:${PATH}"
 
 RUN pnpm setup
-RUN pnpm add -g typescript@5.8.3 turbo@2.5.2
+RUN pnpm add -g turbo@2.5.2
 
 COPY . .
 
@@ -27,7 +27,6 @@ ENV SHELL=/bin/sh
 ENV ENV=/etc/profile
 ENV PNPM_HOME=/root/.local/share/pnpm
 ENV PATH="${PNPM_HOME}:${PATH}"
-ENV SKIP_ENV_VALIDATION="true"
 
 RUN pnpm setup
 RUN pnpm add dotenv-cli
@@ -39,9 +38,9 @@ RUN pnpm install --frozen-lockfile
 # Build the project
 COPY --from=builder /app/out/full/ .
 
-RUN pnpm add -g typescript@5.8.3 turbo@2.5.2
-RUN pnpm add -D @opentelemetry/winston-transport @opentelemetry/exporter-jaeger --workspace-root
-RUN printenv && pnpm turbo run build
+RUN pnpm add -g turbo@2.5.2
+RUN pnpm db:generate
+RUN pnpm turbo run build
 
 FROM base AS runner
 
@@ -58,6 +57,5 @@ COPY --from=installer --chown=nextjs:nodejs /app/apps/web/public ./apps/web/publ
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV NODE_ENV=production
-ENV SKIP_ENV_VALIDATION=true
 
 CMD ["node", "apps/web/server.js"]

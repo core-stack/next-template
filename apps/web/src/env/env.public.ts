@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import { validateEnv } from "@packages/env";
+import { z } from "zod";
 
 const publicEnvSchema = z.object({
   NEXT_PUBLIC_FIREBASE_API_KEY: z.string(),
@@ -11,4 +12,4 @@ const publicEnvSchema = z.object({
   NEXT_PUBLIC_FIREBASE_VAPID_KEY: z.string(),
 });
 
-export const publicEnv = publicEnvSchema.parse(process.env);
+export const publicEnv = validateEnv(publicEnvSchema, process.env);

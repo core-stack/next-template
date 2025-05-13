@@ -57,12 +57,18 @@ importers:
       '@next/third-parties':
         specifier: ^15.3.2
         version: 15.3.2(next@15.4.0-canary.17(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
+      '@opentelemetry/api':
+        specifier: ^1.9.0
+        version: 1.9.0
       '@opentelemetry/auto-instrumentations-node':
         specifier: ^0.58.1
         version: 0.58.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.0.0(@opentelemetry/api@1.9.0))
       '@opentelemetry/exporter-trace-otlp-http':
         specifier: ^0.200.0
         version: 0.200.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-winston':
+        specifier: ^0.45.0
+        version: 0.45.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources':
         specifier: ^2.0.0
         version: 2.0.0(@opentelemetry/api@1.9.0)
@@ -214,7 +220,7 @@ importers:
         specifier: ^5.5.0
         version: 5.5.0(react@19.1.0)
       stripe:
-        specifier: ^18.1.0
+        specifier: ^18.0.0
         version: 18.1.0(@types/node@20.17.32)
       superjson:
         specifier: ^2.2.2

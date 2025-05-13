@@ -61,16 +61,19 @@ type Env = z.infer<typeof envSchema>;
 
 let env: Env
 
-const shouldSkipValidation = () => {
-  const skip = process.env.SKIP_ENV_VALIDATION;
-  return skip === "true" || skip === "1" || skip === "yes" || skip;
-};
-
-if (shouldSkipValidation()) {
-  console.log("SKIP_ENV_VALIDATION is set, skipping env validation");
-  env = process.env as unknown as Env;
-} else {
-  env = envSchema.parse(process.env);
+export function validateEnv(schema: z.ZodSchema, vars: any) {
+  const shouldValidateEnv = () => {
+    const skip = process.env.ENV_VALIDATION;
+    return skip === "true" || skip === "1" || skip === "yes" || skip;
+  };
+  if (shouldValidateEnv()) {
+    env = schema.parse(process.env);
+  } else {
+    console.warn("ENV_VALIDATION is not set, skipping env validation");
+    env = vars as unknown as Env;
+  }
+  return env;
 }
+env = validateEnv(envSchema, process.env);
 
 export { env };
