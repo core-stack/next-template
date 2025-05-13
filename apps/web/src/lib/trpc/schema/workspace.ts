@@ -1,4 +1,6 @@
-import { z } from 'zod';
+import { z } from "zod";
+
+import { subscriptionSchema } from "./subscription";
 
 export const workspaceSchema = z.object({
   id: z.string().uuid(),
@@ -38,3 +40,8 @@ export type DisableWorkspaceSchema = z.infer<typeof disableWorkspaceSchema>;
 
 export const enableWorkspaceSchema = disableWorkspaceSchema.omit({ confirmText: true });
 export type EnableWorkspaceSchema = z.infer<typeof enableWorkspaceSchema>;
+
+export const workspaceWithSubscriptionSchema = workspaceSchema.extend({
+  subscription: subscriptionSchema,
+});
+export type WorkspaceWithSubscriptionSchema = z.infer<typeof workspaceWithSubscriptionSchema>;

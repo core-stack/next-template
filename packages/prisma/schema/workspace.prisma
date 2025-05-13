@@ -43,6 +43,7 @@ model Workspace {
 
   backgroundImage String // url | color
 
+  subscription  Subscription?
   members       Member[]
   invites       Invite[]
   notifications Notification[]

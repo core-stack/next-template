@@ -6,10 +6,12 @@ export type {
   Invite,
   Account,
   VerificationToken,
-  VerificationType
+  VerificationType,
+  Subscription,
 } from "@prisma/client"
 
 export {
   WorkspaceRole,
   UserRole,
+  SubscriptionStatus,
 } from '@prisma/client';
