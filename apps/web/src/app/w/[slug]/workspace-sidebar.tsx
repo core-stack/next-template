@@ -1,19 +1,20 @@
 "use client"
 
-import { CreditCard, LayoutDashboard, Plus, Settings, Users, Zap } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { WorkspaceDialog } from "@/components/workspace/create-or-update-dialog";
 import { MemberInfo } from "@/components/workspace/member-info";
+import { usePermission } from "@/context/permission";
 import { trpc } from "@/lib/trpc/client";
 import { WorkspaceSchema } from "@/lib/trpc/schema/workspace";
 import { cn } from "@/lib/utils";
+import { Permission } from "@packages/permission";
+import { CreditCard, LayoutDashboard, Plus, Settings, Users, Zap } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface WorkspaceSidebarProps {
   slug: string
@@ -23,6 +24,7 @@ interface WorkspaceSidebarProps {
 export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProps) {
   const pathname = usePathname() || ""
   const router = useRouter();
+  const { can } = usePermission();
   const { data: workspaces = [currentWokspace] } = trpc.workspace.get.useQuery();
   const [open, setOpen] = useState(false);
 
@@ -32,24 +34,28 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
       icon: LayoutDashboard,
       href: `/w/${slug}`,
       active: pathname === `/w/${slug}`,
+      permissions: []
     },
     {
       label: "Membros",
       icon: Users,
       href: `/w/${slug}/members`,
       active: pathname.includes(`/${slug}/members`),
+      permissions: [Permission.GET_MEMBERS]
     },
     {
       label: "Faturamento",
       icon: CreditCard,
       href: `/w/${slug}/billing`,
       active: pathname === `/w/${slug}/billing`,
+      permissions: [Permission.GET_BILLING]
     },
     {
       label: "Configurações",
       icon: Settings,
       href: `/w/${slug}/settings`,
       active: pathname === `/w/${slug}/settings`,
+      permissions: [Permission.UPDATE_WORKSPACE]
     },
   ]
 
@@ -93,7 +99,7 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
 
       <div className="flex-1 py-4">
         <nav className="space-y-1 px-2">
-          {routes.map((route) => (
+          {routes.filter(route => can(route.permissions)).map((route) => (
             <Link
               key={route.href}
               href={route.href}

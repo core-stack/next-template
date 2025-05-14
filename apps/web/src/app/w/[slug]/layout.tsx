@@ -1,10 +1,10 @@
-import { redirect } from 'next/navigation';
+import { NotificationsProvider } from "@/components/notifications";
+import { PermissionProvider } from "@/context/permission";
+import { WorkspaceSchema } from "@/lib/trpc/schema/workspace";
+import { caller } from "@/lib/trpc/server";
+import { redirect } from "next/navigation";
 
-import { NotificationsProvider } from '@/components/notifications';
-import { WorkspaceSchema } from '@/lib/trpc/schema/workspace';
-import { caller } from '@/lib/trpc/server';
-
-import { WorkspaceSidebar } from './workspace-sidebar';
+import { WorkspaceSidebar } from "./workspace-sidebar";
 
 import type { ReactNode } from "react"
 interface WorkspaceLayoutProps {
@@ -27,10 +27,12 @@ export default async function WorkspaceLayout({ children, params }: WorkspaceLay
 
   return (
     <NotificationsProvider>
-      <div className="flex min-h-screen">
-        <WorkspaceSidebar slug={slug} currentWokspace={workspace} />
-        <div className="flex-1 overflow-auto">{children}</div>
-      </div>
+      <PermissionProvider>
+        <div className="flex min-h-screen">
+          <WorkspaceSidebar slug={slug} currentWokspace={workspace} />
+          <div className="flex-1 overflow-auto">{children}</div>
+        </div>
+      </PermissionProvider>
     </NotificationsProvider>
   )
 }
