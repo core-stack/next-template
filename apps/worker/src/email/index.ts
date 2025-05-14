@@ -1,13 +1,26 @@
-import { Job, Worker } from 'bullmq';
+import { env } from "@packages/env";
+import { EmailPayload, QueueName } from "@packages/queue";
+import { redisConnection } from "@packages/queue/redis";
+import { Job, Worker } from "bullmq";
+import fs from "fs";
+import Handlebars from "handlebars";
+import path from "path";
 
-import { env } from '@packages/env';
-import { EmailPayload, QueueName } from '@packages/queue';
-import { redisConnection } from '@packages/queue/redis';
+import { nodemailerTransporter } from "./transporter";
+import { MailOptionsWithTemplate } from "./types";
 
-import { MailOptionsWithTemplate, Transporter } from './types';
+const templatesDir = path.join(__dirname, 'templates');
 
-const lazyTransporter: Promise<Transporter> | undefined = env.SMTP_ENABLED ?
-  import("./transporter").then((m) => m.nodemailerTransporter) : undefined;
+const compiledTemplates: Record<string, HandlebarsTemplateDelegate> = {};
+
+fs.readdirSync(templatesDir).forEach(file => {
+  if (file.endsWith('.hbs')) {
+    const filePath = path.join(templatesDir, file);
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const template = Handlebars.compile(content);
+    compiledTemplates[file] = template;
+  }
+});
 
 const emailWorker = new Worker<EmailPayload>(
   QueueName.EMAIL,
@@ -17,15 +30,16 @@ const emailWorker = new Worker<EmailPayload>(
       ...job.data,
       to: env.SMTP_ENV === "development" ? env.SMTP_TEST_EMAIL : job.data.to,
       from: job.data.from ?? env.SMTP_FROM,
+      template: compiledTemplates[job.data.template].toString(),
     }
-    
-    const transporter = await lazyTransporter
-    if (!transporter) {
+
+    if (!env.SMTP_ENABLED) {
       console.warn("SMTP is disabled");
       console.log(job.data);
+      console.log(opts);
     } else {
       console.log(opts);
-      await transporter.sendMail(opts);
+      await nodemailerTransporter.sendMail(opts);
     }
   },
   { connection: redisConnection }

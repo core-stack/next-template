@@ -1,8 +1,5 @@
-import nodemailer from 'nodemailer';
-import hbs from 'nodemailer-express-handlebars';
-import path from 'path';
-
-import { env } from '@packages/env';
+import { env } from "@packages/env";
+import nodemailer from "nodemailer";
 
 export const nodemailerTransporter = nodemailer.createTransport({
   host: env.SMTP_HOST,
@@ -13,14 +10,3 @@ export const nodemailerTransporter = nodemailer.createTransport({
     pass: env.SMTP_PASSWORD,
   },
 });
-
-nodemailerTransporter.use('compile', hbs({
-  viewEngine: {
-    extname: '.hbs',
-    partialsDir: path.resolve("src", "email", "templates"),
-    layoutsDir: "",
-    defaultLayout: "",
-  },
-  viewPath: path.resolve("src", "email", "templates"),
-  extName: '.hbs',
-}));

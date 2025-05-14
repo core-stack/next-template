@@ -1,11 +1,10 @@
-import "./workers";
-
-import express from "express";
-
 import { createBullBoard } from "@bull-board/api";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { ExpressAdapter } from "@bull-board/express";
 import { getQueue, QueueName } from "@packages/queue";
+import express from "express";
+
+import "./workers";
 
 const run = async () => {
   const app = express();

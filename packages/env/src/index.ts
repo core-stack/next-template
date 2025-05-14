@@ -17,7 +17,7 @@ const envSchema = z.object({
   SMTP_PASSWORD: z.string().optional(),
   SMTP_ENV: z.enum(["development", "production"]).default("development"),
   SMTP_TEST_EMAIL: z.string().email().default("delivered@resend.dev").optional(),
-  SMTP_SECURE: z.string().transform((val) => val === "true").default("false"),
+  SMTP_SECURE: z.string().transform((val) => val === "true").default("true"),
 
   STRIPE_PUBLIC_KEY: z.string(),
   STRIPE_SECRET_KEY: z.string(),
