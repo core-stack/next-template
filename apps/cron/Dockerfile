@@ -15,7 +15,7 @@ RUN pnpm add -g turbo@2.5.2
 
 COPY . .
 
-RUN pnpm turbo prune worker --docker
+RUN pnpm turbo prune cron --docker
 
 FROM base AS installer
 
@@ -31,12 +31,14 @@ ENV PATH="${PNPM_HOME}:${PATH}"
 RUN pnpm setup
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
+COPY --from=builder /app/packages/prisma/schema ./packages/prisma/schema
 RUN pnpm install --frozen-lockfile
 
 # Build the project
 COPY --from=builder /app/out/full/ .
 
-RUN pnpm turbo run build --filter=worker
+RUN pnpm db:generate
+RUN pnpm turbo run build --filter=cron
 
 FROM base AS runner
 
@@ -48,4 +50,4 @@ USER appuser
 
 COPY --from=installer --chown=appuser:nodejs /app .
 
-CMD ["node", "apps/worker/dist/index.js"]
+CMD ["node", "apps/cron/dist/index.cjs"]

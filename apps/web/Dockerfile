@@ -38,7 +38,6 @@ RUN pnpm install --frozen-lockfile
 # Build the project
 COPY --from=builder /app/out/full/ .
 
-RUN pnpm add -g turbo@2.5.2
 RUN pnpm db:generate
 RUN pnpm turbo run build --filter=web
 

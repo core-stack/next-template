@@ -5,7 +5,14 @@ services:
       context: .
       dockerfile: apps/cron/Dockerfile
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - ENV_VALIDATION=true
+    networks:
+      - app-network
 
   # Web
   web:
@@ -14,9 +21,17 @@ services:
       dockerfile: apps/web/Dockerfile
     ports:
       - "3000:3000"
+    environment:
+      - ENV_VALIDATION=true
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
 
   # Worker
   worker:
@@ -25,22 +40,37 @@ services:
       dockerfile: apps/worker/Dockerfile
     ports:
       - "4000:4000"
+    environment:
+      - ENV_VALIDATION=true
     depends_on:
-      - redis
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
 
   # Database
   db:
     image: postgres:14
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
 
   # Redis
   redis:
@@ -50,27 +80,17 @@ services:
     restart: unless-stopped
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
-
-  # Overvability
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
-    command: [ "--config=/etc/otel-collector-config.yaml" ]
-    volumes:
-      - ./overvability/otel-collector-config.yaml:/etc/otel-collector-config.yaml
-    ports:
-      - "4317:4317" # OTLP gRPC receiver
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    ports:
-      - "6831:6831/udp" # UDP port for Jaeger agent
-      - "16686:16686" # Web UI
-      - "14268:14268" # HTTP port for spans
-  prometheus:
-    image: prom/prometheus:latest
-    volumes:
-      - ./overvability/prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
+
+
+networks:
+  app-network:
