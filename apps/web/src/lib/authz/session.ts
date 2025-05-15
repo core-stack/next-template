@@ -1,4 +1,4 @@
-import { UserRole, WorkspaceRole } from '@packages/prisma';
+import { UserRole, WorkspaceRole } from "@packages/prisma";
 
 export type Session = {
   id: string
@@ -7,6 +7,7 @@ export type Session = {
     id: string
     email: string
     name?: string
+    image?: string
     role: UserRole
   }
   lastSeen: Date

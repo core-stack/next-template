@@ -1,14 +1,13 @@
-import { z } from "zod";
-
 import { auth } from "@/lib/auth";
 import { comparePassword } from "@/lib/authz";
 import { Permission } from "@packages/permission";
 import { prisma, Workspace } from "@packages/prisma";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import {
-  createWorkspaceSchema, disableWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema,
-  workspaceSchema, workspaceWithCountSchema
+  createWorkspaceSchema, disableWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema, workspaceSchema,
+  workspaceWithCountSchema
 } from "../schema/workspace";
 import { protectedProcedure, rbacProcedure, router } from "../trpc";
 
@@ -97,6 +96,37 @@ export const workspaceRouter = router({
       }
       return formatWorkspace(workspace);
     }),
+  getWithSubscription: protectedProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const workspace = await prisma.workspace.findUnique({
+        where: {
+          slug: input.slug,
+          members: {
+            some: {
+              userId: ctx.session.user.id
+            }
+          }
+        },
+        include: {
+          subscription: true,
+          members: {
+            where: {
+              userId: ctx.session.user.id
+            },
+          },
+          _count: {
+            select: {
+              members: true
+            }
+          }
+        }
+      });
+      if (!workspace) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
+      }
+      return workspace;
+    }),
   create: protectedProcedure
     .input(createWorkspaceSchema)
     .mutation(async ({ ctx, input }) => {
@@ -114,6 +144,8 @@ export const workspaceRouter = router({
             create: {
               email: session.user.email,
               owner: true,
+              name: session.user.name,
+              image: session.user.image,
               role: "WORKSPACE_ADMIN",
               user: {
                 connect: {

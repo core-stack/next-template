@@ -1,9 +1,9 @@
-import { Separator } from '@/components/ui/separator';
-import { caller } from '@/lib/trpc/server';
+import { Separator } from "@/components/ui/separator";
+import { caller } from "@/lib/trpc/server";
 
-import { DangerZone } from './danger-zone';
-import { PricingPlans } from './pricing-plans';
-import { WorkspaceSettingsForm } from './workspace-settings-form';
+import { DangerZone } from "./danger-zone";
+import { PricingPlans } from "./pricing-plans";
+import { WorkspaceSettingsForm } from "./workspace-settings-form";
 
 type Props = {
   params: Promise<{
@@ -26,6 +26,10 @@ export default async function WorkspaceSettingsPage({ params }: Props) {
         <WorkspaceSettingsForm
           workspace={workspace}
         />
+        <div className="mt-6">
+          <h2 className="text-2xl font-bold tracking-tight mb-6">Limites e Uso</h2>
+          <UsageLimits workspaceId={workspace.id} plan={workspace.currentPlan as "free" | "pro" | "enterprise"} />
+        </div>
 
         <div className="mt-6">
           <h2 className="text-2xl font-bold tracking-tight mb-6">Planos e Faturamento</h2>

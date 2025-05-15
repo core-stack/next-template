@@ -7,11 +7,11 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useWorkspace } from "@/hooks/use-workspace";
 import { trpc } from "@/lib/trpc/client";
 import { InviteMemberSchema, inviteMemberSchema } from "@/lib/trpc/schema/invite";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, MinusCircle, PlusCircle } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 
 interface InviteMemberDialogProps {
@@ -20,7 +20,7 @@ interface InviteMemberDialogProps {
 }
 
 export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogProps) {
-  const { slug } = useWorkspace();
+  const { slug } = useParams<{ slug: string }>();
   const form = useForm<InviteMemberSchema>({
     resolver: zodResolver(inviteMemberSchema),
     defaultValues: {
