@@ -4,7 +4,32 @@ import dotenvExpand from "dotenv-expand";
 import path from "path";
 import { z } from "zod";
 
-dotenvExpand.expand(dotenv.config({ path: path.resolve(__dirname, '../../.env') }));
+// Try to load .env from multiple possible locations
+const possibleEnvPaths = [
+  path.resolve(process.cwd(), '.env'),
+  path.resolve(process.cwd(), '../../.env'),
+  path.resolve(__dirname, '../../.env'),
+  path.resolve(__dirname, '../../../.env'),
+];
+
+let envLoaded = false;
+for (const envPath of possibleEnvPaths) {
+  try {
+    const result = dotenv.config({ path: envPath, override: true });
+    if (!result.error) {
+      dotenvExpand.expand(result);
+      envLoaded = true;
+      console.log(`Loaded .env from ${envPath}`);
+      break;
+    }
+  } catch (error) {
+    // Continue to next path
+  }
+}
+
+if (!envLoaded) {
+  console.warn('No .env file found in any of the expected locations');
+}
 
 const envSchema = z.object({
   REDIS_URL: z.string().url(),
@@ -16,7 +41,7 @@ const envSchema = z.object({
   SMTP_FROM: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_ENV: z.enum(["development", "production"]).default("development"),
-  SMTP_TEST_EMAIL: z.string().email().default("delivered@resend.dev").optional(),
+  SMTP_TEST_EMAIL: z.string().email().default("delivered@resend.dev"),
   SMTP_SECURE: z.string().transform((val) => val === "true").default("true"),
 
   STRIPE_PUBLIC_KEY: z.string(),
@@ -55,21 +80,29 @@ const envSchema = z.object({
 })
 type Env = z.infer<typeof envSchema>;
 
-let env: Env
+let env: Env;
 
 export function validateEnv(schema: z.ZodSchema, vars: any) {
   const shouldValidateEnv = () => {
     const skip = process.env.ENV_VALIDATION;
     return skip === "true" || skip === "1" || skip === "yes" || skip;
   };
+
+  const mergedEnv = { ...process.env, ...vars };
+
   if (shouldValidateEnv()) {
-    env = schema.parse(process.env);
+    env = schema.parse(mergedEnv);
   } else {
     console.warn("ENV_VALIDATION is not set, skipping env validation");
-    env = vars as unknown as Env;
+    env = mergedEnv as unknown as Env;
   }
   return env;
 }
+
 env = validateEnv(envSchema, process.env);
+
+export function getEnv() {
+  return validateEnv(envSchema, process.env);
+}
 
 export { env };

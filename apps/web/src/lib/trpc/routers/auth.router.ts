@@ -1,30 +1,30 @@
-import moment from 'moment';
-import { cookies } from 'next/headers';
-import { z } from 'zod';
+import moment from "moment";
+import { cookies } from "next/headers";
+import { z } from "zod";
 
-import { auth } from '@/lib/auth';
-import { comparePassword, hashPassword } from '@/lib/authz';
-import { env } from '@packages/env';
-import { prisma } from '@packages/prisma';
-import { addInQueue, EmailTemplate, QueueName } from '@packages/queue';
-import { TRPCError } from '@trpc/server';
+import { auth } from "@/lib/auth";
+import { comparePassword, hashPassword } from "@/lib/authz";
+import { env } from "@packages/env";
+import { prisma } from "@packages/prisma";
+import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
+import { TRPCError } from "@trpc/server";
 
-import { createAccountSchema, loginSchema } from '../schema/auth';
-import { publicProcedure, router } from '../trpc';
+import { createAccountSchema, loginSchema } from "../schema/auth";
+import { publicProcedure, router } from "../trpc";
 
 const sendActiveAccountEmail = async (to: string, name: string | null, token: string) => {
-  await addInQueue(
-    QueueName.EMAIL,
-    {
-      to,
-      subject: "Ative sua conta",
-      template: EmailTemplate.ACTIVE_ACCOUNT,
-      context: {
-        activationUrl: `${env.APP_URL}/auth/activate/${token}`,
-        name,
-      }
+  const data = {
+    to,
+    subject: "Ative sua conta",
+    template: EmailTemplate.ACTIVE_ACCOUNT,
+    context: {
+      activationUrl: `${env.APP_URL}/auth/activate/${token}`,
+      name,
     }
-  );
+  } as const
+  console.log("Sending active account email");
+  console.log(data);
+  await addInQueue(QueueName.EMAIL, data);
 };
 
 export const authRouter = router({
@@ -35,7 +35,7 @@ export const authRouter = router({
       const user = await prisma.user.findUnique({
         where: { email },
         include: {
-          members: { include: { workspace: { select: { id: true, slug: true } }} }
+          members: { include: { workspace: { select: { id: true, slug: true } } } }
         }
       });
       if (!user) {
@@ -69,31 +69,32 @@ export const authRouter = router({
     .mutation(async ({ input }) => {
       const { email, password, name } = input
       // verify email in use
-      const userWithEmail = await prisma.user.findUnique({where: { email: email }});
+      const userWithEmail = await prisma.user.findUnique({ where: { email: email } });
       if (userWithEmail) throw new TRPCError({ code: "BAD_REQUEST", message: "Email já em uso" });
 
       // hash password
       const hashedPassword = await hashPassword(password);
-
-      // create user
-      const user = await prisma.user.create({
-        data: {
-          email, name, password: hashedPassword,
-          verificationToken: {
-            create: {
-              expires: moment().add(env.ACTIVE_ACCOUNT_TOKEN_EXPIRES, 'ms').toDate(),
-              type: "ACTIVE_ACCOUNT",
-              token: crypto.randomUUID()
+      await prisma.$transaction(async (tx) => {
+        const user = await tx.user.create({
+          data: {
+            email, name, password: hashedPassword,
+            verificationToken: {
+              create: {
+                expires: moment().add(env.ACTIVE_ACCOUNT_TOKEN_EXPIRES, 'ms').toDate(),
+                type: "ACTIVE_ACCOUNT",
+                token: crypto.randomUUID()
+              }
             }
-          }
-        },
-        include: { verificationToken: true }
+          },
+          include: { verificationToken: true }
+        });
+
+        await sendActiveAccountEmail(
+          user.email!,
+          user.name!,
+          user.verificationToken.find(token => token.type === "ACTIVE_ACCOUNT")?.token!
+        );
       });
-      await sendActiveAccountEmail(
-        user.email!,
-        user.name!,
-        user.verificationToken.find(token => token.type === "ACTIVE_ACCOUNT")?.token!
-      );
     }),
 
   activateAccount: publicProcedure
@@ -122,8 +123,8 @@ export const authRouter = router({
           newToken.token
         );
         console.log("O link de ativação expirou. Um novo link foi enviado para o seu email.");
-        throw new TRPCError({ 
-          code: "BAD_REQUEST", 
+        throw new TRPCError({
+          code: "BAD_REQUEST",
           message: "O link de ativação expirou. Um novo link foi enviado para o seu email."
         });
       }

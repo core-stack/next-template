@@ -1,13 +1,14 @@
-import { env } from "@packages/env";
-import { EmailPayload, QueueName } from "@packages/queue";
-import { redisConnection } from "@packages/queue/redis";
 import { Job, Worker } from "bullmq";
 import fs from "fs";
 import Handlebars from "handlebars";
+import { SendMailOptions } from "nodemailer";
 import path from "path";
 
+import { env } from "@packages/env";
+import { EmailPayload, QueueName } from "@packages/queue";
+import { redisConnection } from "@packages/queue/redis";
+
 import { nodemailerTransporter } from "./transporter";
-import { MailOptionsWithTemplate } from "./types";
 
 const templatesDir = path.join(__dirname, 'templates');
 
@@ -18,19 +19,20 @@ fs.readdirSync(templatesDir).forEach(file => {
     const filePath = path.join(templatesDir, file);
     const content = fs.readFileSync(filePath, 'utf-8');
     const template = Handlebars.compile(content);
-    compiledTemplates[file] = template;
+    compiledTemplates[file.replace('.hbs', '')] = template;
   }
 });
 
 const emailWorker = new Worker<EmailPayload>(
   QueueName.EMAIL,
   async (job: Job<EmailPayload>) => {
+    console.log(compiledTemplates[job.data.template](job.data));
 
-    const opts: MailOptionsWithTemplate = {
+    const opts: SendMailOptions = {
       ...job.data,
       to: env.SMTP_ENV === "development" ? env.SMTP_TEST_EMAIL : job.data.to,
       from: job.data.from ?? env.SMTP_FROM,
-      template: compiledTemplates[job.data.template].toString(),
+      html: compiledTemplates[job.data.template](job.data),
     }
 
     if (!env.SMTP_ENABLED) {
