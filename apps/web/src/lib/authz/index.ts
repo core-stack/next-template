@@ -1,16 +1,15 @@
-import bcrypt from 'bcrypt';
-import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import { Member, prisma, User } from "@packages/prisma";
+import bcrypt from "bcrypt";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
-import { Member, prisma, User } from '@packages/prisma';
-
-import { UnauthorizedError } from './error';
-import { AccessToken, generateTokens, RefreshToken, verifyToken } from './jwt';
-import { Provider } from './providers/types';
-import { Session } from './session';
-import { MemoryStore } from './store/memory';
-import { RedisStore } from './store/redis';
-import { Store } from './store/types';
+import { UnauthorizedError } from "./error";
+import { AccessToken, generateTokens, RefreshToken, verifyToken } from "./jwt";
+import { Provider } from "./providers/types";
+import { Session } from "./session";
+import { MemoryStore } from "./store/memory";
+import { RedisStore } from "./store/redis";
+import { Store } from "./store/types";
 
 export async function hashPassword(password: string) {
   return await bcrypt.hash(password, 10)
@@ -55,7 +54,11 @@ export class Authz {
 
   async createSessionAndTokens(user: User & { members: Array<Member & { workspace: { id: string, slug: string }}> }) {
     const sessionId = crypto.randomUUID();
+    console.log("sessionId", sessionId);
+
     const token = generateTokens(sessionId, user.id);
+    console.log("Generated tokens", token);
+
     const session: Session = {
       user: {
         id: user.id,
@@ -70,6 +73,8 @@ export class Authz {
       lastSeen: new Date(),
       id: sessionId,
     }
+    console.log("Created session", session);
+
     await this.store.set(session.id, session, { expiry: token.refreshTokenDuration });
     return { token, session };
   }

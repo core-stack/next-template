@@ -120,6 +120,9 @@ importers:
       '@packages/storage':
         specifier: workspace:*
         version: link:../../packages/storage
+      '@packages/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@prisma/client':
         specifier: ^5.22.0
         version: 5.22.0(prisma@5.22.0)
@@ -570,6 +573,27 @@ importers:
       '@swc/helpers':
         specifier: ^0.5.17
         version: 0.5.17
+      '@types/node':
+        specifier: ^20.17.24
+        version: 20.17.32
+      bunchee:
+        specifier: ^6.4.0
+        version: 6.5.1(typescript@5.8.3)
+      eslint:
+        specifier: ^9.26.0
+        version: 9.26.0(jiti@1.21.7)
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
+
+  packages/utils:
+    devDependencies:
+      '@packages/config-eslint':
+        specifier: workspace:*
+        version: link:../config-eslint
+      '@packages/config-typescript':
+        specifier: workspace:*
+        version: link:../config-typescript
       '@types/node':
         specifier: ^20.17.24
         version: 20.17.32

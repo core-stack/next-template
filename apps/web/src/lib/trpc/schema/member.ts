@@ -4,6 +4,9 @@ import { z } from "zod";
 export const memberSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
+  name: z.string().nullable(),
+  image: z.string().optional().nullable(),
+  fcmToken: z.string().optional(),
   userId: z.string().uuid(),
   user: z.object({
     id: z.string().uuid(),

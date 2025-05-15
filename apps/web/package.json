@@ -27,6 +27,7 @@
     "@opentelemetry/semantic-conventions": "^1.33.0",
     "@packages/env": "workspace:*",
     "@packages/permission": "workspace:*",
+    "@packages/utils": "workspace:*",
     "@packages/prisma": "workspace:*",
     "@packages/queue": "workspace:*",
     "@packages/storage": "workspace:*",

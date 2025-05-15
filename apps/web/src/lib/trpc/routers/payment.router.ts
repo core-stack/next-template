@@ -1,18 +1,13 @@
-import { z } from "zod";
-
-import {
-  createCheckoutSession, createCustomerPortalSession, getStripePrices, getStripeProducts
-} from "@/lib/stripe";
+import { createCheckoutSession, createCustomerPortalSession, getStripeProducts } from "@/lib/stripe";
 import { prisma } from "@packages/prisma";
+import { PLANS } from "@packages/utils";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 
 export const paymentRouter = router({
-  getPlans: publicProcedure.query(async () => {
-    const plans = await getStripePrices();
-    return plans;
-  }),
+  getPlans: publicProcedure.query(() => PLANS),
   getProducts: publicProcedure.query(async () => {
     const products = await getStripeProducts();
     return products;

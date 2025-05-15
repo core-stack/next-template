@@ -53,8 +53,8 @@ const envSchema = z.object({
   GOOGLE_REDIRECT_URL: z.string().optional(),
 
   JWT_SECRET: z.string().default(randomBytes(32).toString('hex')),
-  JWT_ACCESS_TOKEN_DURATION: z.coerce.number().default(60 * 5), // 5 minutes
-  JWT_REFRESH_TOKEN_DURATION: z.coerce.number().default(60 * 60 * 24 * 7), // 7 days
+  JWT_ACCESS_TOKEN_DURATION: z.string().default(`${60 * 5}`).transform((val) => parseInt(val)), // 5 minutes
+  JWT_REFRESH_TOKEN_DURATION: z.string().default(`${60 * 60 * 24 * 7}`).transform((val) => parseInt(val)), // 7 days
 
   SESSION_DURATION: z.coerce.number().default(60 * 60), // 1 hour
   SESSION_STORE: z.enum(["memory", "redis"]).default("memory"),

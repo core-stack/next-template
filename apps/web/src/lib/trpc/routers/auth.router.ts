@@ -1,13 +1,12 @@
-import moment from "moment";
-import { cookies } from "next/headers";
-import { z } from "zod";
-
 import { auth } from "@/lib/auth";
 import { comparePassword, hashPassword } from "@/lib/authz";
 import { env } from "@packages/env";
 import { prisma } from "@packages/prisma";
 import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
 import { TRPCError } from "@trpc/server";
+import moment from "moment";
+import { cookies } from "next/headers";
+import { z } from "zod";
 
 import { createAccountSchema, loginSchema } from "../schema/auth";
 import { publicProcedure, router } from "../trpc";
@@ -57,7 +56,11 @@ export const authRouter = router({
           message: "Email ou senha incorretos"
         });
       }
+      console.log("User logged in", user);
+
       const { token } = await auth.createSessionAndTokens(user);
+      console.log("Token created", token);
+
       const cookie = await cookies();
       cookie.set("access-token", token.accessToken, { maxAge: token.accessTokenDuration });
       cookie.set("refresh-token", token.refreshToken, { maxAge: token.refreshTokenDuration });
@@ -106,28 +109,30 @@ export const authRouter = router({
         include: { user: true }
       });
       if (!verificationToken) throw new TRPCError({ code: "BAD_REQUEST", message: "Token de ativação inválido" });
-      if (verificationToken.expires < new Date()) {
-        await prisma.verificationToken.deleteMany({ where: { userId: verificationToken.userId, type: "ACTIVE_ACCOUNT" } });
-        await prisma.user.update({ where: { id: verificationToken.userId }, data: { emailVerified: null } });
-        const newToken = await prisma.verificationToken.create({
-          data: {
-            userId: verificationToken.userId,
-            type: "ACTIVE_ACCOUNT",
-            token: crypto.randomUUID(),
-            expires: moment().add(env.ACTIVE_ACCOUNT_TOKEN_EXPIRES, 'ms').toDate()
-          }
-        });
-        await sendActiveAccountEmail(
-          verificationToken.user.email!,
-          verificationToken.user.name!,
-          newToken.token
-        );
-        console.log("O link de ativação expirou. Um novo link foi enviado para o seu email.");
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "O link de ativação expirou. Um novo link foi enviado para o seu email."
-        });
-      }
+      console.log(verificationToken.expires, new Date());
+
+      // if (verificationToken.expires > new Date()) {
+      //   await prisma.verificationToken.deleteMany({ where: { userId: verificationToken.userId, type: "ACTIVE_ACCOUNT" } });
+      //   await prisma.user.update({ where: { id: verificationToken.userId }, data: { emailVerified: null } });
+      //   const newToken = await prisma.verificationToken.create({
+      //     data: {
+      //       userId: verificationToken.userId,
+      //       type: "ACTIVE_ACCOUNT",
+      //       token: crypto.randomUUID(),
+      //       expires: moment().add(env.ACTIVE_ACCOUNT_TOKEN_EXPIRES, 'ms').toDate()
+      //     }
+      //   });
+      //   await sendActiveAccountEmail(
+      //     verificationToken.user.email!,
+      //     verificationToken.user.name!,
+      //     newToken.token
+      //   );
+      //   console.log("O link de ativação expirou. Um novo link foi enviado para o seu email.");
+      //   throw new TRPCError({
+      //     code: "BAD_REQUEST",
+      //     message: "O link de ativação expirou. Um novo link foi enviado para o seu email."
+      //   });
+      // }
       const user = verificationToken.user;
       console.log(user);
 

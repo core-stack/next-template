@@ -1,6 +1,5 @@
-import jwt from 'jsonwebtoken';
-
-import { env } from '@/env';
+import { env } from "@/env";
+import jwt from "jsonwebtoken";
 
 export type AccessToken = {
   sessionId: string;
@@ -26,6 +25,7 @@ type Tokens = {
 export function generateTokens(sessionId: string, userId: string): Tokens {
   const accessTokenPayload: AccessToken = { userId, sessionId }
   const refreshTokenPayload: RefreshToken = { userId, sessionId }
+  console.log(JWT_SECRET, JWT_ACCESS_TOKEN_DURATION, JWT_REFRESH_TOKEN_DURATION);
 
   return {
     accessTokenDuration: JWT_ACCESS_TOKEN_DURATION,
