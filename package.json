@@ -16,6 +16,7 @@
     "db:studio": "cd packages/prisma && pnpm run studio"
   },
   "devDependencies": {
+    "@swc/helpers": "^0.5.17",
     "dotenv-cli": "^7.4.4",
     "prettier": "^3.5.3",
     "turbo": "^2.5.3"

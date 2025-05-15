@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@swc/helpers':
+        specifier: ^0.5.17
+        version: 0.5.17
       dotenv-cli:
         specifier: ^7.4.4
         version: 7.4.4
