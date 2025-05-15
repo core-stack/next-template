@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export enum EmailTemplate {
   ACTIVE_ACCOUNT = 'active-account',
@@ -18,6 +18,9 @@ const forgotPasswordSchema = z.object({
 const inviteSchema = z.object({
   workspaceName: z.string(),
   inviteUrl: z.string().url(),
+  role: z.string(),
+  inviterName: z.string(),
+  expirationDate: z.string(),
 });
 const activeAccountSchema = z.object({
   activationUrl: z.string().url(),

@@ -1,4 +1,4 @@
-import { UserRole as UserRoleName, WorkspaceRole as WorkspaceRoleName } from '@packages/prisma';
+import { UserRole as UserRoleName, WorkspaceRole as WorkspaceRoleName } from "@packages/prisma";
 
 export enum Permission {
   // global scope
@@ -23,9 +23,15 @@ export enum Permission {
   DELETE_MEMBER = "workspace:member:delete",
 
   // invite
-  INVITE_ALL = "invite:invite:*",
-  CREATE_INVITE = "invite:invite:create",
-  DELETE_INVITE = "invite:invite:delete",
+  INVITE_ALL = "workspace:invite:*",
+  CREATE_INVITE = "workspace:invite:create",
+  DELETE_INVITE = "workspace:invite:delete",
+
+  // billing
+  BILLING_ALL = "workspace:billing:*",
+  GET_BILLING = "workspace:billing:read",
+  UPDATE_BILLING = "workspace:billing:update",
+  DELETE_BILLING = "workspace:billing:delete",
 }
 
 export type WorkspaceRoleType = {

@@ -1,8 +1,9 @@
 "use client"
-import { trpc } from "@/lib/trpc/client";
-import { can as canPermission, getRolePermissions, Permission } from "@packages/permission";
 import { useParams } from "next/navigation";
 import React from "react";
+
+import { trpc } from "@/lib/trpc/client";
+import { can as canPermission, getRolePermissions, Permission } from "@packages/permission";
 
 type PermissionContextType = {
   can: (permission: Permission | Permission[]) => boolean;

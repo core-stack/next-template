@@ -4,6 +4,8 @@ import { Permission, UserRoleName, WorkspaceRoleName } from "./types";
 export const getRolePermissions = (role: WorkspaceRoleName | UserRoleName) => {
   switch (role) {
     case WorkspaceRoleName.WORKSPACE_ADMIN:
+      console.log(WorkspaceAdminRole);
+
       return WorkspaceAdminRole.permissions;
     case WorkspaceRoleName.WORKSPACE_MEMBER:
       return WorkspaceMemberRole.permissions;

@@ -49,10 +49,7 @@ export function WorkspaceList() {
       <WorkspaceDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        workspace={{
-          ...selectedWorkspace!,
-          disabledAt: selectedWorkspace?.disabledAt ? new Date(selectedWorkspace.disabledAt) : null
-        }}
+        workspace={selectedWorkspace ? selectedWorkspace : undefined}
       />
     </>
   )

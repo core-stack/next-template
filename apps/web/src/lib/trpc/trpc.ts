@@ -51,9 +51,9 @@ export const rbacMiddleware = (requiredPermissions: Permission[]) => {
 
     const userPermissions = getRolePermissions(session.user.role);
 
-    if (rawInput && typeof rawInput === 'object' && 'workspaceSlug' in rawInput) {
+    if (rawInput && typeof rawInput === 'object' && 'slug' in rawInput) {
       const workspace = session.workspaces.find(
-        (w) => w.slug === (rawInput as { workspaceSlug: string }).workspaceSlug
+        (w) => w.slug === (rawInput as { slug: string }).slug
       );
 
       if (workspace) {

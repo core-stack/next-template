@@ -1,5 +1,10 @@
 "use client"
 
+import { CreditCard, LayoutDashboard, Plus, Settings, Users, Zap } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue
@@ -11,10 +16,6 @@ import { trpc } from "@/lib/trpc/client";
 import { WorkspaceSchema } from "@/lib/trpc/schema/workspace";
 import { cn } from "@/lib/utils";
 import { Permission } from "@packages/permission";
-import { CreditCard, LayoutDashboard, Plus, Settings, Users, Zap } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
 
 interface WorkspaceSidebarProps {
   slug: string
@@ -59,9 +60,7 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
     },
   ]
 
-  const handleWorkspaceChange = (value: string) => {
-    router.push(`/w/${value}`)
-  }
+  const handleWorkspaceChange = (value: string) => router.push(`/w/${value}`)
 
   return (
     <div

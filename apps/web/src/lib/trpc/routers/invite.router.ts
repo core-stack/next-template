@@ -68,11 +68,14 @@ export const inviteRouter = router({
             });
             await addInQueue(QueueName.EMAIL, {
               to: email,
-              subject: "Convite para o workspace",
+              subject: `Convite para o workspace ${workspace.name}`,
               template: EmailTemplate.INVITE,
               context: {
                 workspaceName: workspace.name,
                 inviteUrl: `${env.APP_URL}/invite/${invite.id}`,
+                role: invite.role,
+                inviterName: ctx.session.user.name ?? "",
+                expirationDate: moment(invite.expiresAt).format("DD/MM/YYYY HH:mm"),
               },
             });
           })
@@ -88,11 +91,14 @@ export const inviteRouter = router({
             });
             await addInQueue(QueueName.EMAIL, {
               to: email,
-              subject: "Convite para o workspace",
+              subject: `Convite para o workspace ${workspace.name}`,
               template: EmailTemplate.INVITE,
               context: {
                 workspaceName: workspace.name,
                 inviteUrl: `${env.APP_URL}/invite/${invite.id}`,
+                role: invite.role,
+                inviterName: ctx.session.user.name ?? "",
+                expirationDate: moment(invite.expiresAt).format("DD/MM/YYYY HH:mm"),
               },
             });
           })

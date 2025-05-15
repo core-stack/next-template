@@ -69,9 +69,7 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
   const watchName = form.watch("name")
 
   useEffect(() => {
-    if (watchName && !isEditing) {
-      form.setValue("slug", generateSlug(watchName))
-    }
+    if (watchName && !isEditing) form.setValue("slug", generateSlug(watchName))
   }, [watchName, isEditing])
 
   useEffect(() => {
