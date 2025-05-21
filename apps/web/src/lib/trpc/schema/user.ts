@@ -1,30 +1,27 @@
-import { z } from 'zod';
+import { passwordSchema } from "@/validation/password";
+import { UserRole } from "@packages/prisma";
+import { z } from "zod";
 
-import { passwordSchema } from '@/validation/password';
-import { UserRole, WorkspaceRole } from '@packages/prisma';
+import { preAccountSchema } from "./account";
 
-export const selfUserSchema = z.object({
+export const preUserSchema = z.object({
   id: z.string(),
   name: z.string().nullable(),
   email: z.string().nullable(),
-  role: z.nativeEnum(UserRole),
+  emailVerified: z.date(),
   image: z.string().nullable(),
-  members: z.object({
-    id: z.string(),
-    workspaceId: z.string().uuid(),
-    userId: z.string().uuid(),
-    role: z.nativeEnum(WorkspaceRole),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-    owner: z.boolean(),
-    workspace: z.object({
-      id: z.string(),
-      slug: z.string(),
-    })
-  }).array(),
+  role: z.nativeEnum(UserRole),
+  createdAt: z.date(),
+  updatedAt: z.date().nullable(),
 });
 
-export type SelfUserSchema = z.infer<typeof selfUserSchema>;
+export type PreUserSchema = z.infer<typeof preUserSchema>;
+
+export const userSchema = preUserSchema.extend({
+  accounts: z.array(preAccountSchema)
+});
+
+export type UserSchema = z.infer<typeof userSchema>;
 
 export const updateProfileSchema = z.object({
   name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres" }),

@@ -3,12 +3,12 @@ import { prisma, SubscriptionStatus } from "@packages/prisma";
 import { redirect } from "next/navigation";
 import Stripe from "stripe";
 
-import { SubscriptionSchema } from "./trpc/schema/subscription";
+import { PreSubscriptionSchema } from "./trpc/schema/subscription";
 
 export const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-04-30.basil' });
 
 export async function createCheckoutSession({ subscription, priceId }: {
-  subscription: SubscriptionSchema;
+  subscription: PreSubscriptionSchema;
   priceId: string;
 }) {
   const stripeSession = await stripe.checkout.sessions.create({
@@ -33,7 +33,7 @@ export async function createCheckoutSession({ subscription, priceId }: {
   return stripeSession.url!
 }
 
-export async function createCustomerPortalSession(subscription: SubscriptionSchema, slug: string) {
+export async function createCustomerPortalSession(subscription: PreSubscriptionSchema, slug: string) {
   if (!subscription.stripeCustomerId || !subscription.stripeProductId) {
     redirect('/pricing');
   }

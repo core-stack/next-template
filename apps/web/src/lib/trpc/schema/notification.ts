@@ -1,9 +1,10 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { memberSchema } from './member';
+import { preMemberSchema } from "./member";
+import { preWorkspaceSchema } from "./workspace";
 
-export const notificationSchema = z.object({
-  id: z.string(),
+export const preNotificationSchema = z.object({
+  id: z.string().uuid(),
 
   title: z.string(),
   description: z.string(),
@@ -13,12 +14,18 @@ export const notificationSchema = z.object({
   workspaceId: z.string(),
 
   createdById: z.string().nullable(),
-  createdBy: memberSchema.nullable(),
 
   destinationId: z.string(),
-  destination: memberSchema,
 
   createdAt: z.date(),
   readAt: z.date().nullable(),
 });
+export type PreNotificationSchema = z.infer<typeof preNotificationSchema>;
+
+export const notificationSchema = preNotificationSchema.extend({
+  workspace: preWorkspaceSchema,
+  createdBy: preMemberSchema,
+  destination: preMemberSchema
+});
+
 export type NotificationSchema = z.infer<typeof notificationSchema>;

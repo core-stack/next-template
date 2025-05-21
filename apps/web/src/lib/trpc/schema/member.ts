@@ -1,23 +1,25 @@
 import { WorkspaceRole } from "@packages/prisma";
 import { z } from "zod";
 
-export const memberSchema = z.object({
+import { preWorkspaceSchema } from "./workspace";
+
+export const preMemberSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
   name: z.string().nullable(),
-  image: z.string().optional().nullable(),
-  fcmToken: z.string().optional(),
+  image: z.string().url().nullable(),
+  fcmToken: z.string().nullable(),
   userId: z.string().uuid(),
-  user: z.object({
-    id: z.string().uuid(),
-    name: z.string().nullable(),
-    image: z.string().optional().nullable(),
-    email: z.string().email().nullable(),
-  }),
   workspaceId: z.string().uuid(),
   role: z.nativeEnum(WorkspaceRole),
   owner: z.boolean(),
   createdAt: z.date(),
-  updatedAt: z.date(),
+  updatedAt: z.date().nullable(),
+});
+export type PreMemberSchema = z.infer<typeof preMemberSchema>;
+
+export const memberSchema = preMemberSchema.extend({
+  workspace: preWorkspaceSchema,
+
 })
 export type MemberSchema = z.infer<typeof memberSchema>;

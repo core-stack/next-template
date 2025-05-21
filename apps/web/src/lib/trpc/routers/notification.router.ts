@@ -1,9 +1,8 @@
-import { z } from "zod";
-
 import { prisma } from "@packages/prisma";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
-import { notificationSchema } from "../schema/notification";
+import { preNotificationSchema } from "../schema/notification";
 import { protectedProcedure, router } from "../trpc";
 
 const findMemberAndThrowIfNotExists = async (userId: string, slug: string) => {
@@ -32,7 +31,7 @@ export const notificationRouter = router({
     .input(z.object({
       slug: z.string(),
     }))
-    .output(z.array(notificationSchema))
+    .output(z.array(preNotificationSchema))
     .query(async ({ ctx, input }) => {
       const member = await findMemberAndThrowIfNotExists(ctx.session.user.id, input.slug);
       const notifications = await prisma.notification.findMany({

@@ -57,7 +57,7 @@ model Workspace {
 }
 
 model Invite {
-  id String @id @default(cuid())
+  id String @id @default(uuid())
 
   workspaceId String    @map("workspace_id")
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)

@@ -1,21 +1,20 @@
-import { randomUUID } from 'node:crypto';
-import { z } from 'zod';
-
-import { comparePassword, hashPassword } from '@/lib/authz';
-import { prisma } from '@packages/prisma';
-import { addInQueue, EmailTemplate, QueueName } from '@packages/queue';
-import { buildPublicUrl, getPreSignedUploadUrl } from '@packages/storage';
-import { TRPCError } from '@trpc/server';
+import { comparePassword, hashPassword } from "@/lib/authz";
+import { prisma } from "@packages/prisma";
+import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
+import { buildPublicUrl, getPreSignedUploadUrl } from "@packages/storage";
+import { TRPCError } from "@trpc/server";
+import { randomUUID } from "node:crypto";
+import { z } from "zod";
 
 import {
-  confirmUploadProfileImageSchema, selfUserSchema, updatePasswordSchema, updateProfileSchema,
-  updateUserPictureSchema
-} from '../schema/user';
-import { protectedProcedure, router } from '../trpc';
+  confirmUploadProfileImageSchema, updatePasswordSchema, updateProfileSchema, updateUserPictureSchema,
+  userSchema
+} from "../schema/user";
+import { protectedProcedure, router } from "../trpc";
 
 export const userRouter = router({
   self: protectedProcedure
-    .output(selfUserSchema)
+    .output(userSchema)
     .query(async ({ ctx }) => {
     const user = await prisma.user.findUnique({
       select: {

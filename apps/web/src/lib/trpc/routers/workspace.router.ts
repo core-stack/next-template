@@ -6,7 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  createWorkspaceSchema, disableWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema, workspaceSchema,
+  createWorkspaceSchema, disableWorkspaceSchema, preWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema,
   workspaceWithCountSchema
 } from "../schema/workspace";
 import { protectedProcedure, rbacProcedure, router } from "../trpc";
@@ -17,7 +17,7 @@ const slugInUse = async (slug: string) => {
 }
 
 export const formatWorkspace = (workspace: Workspace): WorkspaceSchema => {
-  return workspaceSchema.parse({
+  return preWorkspaceSchema.parse({
     ...workspace,
     backgroundType: workspace.backgroundImage.startsWith("#") ? "color" : "gradient",
     description: workspace.description ?? null,
@@ -59,7 +59,7 @@ export const workspaceRouter = router({
     }),
   getById: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
-    .output(workspaceSchema)
+    .output(preWorkspaceSchema)
     .query(async ({ input, ctx }) => {
       const workspace = await prisma.workspace.findUnique({
         where: {
@@ -78,7 +78,7 @@ export const workspaceRouter = router({
     }),
   getBySlug: protectedProcedure
     .input(z.object({ slug: z.string(), ignoreDisabled: z.boolean().optional() }))
-    .output(workspaceSchema)
+    .output(preWorkspaceSchema)
     .query(async ({ input, ctx }) => {
       const workspace = await prisma.workspace.findUnique({
         where: {

@@ -1,5 +1,14 @@
 "use client"
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import useFcmToken from "@/hooks/use-fcm-token";
+import firebaseApp from "@/lib/firebase.client";
+import { trpc } from "@/lib/trpc/client";
+import { PreNotificationSchema } from "@/lib/trpc/schema/notification";
+import { cn } from "@/lib/utils";
 import { getMessaging, onMessage } from "firebase/messaging";
 import { Info } from "lucide-react";
 import moment from "moment";
@@ -7,20 +16,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import {
-  Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle
-} from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import useFcmToken from "@/hooks/use-fcm-token";
-import firebaseApp from "@/lib/firebase.client";
-import { trpc } from "@/lib/trpc/client";
-import { NotificationSchema } from "@/lib/trpc/schema/notification";
-import { cn } from "@/lib/utils";
-
 type NotificationContextType = {
-  notifications: NotificationSchema[]
+  notifications: PreNotificationSchema[]
   unreadNotifications: boolean
   unreadCount: number
   markAllAsRead: () => Promise<void>
@@ -49,7 +46,7 @@ export function NotificationsProvider({ children }: Props) {
 
   const utils = trpc.useUtils()
   const { data: notificationsData } = trpc.notification.getNotifications.useQuery({ slug }, { initialData: [] })
-  const notifications = notificationsData.map((notification: NotificationSchema) => ({
+  const notifications = notificationsData.map((notification: PreNotificationSchema) => ({
     ...notification,
     createdAt: new Date(notification.createdAt),
     readAt: notification.readAt ? new Date(notification.readAt) : null,
@@ -66,8 +63,8 @@ export function NotificationsProvider({ children }: Props) {
   }))
   const { mutateAsync: markAllAsReadMutation } = trpc.notification.markAllAsRead.useMutation()
   const { mutateAsync: markAsReadMutation } = trpc.notification.markAsRead.useMutation()
-  const unreadNotifications = notifications?.some((notification: NotificationSchema) => !notification.read)
-  const unreadCount = notifications?.filter((notification: NotificationSchema) => !notification.read).length
+  const unreadNotifications = notifications?.some((notification: PreNotificationSchema) => !notification.read)
+  const unreadCount = notifications?.filter((notification: PreNotificationSchema) => !notification.read).length
 
   const markAllAsRead = async () => {
     await markAllAsReadMutation({ slug })
@@ -128,14 +125,14 @@ export function NotificationsProvider({ children }: Props) {
             </TabsContent>
 
             <TabsContent value="unread" className="mt-4 space-y-4">
-              {notifications.filter((n: NotificationSchema) => !n.read).length === 0 ? (
+              {notifications.filter((n: PreNotificationSchema) => !n.read).length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <p>Nenhuma notificação não lida</p>
                 </div>
               ) : (
                 notifications
-                  .filter((n: NotificationSchema) => !n.read)
-                  .map((notification: NotificationSchema) => (
+                  .filter((n: PreNotificationSchema) => !n.read)
+                  .map((notification: PreNotificationSchema) => (
                     <NotificationItem key={notification.id} notification={notification} onRead={markAsRead} />
                   ))
               )}
@@ -150,7 +147,7 @@ export function NotificationsProvider({ children }: Props) {
 export const useNotifications = () => useContext(NotificationContext)
 
 interface NotificationItemProps {
-  notification: NotificationSchema
+  notification: PreNotificationSchema
   onRead: (id: string) => void
 }
 
