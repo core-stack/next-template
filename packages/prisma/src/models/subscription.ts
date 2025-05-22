@@ -1,5 +1,6 @@
-import { SubscriptionStatus } from "@packages/prisma";
 import { z } from "zod";
+
+import { SubscriptionStatus } from "@prisma/client";
 
 import { preWorkspaceSchema } from "./workspace";
 

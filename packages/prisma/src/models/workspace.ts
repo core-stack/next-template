@@ -27,12 +27,3 @@ export const workspaceSchema = preWorkspaceSchema.extend({
   notifications: z.array(preNotificationSchema),
 });
 export type WorkspaceSchema = z.infer<typeof workspaceSchema>;
-
-export const workspaceListSchema = z.array(preWorkspaceSchema);
-export type WorkspaceListSchema = z.infer<typeof workspaceListSchema>;
-
-export const createWorkspaceSchema = preWorkspaceSchema.omit({ id: true, disabledAt: true });
-export type CreateWorkspaceSchema = z.infer<typeof createWorkspaceSchema>;
-
-export const updateWorkspaceSchema = preWorkspaceSchema.omit({ disabledAt: true });
-export type UpdateWorkspaceSchema = z.infer<typeof updateWorkspaceSchema>;

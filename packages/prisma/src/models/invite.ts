@@ -1,5 +1,6 @@
-import { WorkspaceRole } from "@packages/prisma";
 import { z } from "zod";
+
+import { WorkspaceRole } from "@prisma/client";
 
 import { preUserSchema } from "./user";
 import { preWorkspaceSchema } from "./workspace";

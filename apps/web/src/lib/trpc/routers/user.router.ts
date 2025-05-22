@@ -4,34 +4,25 @@ import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
 import { buildPublicUrl, getPreSignedUploadUrl } from "@packages/storage";
 import { TRPCError } from "@trpc/server";
 import { randomUUID } from "node:crypto";
-import { z } from "zod";
 
 import {
-  confirmUploadProfileImageSchema, updatePasswordSchema, updateProfileSchema, updateUserPictureSchema,
-  userSchema
-} from "../schema/user";
+  confirmUploadSchema, getUpdateImagePresignedUrlSchema, updatePasswordSchema,
+  updateProfileSchema as updateNameSchema
+} from "../schema/user.schema";
 import { protectedProcedure, router } from "../trpc";
 
 export const userRouter = router({
   self: protectedProcedure
-    .output(userSchema)
     .query(async ({ ctx }) => {
-    const user = await prisma.user.findUnique({
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        image: true,
-        members: { include: { workspace: { select: { id: true, slug: true } }} }
-      },
-      where: { id: ctx.session.user.id },
-    });
-    if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Usuário não encontrado" });
-    return user;
-  }),
+      const user = await prisma.user.findUnique({
+        include: { members: { include: { workspace: { select: { id: true, slug: true } }} } },
+        where: { id: ctx.session.user.id },
+      });
+      if (!!user?.password) user.password = null;
+      if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Usuário não encontrado" });
+      return user;
+    }),
   hasPassword: protectedProcedure
-    .output(z.boolean())
     .query(async ({ ctx }) => {
       const user = await prisma.user.findUnique({ where: { id: ctx.session.user.id } });
       if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Usuário não encontrado" });
@@ -43,7 +34,6 @@ export const userRouter = router({
       const { session } = ctx;
       const user = await prisma.user.findUnique({ where: { id: session.user.id } });
       if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Usuário não encontrado" });
-      console.log(input);
 
       if (user.password) {
         if (!input.currentPassword)
@@ -69,7 +59,7 @@ export const userRouter = router({
       )
     }),
   updateName: protectedProcedure
-    .input(updateProfileSchema)
+    .input(updateNameSchema)
     .mutation(async ({ input, ctx }) => {
       const { session } = ctx;
       await prisma.user.update({
@@ -79,14 +69,14 @@ export const userRouter = router({
       return { name: input.name };
     }),
   getUpdateImagePresignedUrl: protectedProcedure
-    .input(updateUserPictureSchema)
+    .input(getUpdateImagePresignedUrlSchema)
     .mutation(async ({ input }) => {
       const key = `user-profile/${randomUUID()}.${input.fileName.split(".").pop()}`;
       const url = await getPreSignedUploadUrl(key, input.contentType, true);
       return { url, key, publicUrl: buildPublicUrl(key) };
     }),
   confirmUpload: protectedProcedure
-    .input(confirmUploadProfileImageSchema)
+    .input(confirmUploadSchema)
     .mutation(async ({ input, ctx }) => {
       const { session } = ctx;
       const { key } = input;

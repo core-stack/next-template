@@ -8,7 +8,7 @@ import moment from "moment";
 import { cookies } from "next/headers";
 import { z } from "zod";
 
-import { createAccountSchema, loginSchema } from "../schema/auth";
+import { createAccountSchema, loginSchema } from "../schema";
 import { publicProcedure, router } from "../trpc";
 
 const sendActiveAccountEmail = async (to: string, name: string | null, token: string) => {
@@ -20,9 +20,7 @@ const sendActiveAccountEmail = async (to: string, name: string | null, token: st
       activationUrl: `${env.APP_URL}/auth/activate/${token}`,
       name,
     }
-  } as const
-  console.log("Sending active account email");
-  console.log(data);
+  } as const;
   await addInQueue(QueueName.EMAIL, data);
 };
 

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -11,3 +11,4 @@ if (process.env.NODE_ENV !== "production") globalThis.prisma = client;
 
 export { client as prisma };
 export * from "./client";
+export * from "./models";

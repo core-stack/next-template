@@ -1,30 +1,31 @@
-import moment from "moment";
-import { z } from "zod";
-
 import { env } from "@/env";
 import { hasAccess } from "@/lib/utils";
 import { Permission } from "@packages/permission";
 import { prisma } from "@packages/prisma";
 import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
 import { TRPCError } from "@trpc/server";
+import moment from "moment";
 
-import { inviteMemberSchema, inviteWithWorkspaceSchema } from "../schema/invite";
+import {
+  deleteInviteSchema, getInviteByWorkspaceSchema, getInviteSchema, inviteMemberSchema,
+  inviteWithWorkspaceSchema
+} from "../schema/invite.schema";
 import { protectedProcedure, rbacProcedure, router } from "../trpc";
-import { formatWorkspace } from "./workspace.router";
 
 export const inviteRouter = router({
   getByIdWithWorkspace: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(getInviteSchema)
+    .output(inviteWithWorkspaceSchema)
     .query(async ({ input, ctx }) => {
       const invite = await prisma.invite.findUnique({ where: { id: input.id }, include: { workspace: true } });
       if (!invite) throw new TRPCError({ code: 'NOT_FOUND', message: "Convite não encontrado" });
       if (invite.email !== ctx.session.user.email)
         throw new TRPCError({ code: 'FORBIDDEN', message: "Você não tem acesso a esse convite" });
-      return inviteWithWorkspaceSchema.parse({ ...invite, workspace: formatWorkspace(invite.workspace) });
+      return invite;
     }),
 
   getByWorkspace: protectedProcedure
-    .input(z.object({ slug: z.string() }))
+    .input(getInviteByWorkspaceSchema)
     .query(async ({ input }) => {
       const invites = await prisma.invite.findMany({
         where: { workspace: { slug: input.slug, disabledAt: null } },
@@ -107,7 +108,7 @@ export const inviteRouter = router({
     }),
 
   accept: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(getInviteSchema)
     .mutation(async ({ input, ctx }) => {
       const invite = await prisma.invite.findUnique({ where: { id: input.id } });
       if (!invite) throw new TRPCError({ code: 'NOT_FOUND', message: "Convite não encontrado" });
@@ -129,7 +130,7 @@ export const inviteRouter = router({
     }),
 
   reject: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(getInviteSchema)
     .mutation(async ({ input, ctx }) => {
       const invite = await prisma.invite.findUnique({ where: { id: input.id } });
       if (!invite) throw new TRPCError({ code: 'NOT_FOUND', message: "Convite não encontrado" });
@@ -141,7 +142,7 @@ export const inviteRouter = router({
     }),
 
   delete: rbacProcedure([Permission.DELETE_INVITE])
-    .input(z.object({ id: z.string(), slug: z.string() }))
+    .input(deleteInviteSchema)
     .mutation(async ({ input, ctx }) => {
       if (!hasAccess(ctx.session, input.slug)) throw new TRPCError({ code: 'FORBIDDEN', message: "Você não tem acesso a esse workspace" });
 

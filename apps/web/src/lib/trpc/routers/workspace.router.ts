@@ -1,14 +1,13 @@
 import { auth } from "@/lib/auth";
 import { comparePassword } from "@/lib/authz";
 import { Permission } from "@packages/permission";
-import { prisma, Workspace } from "@packages/prisma";
+import { preWorkspaceSchema, prisma } from "@packages/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  createWorkspaceSchema, disableWorkspaceSchema, preWorkspaceSchema, updateWorkspaceSchema, WorkspaceSchema,
-  workspaceWithCountSchema
-} from "../schema/workspace";
+  createWorkspaceSchema, disableWorkspaceSchema, updateWorkspaceSchema, workspaceWithMemberCountSchema
+} from "../schema/workspace.schema";
 import { protectedProcedure, rbacProcedure, router } from "../trpc";
 
 const slugInUse = async (slug: string) => {
@@ -16,18 +15,9 @@ const slugInUse = async (slug: string) => {
   return !!workspace;
 }
 
-export const formatWorkspace = (workspace: Workspace): WorkspaceSchema => {
-  return preWorkspaceSchema.parse({
-    ...workspace,
-    backgroundType: workspace.backgroundImage.startsWith("#") ? "color" : "gradient",
-    description: workspace.description ?? null,
-    backgroundColor: workspace.backgroundImage.startsWith("#") ? workspace.backgroundImage : null,
-    backgroundGradient: workspace.backgroundImage.startsWith("#") ? null : workspace.backgroundImage,
-  });
-}
 export const workspaceRouter = router({
   get: protectedProcedure
-    .output(workspaceWithCountSchema.array())
+    .output(workspaceWithMemberCountSchema.array())
     .query(async ({ ctx }) => {
       const workspaces = await prisma.workspace.findMany({
         where: {
@@ -45,17 +35,7 @@ export const workspaceRouter = router({
           }
         }
       });
-      return workspaces.map(w => ({
-        id: w.id,
-        name: w.name,
-        slug: w.slug,
-        backgroundType: w.backgroundImage.startsWith("#") ? "color" : "gradient",
-        backgroundColor: w.backgroundImage.startsWith("#") ? w.backgroundImage : null,
-        backgroundGradient: w.backgroundImage.startsWith("#") ? null : w.backgroundImage,
-        description: w.description,
-        memberCount: w._count.members,
-        disabledAt: w.disabledAt
-      }));
+      return workspaces.map(w => ({ ...w, memberCount: w._count.members }));
     }),
   getById: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
@@ -74,7 +54,7 @@ export const workspaceRouter = router({
       if (!workspace) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
       }
-      return formatWorkspace(workspace);
+      return workspace;
     }),
   getBySlug: protectedProcedure
     .input(z.object({ slug: z.string(), ignoreDisabled: z.boolean().optional() }))
@@ -94,7 +74,7 @@ export const workspaceRouter = router({
       if (!workspace) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
       }
-      return formatWorkspace(workspace);
+      return workspace;
     }),
   getWithSubscription: protectedProcedure
     .input(z.object({ slug: z.string() }))
@@ -136,10 +116,7 @@ export const workspaceRouter = router({
       }
       await prisma.workspace.create({
         data: {
-          name: input.name,
-          slug: input.slug,
-          description: input.description,
-          backgroundImage: (input.backgroundType === "color" ? input.backgroundColor : input.backgroundGradient) || "",
+          ...input,
           members: {
             create: {
               email: session.user.email,
@@ -147,11 +124,7 @@ export const workspaceRouter = router({
               name: session.user.name,
               image: session.user.image,
               role: "WORKSPACE_ADMIN",
-              user: {
-                connect: {
-                  id: session.user.id
-                }
-              }
+              user: { connect: { id: session.user.id } }
             }
           }
         }
@@ -168,17 +141,13 @@ export const workspaceRouter = router({
       const { session } = ctx;
       const res = await prisma.workspace.update({
         where: { id: input.id, disabledAt: null },
-        data: {
-          name: input.name,
-          description: input.description,
-          backgroundImage: (input.backgroundType === "color" ? input.backgroundColor : input.backgroundGradient) || "",
-        }
+        data: input
       });
       if (!res) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
       }
       await auth.reloadSession(session.id);
-      return formatWorkspace(res);
+      return res;
     }),
   disable: rbacProcedure([Permission.DELETE_WORKSPACE])
     .input(disableWorkspaceSchema)
@@ -186,9 +155,14 @@ export const workspaceRouter = router({
       const { session } = ctx;
       const userId = session.user.id;
       const user = await prisma.user.findUnique({ where: { id: userId } });
+
       if (!user) throw new TRPCError({ code: "FORBIDDEN", message: "Você não tem acesso a esse workspace" });
-      if (!user.password) throw new TRPCError({ code: "FORBIDDEN", message: "Por favor, defina uma senha para ativar esse workspace" });
-      if (!await comparePassword(input.password, user.password)) throw new TRPCError({ code: "FORBIDDEN", message: "Senha incorreta" });
+
+      if (!user.password)
+        throw new TRPCError({ code: "FORBIDDEN", message: "Por favor, defina uma senha para ativar esse workspace" });
+
+      if (!await comparePassword(input.password, user.password))
+        throw new TRPCError({ code: "FORBIDDEN", message: "Senha incorreta" });
       const workspace = await prisma.workspace.findUnique({
         where: { slug: input.slug, name: input.confirmText, disabledAt: null },
       });
@@ -201,9 +175,14 @@ export const workspaceRouter = router({
       const { session } = ctx;
       const userId = session.user.id;
       const user = await prisma.user.findUnique({ where: { id: userId } });
+
       if (!user) throw new TRPCError({ code: "FORBIDDEN", message: "Você não tem acesso a esse workspace" });
-      if (!user.password) throw new TRPCError({ code: "FORBIDDEN", message: "Por favor, defina uma senha para ativar esse workspace" });
-      if (!await comparePassword(input.password, user.password)) throw new TRPCError({ code: "FORBIDDEN", message: "Senha incorreta" });
+
+      if (!user.password)
+        throw new TRPCError({ code: "FORBIDDEN", message: "Por favor, defina uma senha para ativar esse workspace" });
+
+      if (!await comparePassword(input.password, user.password))
+        throw new TRPCError({ code: "FORBIDDEN", message: "Senha incorreta" });
 
       await prisma.workspace.update({
         where: { slug: input.slug, disabledAt: { not: null } },

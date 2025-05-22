@@ -2,18 +2,15 @@ import { createCheckoutSession, createCustomerPortalSession, getStripeProducts }
 import { prisma } from "@packages/prisma";
 import { PLANS } from "@packages/utils";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
+import { checkoutSchema, customerPortalSchema } from "../schema/payment.schema";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 
 export const paymentRouter = router({
   getPlans: publicProcedure.query(() => PLANS),
-  getProducts: publicProcedure.query(async () => {
-    const products = await getStripeProducts();
-    return products;
-  }),
+  getProducts: publicProcedure.query(getStripeProducts),
   checkout: protectedProcedure
-    .input(z.object({ priceId: z.string(), slug: z.string() }))
+    .input(checkoutSchema)
     .mutation(async ({ input }) => {
       const workspace = await prisma.workspace.findUnique({
         where: { slug: input.slug },
@@ -42,7 +39,7 @@ export const paymentRouter = router({
       return session;
     }),
   customerPortal: protectedProcedure
-    .input(z.object({ slug: z.string() }))
+    .input(customerPortalSchema)
     .mutation(async ({ input }) => {
       const workspace = await prisma.workspace.findUnique({
         where: { slug: input.slug },

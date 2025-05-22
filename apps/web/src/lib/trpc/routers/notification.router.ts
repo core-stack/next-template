@@ -1,8 +1,10 @@
-import { prisma } from "@packages/prisma";
+import { preNotificationSchema, prisma } from "@packages/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { preNotificationSchema } from "../schema/notification";
+import {
+  deleteSchema, markAllAsReadSchema, markAsReadSchema, syncSchema
+} from "../schema/notification.schema";
 import { protectedProcedure, router } from "../trpc";
 
 const findMemberAndThrowIfNotExists = async (userId: string, slug: string) => {
@@ -15,13 +17,8 @@ const findMemberAndThrowIfNotExists = async (userId: string, slug: string) => {
 
 export const notificationRouter = router({
   sync: protectedProcedure
-    .input(z.object({
-      token: z.string().nullable(),
-      slug: z.string(),
-    }))
+    .input(syncSchema)
     .mutation(async ({ ctx, input }) => {
-      console.log("sync", input);
-
       const member = await findMemberAndThrowIfNotExists(ctx.session.user.id, input.slug);
       if (member.fcmToken !== input.token) {
         await prisma.member.update({ where: { id: member.id }, data: { fcmToken: input.token } });
@@ -31,7 +28,7 @@ export const notificationRouter = router({
     .input(z.object({
       slug: z.string(),
     }))
-    .output(z.array(preNotificationSchema))
+    .output(preNotificationSchema.array())
     .query(async ({ ctx, input }) => {
       const member = await findMemberAndThrowIfNotExists(ctx.session.user.id, input.slug);
       const notifications = await prisma.notification.findMany({
@@ -46,28 +43,20 @@ export const notificationRouter = router({
       }));
     }),
   markAsRead: protectedProcedure
-    .input(z.object({
-      slug: z.string(),
-      id: z.string(),
-    }))
+    .input(markAsReadSchema)
     .mutation(async ({ input, ctx }) => {
       await findMemberAndThrowIfNotExists(ctx.session.user.id, input.slug);
       await prisma.notification.update({ where: { id: input.id }, data: { read: true } });
     }),
   markAllAsRead: protectedProcedure
-    .input(z.object({
-      slug: z.string(),
-    }))
+    .input(markAllAsReadSchema)
     .mutation(async ({ ctx, input }) => {
       const member = await findMemberAndThrowIfNotExists(ctx.session.user.id, input.slug);
       await prisma.notification
         .updateMany({ where: { destinationId: member.id }, data: { read: true } });
     }),
   delete: protectedProcedure
-    .input(z.object({
-      slug: z.string(),
-      id: z.string(),
-    }))
+    .input(deleteSchema)
     .mutation(async ({ input, ctx }) => {
       await findMemberAndThrowIfNotExists(ctx.session.user.id, input.slug);
       await prisma.notification.delete({ where: { id: input.id } });

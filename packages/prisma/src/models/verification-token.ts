@@ -1,5 +1,6 @@
-import { VerificationType } from "@packages/prisma";
 import { z } from "zod";
+
+import { VerificationType } from "@prisma/client";
 
 import { preUserSchema } from "./user";
 
