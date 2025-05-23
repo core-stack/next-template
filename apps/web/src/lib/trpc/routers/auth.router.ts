@@ -6,7 +6,7 @@ import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
 import { TRPCError } from "@trpc/server";
 import moment from "moment";
 import { cookies } from "next/headers";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { createAccountSchema, loginSchema } from "../schema";
 import { publicProcedure, router } from "../trpc";

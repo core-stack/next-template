@@ -1,5 +1,5 @@
 import { preInviteSchema, preWorkspaceSchema, WorkspaceRole } from "@packages/prisma";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const inviteWithWorkspaceSchema = preInviteSchema.extend({
   workspace: preWorkspaceSchema
@@ -15,12 +15,12 @@ export const inviteMemberSchema = z.object({
 })
 
 export const deleteInviteSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   slug: z.string().trim()
 })
 
 export const getInviteSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 })
 
 export const getInviteByWorkspaceSchema = z.object({

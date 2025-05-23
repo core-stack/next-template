@@ -1,13 +1,13 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { SubscriptionStatus } from "@prisma/client";
 
 import { preWorkspaceSchema } from "./workspace";
 
 export const preSubscriptionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   plan: z.string(),
-  workspaceId: z.string().uuid(),
+  workspaceId: z.uuid(),
   stripeSubscriptionId: z.string().nullable(),
   stripeCustomerId: z.string().nullable(),
   stripeProductId: z.string().nullable(),

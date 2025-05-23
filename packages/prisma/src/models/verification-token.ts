@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { VerificationType } from "@prisma/client";
 
@@ -6,9 +6,9 @@ import { preUserSchema } from "./user";
 
 export const preVerificationTokenSchema = z.object({
   type: z.nativeEnum(VerificationType),
-  token: z.string().uuid(),
+  token: z.uuid(),
   expires: z.date(),
-  userId: z.string().uuid(),
+  userId: z.uuid(),
 });
 export type PreVerificationTokenSchema = z.infer<typeof preVerificationTokenSchema>;
 

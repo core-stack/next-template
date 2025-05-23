@@ -1,5 +1,5 @@
 import { preWorkspaceSchema } from "@packages/prisma";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const workspaceWithMemberCountSchema = preWorkspaceSchema.extend({
   memberCount: z.number()

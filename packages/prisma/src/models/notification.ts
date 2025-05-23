@@ -1,10 +1,10 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { preMemberSchema } from "./member";
 import { preWorkspaceSchema } from "./workspace";
 
 export const preNotificationSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 
   title: z.string(),
   description: z.string(),

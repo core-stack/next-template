@@ -39,10 +39,10 @@
   },
   "dependencies": {
     "bullmq": "^5.51.1",
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "^6.8.2",
     "ioredis": "^5.6.1",
     "@packages/env": "workspace:*",
-    "zod": "^3.24.3"
+    "zod": "^3.25.0"
   },
   "devDependencies": {
     "@packages/config-eslint": "workspace:*",
@@ -50,7 +50,7 @@
     "bunchee": "^6.4.0",
     "eslint": "^9.26.0",
     "@types/node": "^20.17.24",
-    "prisma": "^5.22.0",
+    "prisma": "^6.8.2",
     "typescript": "5.8.3"
   },
   "keywords": [],

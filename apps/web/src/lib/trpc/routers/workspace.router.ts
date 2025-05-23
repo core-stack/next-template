@@ -3,7 +3,7 @@ import { comparePassword } from "@/lib/authz";
 import { Permission } from "@packages/permission";
 import { preWorkspaceSchema, prisma } from "@packages/prisma";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import {
   createWorkspaceSchema, disableWorkspaceSchema, updateWorkspaceSchema, workspaceWithMemberCountSchema
@@ -38,7 +38,7 @@ export const workspaceRouter = router({
       return workspaces.map(w => ({ ...w, memberCount: w._count.members }));
     }),
   getById: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.uuid() }))
     .output(preWorkspaceSchema)
     .query(async ({ input, ctx }) => {
       const workspace = await prisma.workspace.findUnique({

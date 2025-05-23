@@ -1,5 +1,5 @@
 import { passwordSchema } from "@/validation/password";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const createAccountSchema = z.object({
   name: z.string().min(2),
