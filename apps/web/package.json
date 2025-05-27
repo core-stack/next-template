@@ -68,7 +68,7 @@
     "superjson": "^2.2.2",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.25.0"
+    "zod": "^3.25.23"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

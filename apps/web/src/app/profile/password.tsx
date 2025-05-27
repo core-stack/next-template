@@ -1,20 +1,15 @@
 "use client"
-import { Loader2, Lock } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-
-import { Button } from '@/components/ui/button';
-import {
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
-} from '@/components/ui/card';
-import {
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Loading } from '@/components/ui/loading';
-import { useToast } from '@/hooks/use-toast';
-import { trpc } from '@/lib/trpc/client';
-import { updatePasswordSchema, UpdatePasswordSchema } from '@/lib/trpc/schema/user';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Loading } from "@/components/ui/loading";
+import { useToast } from "@/hooks/use-toast";
+import { trpc } from "@/lib/trpc/client";
+import { UpdatePasswordSchema, updatePasswordSchema } from "@/lib/trpc/schema/user.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Lock } from "lucide-react";
+import { useForm } from "react-hook-form";
 
 export const UpdatePassword = () => {
   const { data: hasPassword, isLoading: isFetching } = trpc.user.hasPassword.useQuery(undefined, { staleTime: Infinity });
@@ -31,7 +26,7 @@ export const UpdatePassword = () => {
   const isLoading = form.formState.isSubmitting;
   const { mutate } = trpc.user.updatePassword.useMutation();
   const onSubmit = form.handleSubmit(data => {
-    mutate(data, { 
+    mutate(data, {
       onSuccess: () => {
         form.reset()
         toast({ title: "Senha atualizada com sucesso" })
@@ -132,7 +127,7 @@ export const UpdatePassword = () => {
                 {
                   isDirty &&
                   <Button variant="destructive-outline" type="reset" disabled={isLoading} onClick={reset}>
-                    Cancelar                
+                    Cancelar
                   </Button>
                 }
                 <Button type="submit"disabled={isLoading || !isDirty}>

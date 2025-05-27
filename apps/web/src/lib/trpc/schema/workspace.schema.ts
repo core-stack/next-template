@@ -1,5 +1,5 @@
 import { preWorkspaceSchema } from "@packages/prisma";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export const workspaceWithMemberCountSchema = preWorkspaceSchema.extend({
   memberCount: z.number()
@@ -14,7 +14,7 @@ export const createWorkspaceSchema = preWorkspaceSchema
     updatedAt: true,
     createdAt: true,
   });
-
+export type CreateWorkspaceSchema = z.infer<typeof createWorkspaceSchema>;
 
 export const updateWorkspaceSchema = preWorkspaceSchema
   .omit({
@@ -28,3 +28,5 @@ export const disableWorkspaceSchema = z.object({
   password: z.string().trim(),
   confirmText: z.string().trim().min(1)
 });
+
+export type DisableWorkspaceSchema = z.infer<typeof disableWorkspaceSchema>

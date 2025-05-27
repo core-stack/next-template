@@ -1,6 +1,6 @@
 import { NotificationsProvider } from "@/components/notifications";
 import { PermissionProvider } from "@/context/permission";
-import { WorkspaceSchema } from "@/lib/trpc/schema/workspace";
+import { RouterOutput } from "@/lib/trpc/app.router";
 import { caller } from "@/lib/trpc/server";
 import { redirect } from "next/navigation";
 
@@ -16,7 +16,7 @@ interface WorkspaceLayoutProps {
 
 export default async function WorkspaceLayout({ children, params }: WorkspaceLayoutProps) {
   const { slug } = await params;
-  let workspace: WorkspaceSchema | undefined;
+  let workspace: RouterOutput["workspace"]["getBySlug"] | undefined;
   try {
     workspace = await caller.workspace.getBySlug({ slug, ignoreDisabled: true });
   } catch (error) {

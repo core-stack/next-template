@@ -1,13 +1,12 @@
 import type { Metadata } from "next"
-import { redirect } from 'next/navigation';
+import { WorkspacesHeader } from "@/components/workspace/workspace-header";
+import { auth } from "@/lib/auth";
+import { caller } from "@/lib/trpc/server";
+import { PreWorkspaceSchema } from "@packages/prisma";
+import { TRPCError } from "@trpc/server";
+import { redirect } from "next/navigation";
 
-import { WorkspacesHeader } from '@/components/workspace/workspace-header';
-import { auth } from '@/lib/auth';
-import { WorkspaceSchema } from '@/lib/trpc/schema/workspace';
-import { caller } from '@/lib/trpc/server';
-import { TRPCError } from '@trpc/server';
-
-import { ReactivateWorkspaceForm } from './reactivate-form';
+import { ReactivateWorkspaceForm } from "./reactivate-form";
 
 interface ReactivateWorkspacePageProps {
   params: Promise<{ slug: string }>
@@ -24,7 +23,7 @@ export async function generateMetadata({ params }: ReactivateWorkspacePageProps)
 
 export default async function ReactivateWorkspacePage({ params }: ReactivateWorkspacePageProps) {
   const { slug } = await params
-  let workspace: WorkspaceSchema | undefined;
+  let workspace: PreWorkspaceSchema | undefined;
   try {
     workspace = await caller.workspace.getBySlug({ slug, ignoreDisabled: true })
   } catch (error) {

@@ -1,8 +1,3 @@
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { ChromePicker } from "react-color";
-import { useForm } from "react-hook-form";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
@@ -12,16 +7,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc/client";
-import {
-  CreateWorkspaceSchema, createWorkspaceSchema, WorkspaceSchema
-} from "@/lib/trpc/schema/workspace";
+import { createWorkspaceSchema, CreateWorkspaceSchema } from "@/lib/trpc/schema";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import { ScrollArea } from "../ui/scroll-area";
+import { WorkspaceSchema } from "@packages/prisma";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChromePicker } from "react-color";
+import { useForm } from "react-hook-form";
 
 const generateSlug = (name: string) => {
   return name
@@ -31,27 +28,26 @@ const generateSlug = (name: string) => {
     .replace(/-+/g, "-")
 }
 
-interface WorkspaceDialogProps {
+export interface WorkspaceDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   workspace?: WorkspaceSchema
 }
 
-export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDialogProps) {
+export function CreateOrUpdateWorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDialogProps) {
   const [showColorPicker, setShowColorPicker] = useState(false)
+  const [backgroundType, setBackgroundType] = useState();
   const isEditing = !!workspace
+  const defaultValues = {
+    name: workspace?.name || "",
+    slug: workspace?.slug || "",
+    description: workspace?.description || "",
+    // backgroundType: workspace?.backgroundImage.includes("#") || "gradient",
+    // backgroundColor: workspace?.backgroundColor || "#6366f1",
+    // backgroundGradient: workspace?.backgroundGradient || "linear-gradient(to right, #6366f1, #a855f7)",
+  }
 
-  const form = useForm<CreateWorkspaceSchema>({
-    resolver: zodResolver(createWorkspaceSchema),
-    defaultValues: {
-      name: workspace?.name || "",
-      slug: workspace?.slug || "",
-      description: workspace?.description || "",
-      backgroundType: workspace?.backgroundType || "gradient",
-      backgroundColor: workspace?.backgroundColor || "#6366f1",
-      backgroundGradient: workspace?.backgroundGradient || "linear-gradient(to right, #6366f1, #a855f7)",
-    }
-  });
+  const form = useForm<CreateWorkspaceSchema>({ resolver: zodResolver(createWorkspaceSchema), defaultValues });
 
   const isLoading = form.formState.isSubmitting;
   const utils = trpc.useUtils();
@@ -73,14 +69,7 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
   }, [watchName, isEditing])
 
   useEffect(() => {
-    form.reset({
-      name: workspace?.name || "",
-      slug: workspace?.slug || "",
-      description: workspace?.description || "",
-      backgroundType: workspace?.backgroundType || "gradient",
-      backgroundColor: workspace?.backgroundColor || "#6366f1",
-      backgroundGradient: workspace?.backgroundGradient || "linear-gradient(to right, #6366f1, #a855f7)",
-    });
+    form.reset(defaultValues);
   }, [workspace, form, isEditing]);
 
   return (
@@ -152,7 +141,6 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
                 />
 
                 <FormField
-                  control={form.control}
                   name="backgroundType"
                   render={({ field }) => (
                     <FormItem>
@@ -167,7 +155,7 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
                           <TabsContent value="color" className="space-y-4">
                             <FormField
                               control={form.control}
-                              name="backgroundColor"
+                              name="backgroundImage"
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>
@@ -202,7 +190,7 @@ export function WorkspaceDialog({ open, onOpenChange, workspace }: WorkspaceDial
                           <TabsContent value="gradient" className="space-y-4">
                             <FormField
                               control={form.control}
-                              name="backgroundGradient"
+                              name="backgroundImage"
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>

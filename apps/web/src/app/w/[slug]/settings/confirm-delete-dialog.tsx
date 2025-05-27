@@ -1,21 +1,20 @@
 "use client"
 
-import { AlertTriangle, Loader2 } from 'lucide-react';
-import { useParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { trpc } from '@/lib/trpc/client';
-import { DisableWorkspaceSchema, disableWorkspaceSchema } from '@/lib/trpc/schema/workspace';
-import { zodResolver } from '@hookform/resolvers/zod';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { trpc } from "@/lib/trpc/client";
+import { DisableWorkspaceSchema, disableWorkspaceSchema } from "@/lib/trpc/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertTriangle, Loader2 } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useForm } from "react-hook-form";
 
 type Props = {
   isDeleteDialogOpen: boolean;
@@ -116,5 +115,5 @@ export const ConfirmDeleteDialog = ({ isDeleteDialogOpen, setIsDeleteDialogOpen,
         </Form>
       </DialogContent>
     </Dialog>
-  ) 
+  )
 }

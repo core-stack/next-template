@@ -1,10 +1,5 @@
 "use client"
 
-import { CreditCard, LayoutDashboard, Plus, Settings, Users, Zap } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue
@@ -12,14 +7,18 @@ import {
 import { WorkspaceDialog } from "@/components/workspace/create-or-update-dialog";
 import { MemberInfo } from "@/components/workspace/member-info";
 import { usePermission } from "@/context/permission";
+import { RouterOutput } from "@/lib/trpc/app.router";
 import { trpc } from "@/lib/trpc/client";
-import { WorkspaceSchema } from "@/lib/trpc/schema/workspace";
 import { cn } from "@/lib/utils";
 import { Permission } from "@packages/permission";
+import { CreditCard, LayoutDashboard, Plus, Settings, Users, Zap } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface WorkspaceSidebarProps {
   slug: string
-  currentWokspace: WorkspaceSchema
+  currentWokspace: RouterOutput["workspace"]["getBySlug"]
 }
 
 export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProps) {

@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "dotenv": "^16.5.0",
-    "zod": "^3.25.0",
+    "zod": "^3.25.23",
     "@packages/prisma": "workspace:*"
   },
   "devDependencies": {

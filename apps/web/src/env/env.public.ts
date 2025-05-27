@@ -1,5 +1,5 @@
 import { validateEnv } from "@packages/env";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const publicEnvSchema = z.object({
   NEXT_PUBLIC_FIREBASE_API_KEY: z.string(),

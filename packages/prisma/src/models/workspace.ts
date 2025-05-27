@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import { z } from "zod";
 
 import { preInviteSchema } from "./invite";
 import { preMemberSchema } from "./member";
@@ -6,7 +6,7 @@ import { preNotificationSchema } from "./notification";
 import { preSubscriptionSchema } from "./subscription";
 
 export const preWorkspaceSchema = z.object({
-  id: z.uuid(),
+  id: z.string().uuid(),
   name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres" }),
   slug: z
     .string()

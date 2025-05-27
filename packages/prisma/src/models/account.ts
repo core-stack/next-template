@@ -1,12 +1,12 @@
-import { z } from "zod/v4";
+import { z } from "zod";
 
 import { preUserSchema } from "./user";
 
 export const preAccountSchema = z.object({
-  id: z.uuid(),
+  id: z.string().uuid(),
   provider: z.string(),
   providerAccountId: z.string(),
-  userId: z.uuid(),
+  userId: z.string().uuid(),
 });
 export type PreAccountSchema = z.infer<typeof accountSchema>;
 

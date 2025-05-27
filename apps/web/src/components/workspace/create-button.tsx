@@ -1,22 +1,19 @@
 "use client"
 
-import { Building } from 'lucide-react';
-import { useState } from 'react';
-
-import { Button } from '@/components/ui/button';
-
-import { WorkspaceDialog } from './create-or-update-dialog';
+import { Button } from "@/components/ui/button";
+import { DialogType } from "@/dialogs";
+import { useDialog } from "@/hooks/use-dialog";
+import { Building } from "lucide-react";
 
 export function CreateWorkspaceButton() {
-  const [open, setOpen] = useState(false)
+  const { openDialog } = useDialog();
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      <Button onClick={() => openDialog({ type: DialogType.CreateWorkspace })}>
         <Building className="mr-2 h-4 w-4" />
         Novo Workspace
       </Button>
-      <WorkspaceDialog open={open} onOpenChange={setOpen} />
     </>
   )
 }

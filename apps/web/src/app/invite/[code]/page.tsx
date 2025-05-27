@@ -1,10 +1,9 @@
 
-import { redirect } from 'next/navigation';
+import { RouterOutput } from "@/lib/trpc/app.router";
+import { caller } from "@/lib/trpc/server";
+import { redirect } from "next/navigation";
 
-import { InviteWithWorkspaceSchema } from '@/lib/trpc/schema/invite';
-import { caller } from '@/lib/trpc/server';
-
-import { InviteAcceptance } from './invite-acceptance';
+import { InviteAcceptance } from "./invite-acceptance";
 
 type Props = {
   params: Promise<{
@@ -13,7 +12,7 @@ type Props = {
 }
 export default async function InvitePage({ params }: Props) {
   const { code } = await params;
-  let invite: InviteWithWorkspaceSchema | null = null;
+  let invite: RouterOutput["invite"]["getByIdWithWorkspace"] | null = null;
   try {
     invite = await caller.invite.getByIdWithWorkspace({ id: code });
     if (!invite) redirect("/w");

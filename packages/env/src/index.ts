@@ -2,7 +2,7 @@ import { randomBytes } from "crypto";
 import dotenv from "dotenv";
 import dotenvExpand from "dotenv-expand";
 import path from "path";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 // Try to load .env from multiple possible locations
 const possibleEnvPaths = [

@@ -1,20 +1,17 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
+import { RouterOutput } from "@/lib/trpc/app.router";
+import { trpc } from "@/lib/trpc/client";
 import { Building, Calendar, Check, Users, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
-} from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
-import { trpc } from "@/lib/trpc/client";
-import { InviteWithWorkspaceSchema } from "@/lib/trpc/schema/invite";
-
 type InviteAcceptanceProps = {
-  invite: InviteWithWorkspaceSchema;
+  invite: RouterOutput["invite"]["getByIdWithWorkspace"];
 }
 
 export function InviteAcceptance({ invite }: InviteAcceptanceProps) {

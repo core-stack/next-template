@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc/client";
-import { InviteMemberSchema, inviteMemberSchema } from "@/lib/trpc/schema/invite";
+import { inviteMemberSchema, InviteMemberSchema } from "@/lib/trpc/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, MinusCircle, PlusCircle } from "lucide-react";
 import { useParams } from "next/navigation";

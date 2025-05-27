@@ -1,27 +1,23 @@
 "use client"
 
-import { User } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-
-import { Button } from '@/components/ui/button';
-import {
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
-} from '@/components/ui/card';
-import {
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { ProfileImageUploader } from '@/components/user/profile-image-uploader';
-import { toast } from '@/hooks/use-toast';
-import { trpc } from '@/lib/trpc/client';
-import { SelfUserSchema, updateProfileSchema, UpdateUserNameSchema } from '@/lib/trpc/schema/user';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ProfileImageUploader } from "@/components/user/profile-image-uploader";
+import { toast } from "@/hooks/use-toast";
+import { RouterOutput } from "@/lib/trpc/app.router";
+import { trpc } from "@/lib/trpc/client";
+import { UpdateProfileSchema, updateProfileSchema } from "@/lib/trpc/schema/user.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { User } from "lucide-react";
+import { useForm } from "react-hook-form";
 
 type Props = {
-  user: SelfUserSchema;
+  user: RouterOutput["user"]["self"];
 }
 export const General = ({ user }: Props) => {
-  const form = useForm<UpdateUserNameSchema>({
+  const form = useForm<UpdateProfileSchema>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
       name: user.name ?? "",
@@ -32,7 +28,7 @@ export const General = ({ user }: Props) => {
   const { mutate } = trpc.user.updateName.useMutation();
   const onSubmit = form.handleSubmit(data => {
     mutate(
-      data, 
+      data,
       {
         onSuccess: ({ name }) => {
           form.reset({ name });
@@ -44,7 +40,7 @@ export const General = ({ user }: Props) => {
   });
 
   const reset = () => form.reset({ name: user.name ?? "" });
-  
+
   return (
     <Card>
       <CardHeader>
@@ -78,7 +74,7 @@ export const General = ({ user }: Props) => {
               {
                 isDirty &&
                 <Button variant="destructive-outline" type="reset" disabled={isLoading} onClick={reset}>
-                  Cancelar                
+                  Cancelar
                 </Button>
               }
               <Button type="submit" disabled={isLoading || !isDirty}>

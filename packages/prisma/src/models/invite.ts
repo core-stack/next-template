@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import { z } from "zod";
 
 import { WorkspaceRole } from "@prisma/client";
 
@@ -6,11 +6,11 @@ import { preUserSchema } from "./user";
 import { preWorkspaceSchema } from "./workspace";
 
 export const preInviteSchema = z.object({
-  id: z.uuid(),
-  workspaceId: z.uuid(),
+  id: z.string().uuid(),
+  workspaceId: z.string().uuid(),
   email: z.string().email(),
   role: z.nativeEnum(WorkspaceRole),
-  userId: z.uuid().nullable(),
+  userId: z.string().uuid().nullable(),
   expiresAt: z.date(),
   createdAt: z.date(),
   updatedAt: z.date().nullable(),
