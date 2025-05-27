@@ -1,7 +1,6 @@
-import { ThemeProvider } from '@/components/theme-provider';
-import { Toaster } from '@/components/ui/toaster';
-import { TRPCProvider } from '@/lib/trpc/provider';
-import { GoogleAnalytics } from '@next/third-parties/google';
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
+import { TRPCProvider } from "@/lib/trpc/provider";
 
 export function Providers({ children }: { children: React.ReactNode}) {
   return (
@@ -12,7 +11,6 @@ export function Providers({ children }: { children: React.ReactNode}) {
         </ThemeProvider>
       </TRPCProvider>
       <Toaster />
-      <GoogleAnalytics gaId="G-R1F366FVFW" />
     </>
   )
 }
