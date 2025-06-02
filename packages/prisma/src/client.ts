@@ -11,7 +11,6 @@ export type {
 } from "@prisma/client"
 
 export {
-  WorkspaceRole,
-  UserRole,
+  RoleScope,
   SubscriptionStatus,
 } from '@prisma/client';

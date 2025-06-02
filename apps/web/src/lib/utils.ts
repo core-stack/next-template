@@ -8,3 +8,4 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const hasAccess = (session: Session, slug: string) => session.workspaces.some((w) => w.slug === slug);
+export const getWorkspace = (session: Session, slug: string) => session.workspaces.find((w) => w.slug === slug);

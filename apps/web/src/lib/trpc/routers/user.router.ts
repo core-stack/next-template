@@ -15,7 +15,14 @@ export const userRouter = router({
   self: protectedProcedure
     .query(async ({ ctx }) => {
       const user = await prisma.user.findUnique({
-        include: { members: { include: { workspace: { select: { id: true, slug: true } }} } },
+        include: {
+          members: {
+            include: {
+              workspace: { select: { id: true, slug: true } },
+              role: true
+            }
+          }
+        },
         where: { id: ctx.session.user.id },
       });
       if (!!user?.password) user.password = null;

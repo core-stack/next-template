@@ -1,94 +1,68 @@
+"use client"
+
 import { Button } from "@/components/ui/button";
-import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DialogFooter } from "@/components/ui/dialog";
 import {
   Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { useDialog } from "@/hooks/use-dialog";
 import { trpc } from "@/lib/trpc/client";
-import { createWorkspaceSchema, CreateWorkspaceSchema } from "@/lib/trpc/schema";
+import { updateWorkspaceSchema, UpdateWorkspaceSchema } from "@/lib/trpc/schema";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { WorkspaceSchema } from "@packages/prisma";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { PreWorkspaceSchema } from "@packages/prisma";
+import { useState } from "react";
 import { ChromePicker } from "react-color";
 import { useForm } from "react-hook-form";
 
-import { DialogType } from "./";
-
-const generateSlug = (name: string) => {
-  return name
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-}
-
-export interface WorkspaceDialogProps {
-  workspace?: WorkspaceSchema
-}
 const splitBackgroundProps = (image: string) => {
   return {
     type: image.includes("#") ? "color" : "gradient",
     value: image
   }
 }
-export function CreateOrUpdateWorkspaceDialog({ workspace }: WorkspaceDialogProps) {
-  const { closeDialog } = useDialog();
+interface WorkspaceSettingsFormProps {
+  workspace: PreWorkspaceSchema
+}
+
+export function WorkspaceSettingsForm({ workspace }: WorkspaceSettingsFormProps) {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [backgroundType, setBackgroundType] = useState(
     splitBackgroundProps(workspace?.backgroundImage || "").type
   );
   const isEditing = !!workspace
-  const defaultValues: Partial<CreateWorkspaceSchema> = {
+  const defaultValues: Partial<UpdateWorkspaceSchema> = {
     name: workspace?.name || "",
     slug: workspace?.slug || "",
     description: workspace?.description || "",
     backgroundImage: workspace?.backgroundImage || "",
   }
 
-  const form = useForm<CreateWorkspaceSchema>({ resolver: zodResolver(createWorkspaceSchema), defaultValues });
+  const form = useForm<UpdateWorkspaceSchema>({ resolver: zodResolver(updateWorkspaceSchema), defaultValues });
 
   const isLoading = form.formState.isSubmitting;
   const utils = trpc.useUtils();
-  const { mutate } = isEditing ? trpc.workspace.update.useMutation() : trpc.workspace.create.useMutation();
+  const { mutate } = trpc.workspace.update.useMutation();
   const onSubmit = form.handleSubmit(async (data) => {
-    mutate({ ...data, id: workspace?.id || "" }, {
-      onSuccess: () => {
-        utils.workspace.get.invalidate();
-        utils.user.self.invalidate();
-        closeDialog(workspace ? DialogType.UPDATE_WORKSPACE : DialogType.CREATE_WORKSPACE);
+    mutate(data, {
+      onSuccess: async (updated) => {
+        form.reset(updated);
+        await utils.workspace.get.invalidate();
       }
     });
   });
 
-  const watchName = form.watch("name")
-
-  useEffect(() => {
-    if (watchName && !isEditing) form.setValue("slug", generateSlug(watchName))
-  }, [watchName, isEditing])
-
-  useEffect(() => {
-    form.reset(defaultValues);
-  }, [workspace, form, isEditing]);
-
   return (
-    <ScrollArea className='max-h-[90vh] pr-3'>
-      <div className='p-1'>
-        <DialogHeader>
-          <DialogTitle>{isEditing ? "Editar workspace" : "Criar workspace"}</DialogTitle>
-          <DialogDescription>
-            {isEditing
-              ? "Edite as informações do ser workspace"
-              : "Preencha as informações para criar um novo workspace"}
-          </DialogDescription>
-        </DialogHeader>
-
+    <Card>
+      <CardHeader>
+        <CardTitle>Informações da Organização</CardTitle>
+        <CardDescription>Atualize as informações e aparência da sua organização.</CardDescription>
+      </CardHeader>
+      <CardContent>
         <Form {...form}>
           <form onSubmit={onSubmit} className="space-y-6">
             <FormField
@@ -256,18 +230,17 @@ export function CreateOrUpdateWorkspaceDialog({ workspace }: WorkspaceDialogProp
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => closeDialog(workspace ? DialogType.UPDATE_WORKSPACE : DialogType.CREATE_WORKSPACE)}
+                onClick={() => form.reset()}
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isEditing ? "Salvar alterações" : "Criar"}
+              <Button type="submit" disabled={isLoading} isLoading={isLoading}>
+                Salvar alterações
               </Button>
             </DialogFooter>
           </form>
         </Form>
-      </div>
-    </ScrollArea>
+      </CardContent>
+    </Card>
   )
 }

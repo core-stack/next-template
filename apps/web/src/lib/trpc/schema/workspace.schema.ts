@@ -23,6 +23,8 @@ export const updateWorkspaceSchema = preWorkspaceSchema
     createdAt: true,
   })
 
+export type UpdateWorkspaceSchema = z.infer<typeof updateWorkspaceSchema>;
+
 export const disableWorkspaceSchema = z.object({
   slug: z.string().trim().min(1),
   password: z.string().trim(),

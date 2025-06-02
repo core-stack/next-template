@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { comparePassword } from "@/lib/authz";
-import { Permission } from "@packages/permission";
+import { Permission, roles } from "@packages/permission";
 import { preWorkspaceSchema, prisma } from "@packages/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -21,22 +21,15 @@ export const workspaceRouter = router({
     .query(async ({ ctx }) => {
       const workspaces = await prisma.workspace.findMany({
         where: {
-          members: {
-            some: {
-              userId: ctx.session.user.id
-            }
-          }
+          members: { some: { userId: ctx.session.user.id } }
         },
         include: {
-          _count: {
-            select: {
-              members: true
-            }
-          }
+          _count: { select: { members: true } }
         }
       });
       return workspaces.map(w => ({ ...w, memberCount: w._count.members }));
     }),
+
   getById: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .output(preWorkspaceSchema)
@@ -44,18 +37,15 @@ export const workspaceRouter = router({
       const workspace = await prisma.workspace.findUnique({
         where: {
           id: input.id, disabledAt: null,
-          members: {
-            some: {
-              userId: ctx.session.user.id
-            }
-          }
+          members: { some: { userId: ctx.session.user.id } }
         }
       });
-      if (!workspace) {
+      if (!workspace)
         throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
-      }
+
       return workspace;
     }),
+
   getBySlug: protectedProcedure
     .input(z.object({ slug: z.string(), ignoreDisabled: z.boolean().optional() }))
     .output(preWorkspaceSchema)
@@ -64,73 +54,77 @@ export const workspaceRouter = router({
         where: {
           slug: input.slug,
           disabledAt: input.ignoreDisabled ? undefined : null,
-          members: {
-            some: {
-              userId: ctx.session.user.id
-            }
-          }
+          members: { some: { userId: ctx.session.user.id } }
         },
       });
-      if (!workspace) {
+      if (!workspace)
         throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
-      }
+
       return workspace;
     }),
+
   getWithSubscription: protectedProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ input, ctx }) => {
       const workspace = await prisma.workspace.findUnique({
         where: {
           slug: input.slug,
-          members: {
-            some: {
-              userId: ctx.session.user.id
-            }
-          }
+          members: { some: { userId: ctx.session.user.id } }
         },
         include: {
           subscription: true,
-          members: {
-            where: {
-              userId: ctx.session.user.id
-            },
-          },
-          _count: {
-            select: {
-              members: true
-            }
-          }
+          members: { where: { userId: ctx.session.user.id } },
+          _count: { select: { members: true } }
         }
       });
-      if (!workspace) {
+      if (!workspace)
         throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
-      }
+
       return workspace;
     }),
+
   create: protectedProcedure
     .input(createWorkspaceSchema)
     .mutation(async ({ ctx, input }) => {
       const { session } = ctx;
-      if (await slugInUse(input.slug)) {
+      if (await slugInUse(input.slug))
         throw new TRPCError({ code: "CONFLICT", message: "Slug já em uso" });
-      }
-      await prisma.workspace.create({
-        data: {
-          ...input,
-          members: {
-            create: {
-              email: session.user.email,
-              owner: true,
-              name: session.user.name,
-              image: session.user.image,
-              role: "WORKSPACE_ADMIN",
-              user: { connect: { id: session.user.id } }
-            }
+
+      await prisma.$transaction(async (tx) => {
+        const workspace = await tx.workspace.create({ data: input });
+        await tx.role.createMany({
+          data: roles.workspace.map(role => ({
+            name: role.name,
+            permissions: role.permissions,
+            scope: "WORKSPACE",
+            workspaceId: workspace.id,
+            workspaceKey: workspace.id,
+          }))
+        });
+        const member = await tx.member.create({
+          data: {
+            email: session.user.email,
+            owner: true,
+            name: session.user.name,
+            image: session.user.image,
+            role: {
+              connect: {
+                workspaceKey_name_scope: {
+                  workspaceKey: workspace.id,
+                  name: roles.workspaceAdmin.name,
+                  scope: "WORKSPACE"
+                }
+              }
+            },
+            workspace: { connect: { id: workspace.id } },
+            user: { connect: { id: session.user.id } }
           }
-        }
-      });
+        });
+      })
+
       await auth.reloadSession(session.id);
     }),
+
   existsBySlug: protectedProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => slugInUse(input.slug)),
@@ -149,6 +143,7 @@ export const workspaceRouter = router({
       await auth.reloadSession(session.id);
       return res;
     }),
+
   disable: rbacProcedure([Permission.DELETE_WORKSPACE])
     .input(disableWorkspaceSchema)
     .mutation(async ({ input, ctx }) => {
@@ -169,6 +164,7 @@ export const workspaceRouter = router({
       if (!workspace) throw new TRPCError({ code: "NOT_FOUND", message: "Workspace não encontrado" });
       await prisma.workspace.update({ where: { id: workspace.id }, data: { disabledAt: new Date() } });
     }),
+
   enable: rbacProcedure([Permission.DELETE_WORKSPACE])
     .input(disableWorkspaceSchema)
     .mutation(async ({ input, ctx }) => {

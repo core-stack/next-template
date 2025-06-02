@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { WorkspacesHeader } from "@/components/workspace/workspace-header";
+import { WorkspacesHeader } from "@/components/workspace-header";
 import { auth } from "@/lib/auth";
 import { caller } from "@/lib/trpc/server";
 import { PreWorkspaceSchema } from "@packages/prisma";

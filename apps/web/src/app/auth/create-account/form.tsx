@@ -1,20 +1,16 @@
 "use client"
 
-import { Mail } from "lucide-react";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { FcGoogle } from "react-icons/fc";
-
 import { Button } from "@/components/ui/button";
-import {
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { trpc } from "@/lib/trpc/client";
-import { createAccountSchema, CreateAccountSchema } from "@/lib/trpc/schema/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Mail } from "lucide-react";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { FcGoogle } from "react-icons/fc";
 
 export function CreateAccountForm() {
   const { toast } = useToast();

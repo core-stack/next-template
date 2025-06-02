@@ -1,4 +1,4 @@
-import { WorkspacesHeader } from '@/components/workspace/workspace-header';
+import { WorkspacesHeader } from "@/components/workspace-header";
 
 import type { ReactNode } from "react"
 

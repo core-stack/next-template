@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { comparePassword, hashPassword } from "@/lib/authz";
 import { env } from "@packages/env";
+import { roles } from "@packages/permission";
 import { prisma } from "@packages/prisma";
 import { addInQueue, EmailTemplate, QueueName } from "@packages/queue";
 import { TRPCError } from "@trpc/server";
@@ -79,6 +80,15 @@ export const authRouter = router({
         const user = await tx.user.create({
           data: {
             email, name, password: hashedPassword,
+            role: {
+              connect: {
+                workspaceKey_name_scope: {
+                  name: roles.user.name,
+                  scope: "GLOBAL",
+                  workspaceKey: "global"
+                }
+              }
+            },
             verificationToken: {
               create: {
                 expires: moment().add(env.ACTIVE_ACCOUNT_TOKEN_EXPIRES, 'ms').toDate(),

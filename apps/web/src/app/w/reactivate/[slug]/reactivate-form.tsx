@@ -1,20 +1,17 @@
 "use client"
 
-import { AlertTriangle, ArrowLeft, Building, Loader2, RefreshCw } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import {
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
-} from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/hooks/use-toast';
-import { WorkspaceSchema } from '@/lib/trpc/schema/workspace';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { PreWorkspaceSchema } from "@packages/prisma";
+import { AlertTriangle, ArrowLeft, Building, Loader2, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface ReactivateWorkspaceFormProps {
-  workspace: WorkspaceSchema
+  workspace: PreWorkspaceSchema
 }
 
 export function ReactivateWorkspaceForm({ workspace }: ReactivateWorkspaceFormProps) {

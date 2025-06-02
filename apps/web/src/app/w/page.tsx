@@ -1,6 +1,8 @@
-import { CreateWorkspaceButton } from '@/components/workspace/create-button';
-import { WorkspaceList } from '@/components/workspace/list';
-import { WorkspacesHeader } from '@/components/workspace/workspace-header';
+
+import { WorkspacesHeader } from "@/components/workspace-header";
+
+import { CreateWorkspaceButton } from "./components/create-button";
+import { WorkspaceList } from "./components/list";
 
 export default async function Workspaces() {
   return (

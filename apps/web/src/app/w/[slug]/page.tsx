@@ -1,4 +1,4 @@
-import { WorkspaceOverview } from './workspace-overview';
+import { WorkspaceOverview } from "./components/workspace-overview";
 
 export default function WorkspacePage() {
   const workspace = {
@@ -13,7 +13,7 @@ export default function WorkspacePage() {
     memberCount: 12,
   }
 
-  return (  
+  return (
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">{workspace.name}</h1>

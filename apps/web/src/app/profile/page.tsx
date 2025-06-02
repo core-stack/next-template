@@ -1,10 +1,10 @@
 import type { Metadata } from "next"
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { caller } from '@/lib/trpc/server';
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { caller } from "@/lib/trpc/server";
 
-import { General } from './general';
-import { UpdatePassword } from './password';
+import { General } from "./components/general";
+import { UpdatePassword } from "./components/password";
 
 export const metadata: Metadata = {
   title: "Perfil",

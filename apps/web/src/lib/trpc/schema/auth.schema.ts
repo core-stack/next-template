@@ -6,9 +6,12 @@ export const createAccountSchema = z.object({
   email: z.string().email(),
   password: passwordSchema,
 });
+export type CreateAccountSchema = z.infer<typeof createAccountSchema>;
 
 export const loginSchema = z.object({
   email: z.string().email(),
   password: passwordSchema,
   redirect: z.string().optional(),
 });
+
+export type LoginSchema = z.infer<typeof loginSchema>;

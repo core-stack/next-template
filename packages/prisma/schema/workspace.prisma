@@ -1,9 +1,3 @@
-enum WorkspaceRole {
-  // workspace
-  WORKSPACE_ADMIN
-  WORKSPACE_MEMBER
-}
-
 model Member {
   id String @id @default(uuid())
 
@@ -21,8 +15,12 @@ model Member {
 
   notifications        Notification[] @relation("destination")
   createdNotifications Notification[] @relation("createdBy")
+  invites              Invite[]
 
-  role WorkspaceRole @default(WORKSPACE_MEMBER)
+  roleId String @map("role_id")
+  role Role @relation(fields: [roleId], references: [id], name: "members")
+
+  creatorRole Role[] @relation(name: "creator")
 
   owner Boolean @default(false)
 
@@ -47,6 +45,7 @@ model Workspace {
   members       Member[]
   invites       Invite[]
   notifications Notification[]
+  roles         Role[]
 
   disabledAt DateTime?
 
@@ -63,10 +62,15 @@ model Invite {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   email String
-  role  WorkspaceRole @default(WORKSPACE_MEMBER)
+
+  roleId String @map("role_id")
+  role Role @relation(fields: [roleId], references: [id])
 
   userId String? @map("user_id")
   user   User?   @relation(fields: [userId], references: [id])
+
+  creatorId String @map("creator_id")
+  creator Member @relation(fields: [creatorId], references: [id])
 
   expiresAt DateTime
   createdAt DateTime @default(now())

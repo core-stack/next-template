@@ -21,13 +21,6 @@ model Account {
   @@map("accounts")
 }
 
-enum UserRole {
-  // global
-  ROOT
-  ADMIN
-  USER
-}
-
 model User {
   id            String    @id @default(uuid())
 
@@ -37,7 +30,9 @@ model User {
   emailVerified DateTime? @map("email_verified")
   image         String?
 
-  role          UserRole  @default(USER)
+  roleId        String @map("role_id")
+  role          Role   @relation(fields: [roleId], references: [id])
+
 
   createdAt     DateTime? @map("created_at")
   updatedAt     DateTime? @map("updated_at")

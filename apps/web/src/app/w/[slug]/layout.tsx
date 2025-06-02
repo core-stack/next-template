@@ -1,10 +1,10 @@
-import { NotificationsProvider } from "@/components/notifications";
+import { NotificationsProvider } from "@/context/notifications";
 import { PermissionProvider } from "@/context/permission";
 import { RouterOutput } from "@/lib/trpc/app.router";
 import { caller } from "@/lib/trpc/server";
 import { redirect } from "next/navigation";
 
-import { WorkspaceSidebar } from "./workspace-sidebar";
+import { WorkspaceSidebar } from "./components/workspace-sidebar";
 
 import type { ReactNode } from "react"
 interface WorkspaceLayoutProps {

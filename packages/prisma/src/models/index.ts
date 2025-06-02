@@ -6,3 +6,4 @@ export * from "./subscription";
 export * from "./user";
 export * from "./verification-token";
 export * from "./workspace";
+export * from "./role";

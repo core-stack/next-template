@@ -16,6 +16,7 @@ export type UpdateProfileSchema = z.infer<typeof updateProfileSchema>;
 export const getUpdateImagePresignedUrlSchema = z.object({
   fileName: z.string().min(1),
   contentType: z.string().min(1),
+  fileSize: z.number().max(5 * 1024 * 1024), // 5MB
 });
 
 export const confirmUploadSchema = z.object({

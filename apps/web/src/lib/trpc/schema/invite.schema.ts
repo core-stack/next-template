@@ -1,4 +1,4 @@
-import { preInviteSchema, preWorkspaceSchema, WorkspaceRole } from "@packages/prisma";
+import { preInviteSchema, preWorkspaceSchema } from "@packages/prisma";
 import { z } from "zod";
 
 export const inviteWithWorkspaceSchema = preInviteSchema.extend({
@@ -10,7 +10,7 @@ export const inviteMemberSchema = z.object({
   slug: z.string().trim().min(1),
   emails: z.array(z.object({
     email: z.string().email(),
-    role: z.nativeEnum(WorkspaceRole)
+    role: z.string().uuid(),
   }))
 });
 export type InviteMemberSchema = z.infer<typeof inviteMemberSchema>;
