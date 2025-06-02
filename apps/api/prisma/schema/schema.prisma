@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                 String  @id @default(uuid())
+
+  provider           String
+  providerAccountId  String  @map("provider_account_id")
+
+  userId             String  @map("user_id")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model User {
+  id            String    @id @default(uuid())
+
+  name          String?
+  email         String?   @unique
+  password      String?
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+
+  roleId        String @map("role_id")
+  role          Role   @relation(fields: [roleId], references: [id])
+
+
+  createdAt     DateTime? @map("created_at")
+  updatedAt     DateTime? @map("updated_at")
+
+  accounts      Account[]
+  invites       Invite[]
+  members       Member[]
+  verificationToken VerificationToken[]
+
+  @@map("users")
+}
+
+enum VerificationType {
+  ACTIVE_ACCOUNT
+}
+
+model VerificationToken {
+  type       VerificationType
+  token      String  @unique @default(uuid())
+  expires    DateTime
+
+  userId             String  @map("user_id")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("verification_tokens")
+}
