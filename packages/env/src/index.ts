@@ -32,6 +32,8 @@ if (!envLoaded) {
 }
 
 const envSchema = z.object({
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  API_PORT: z.coerce.number().default(4000),
   REDIS_URL: z.string().url(),
 
   SMTP_ENABLED: z.string().transform((val) => val === "true").default("false"),
@@ -44,9 +46,9 @@ const envSchema = z.object({
   SMTP_TEST_EMAIL: z.string().email().default("delivered@resend.dev"),
   SMTP_SECURE: z.string().transform((val) => val === "true").default("true"),
 
-  STRIPE_PUBLIC_KEY: z.string(),
-  STRIPE_SECRET_KEY: z.string(),
-  STRIPE_WEBHOOK_SECRET: z.string(),
+  // STRIPE_PUBLIC_KEY: z.string(),
+  // STRIPE_SECRET_KEY: z.string(),
+  // STRIPE_WEBHOOK_SECRET: z.string(),
 
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
@@ -74,9 +76,9 @@ const envSchema = z.object({
 
   ACTIVE_ACCOUNT_TOKEN_EXPIRES: z.coerce.number().default(60 * 60 * 24 * 1000), // 1 day
 
-  FIREBASE_PROJECT_ID: z.string(),
-  FIREBASE_PRIVATE_KEY: z.string(),
-  FIREBASE_CLIENT_EMAIL: z.string(),
+  // FIREBASE_PROJECT_ID: z.string(),
+  // FIREBASE_PRIVATE_KEY: z.string(),
+  // FIREBASE_CLIENT_EMAIL: z.string(),
 })
 type Env = z.infer<typeof envSchema>;
 

@@ -15,8 +15,8 @@ model Subscription {
 
   plan String @default("free")
 
-  workspaceId String    @unique @map("workspace_id")
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  tenantId String    @unique @map("tenant_id")
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   stripeSubscriptionId String? @unique @map("stripe_subscription_id")
   stripeCustomerId     String? @unique @map("stripe_customer_id")

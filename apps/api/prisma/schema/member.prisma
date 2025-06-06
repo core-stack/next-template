@@ -1,0 +1,33 @@
+model Member {
+  id String @id @default(uuid())
+
+  email String
+  image String?
+  name  String?
+
+  fcmToken String? @map("fcm_token")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  tenantId String    @map("tenant_id")
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  notifications        Notification[] @relation("destination")
+  createdNotifications Notification[] @relation("createdBy")
+  invites              Invite[]
+
+  roleId String @map("role_id")
+  role Role @relation(fields: [roleId], references: [id], name: "members")
+
+  creatorRole Role[] @relation(name: "creator")
+
+  owner Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, tenantId])
+  @@unique([email, tenantId])
+  @@map("members")
+}

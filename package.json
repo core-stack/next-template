@@ -9,11 +9,11 @@
     "test": "turbo run test",
     "check-types": "turbo run check-types",
     "lint": "turbo run lint",
-    "db:generate": "cd packages/prisma && pnpm run generate",
-    "db:migrate": "cd packages/prisma && pnpm run migrate",
-    "db:migrate:dev": "cd packages/prisma && pnpm run migrate:dev",
-    "db:push": "cd packages/prisma && pnpm run push",
-    "db:studio": "cd packages/prisma && pnpm run studio"
+    "db:generate": "cd apps/api && pnpm run db:generate",
+    "db:migrate": "cd apps/api && pnpm run db:migrate",
+    "db:migrate:dev": "cd apps/api && pnpm run db:migrate:dev",
+    "db:push": "cd apps/api && pnpm run db:push",
+    "db:studio": "cd apps/api && pnpm run db:studio"
   },
   "devDependencies": {
     "@swc/helpers": "^0.5.17",

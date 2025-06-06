@@ -1,0 +1,55 @@
+{
+  "name": "@packages/prisma",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/es/index.js",
+  "module": "./dist/es/index.js",
+  "types": "./dist/es/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/es/index.d.ts",
+        "default": "./dist/es/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "build": "bunchee",
+    "dev": "bunchee --watch",
+    "lint": "eslint src/",
+    "check-types": "tsc --noEmit",
+    "generate": "dotenv -e ../../.env -- prisma generate --schema=./schema",
+    "migrate": "dotenv -e ../../.env -- prisma migrate deploy --schema=./schema",
+    "migrate:dev": "dotenv -e ../../.env -- prisma migrate dev --schema=./schema",
+    "push": "dotenv -e ../../.env -- prisma db push --schema=./schema",
+    "studio": "dotenv -e ../../.env -- prisma studio --schema=./schema --browser none",
+    "prebuild": "pnpm run generate",
+    "predev": "pnpm run generate",
+    "format": "prisma format --schema=./schema"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.8.2",
+    "zod": "^3.25.23"
+  },
+  "devDependencies": {
+    "@packages/config-eslint": "workspace:*",
+    "@packages/config-typescript": "workspace:*",
+    "@types/node": "^20.17.24",
+    "bunchee": "^6.4.0",
+    "dotenv-cli": "^7.4.4",
+    "eslint": "^9.26.0",
+    "prisma": "^6.8.2",
+    "typescript": "5.8.3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

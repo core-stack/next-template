@@ -1,57 +1,62 @@
-import { prisma, roleSchema } from "@packages/prisma";
 import { z } from "zod";
 
-import global from "../../../config/default-global-roles.json";
-import workspace from "../../../config/default-workspace-roles.json";
+import global from "../../../config/global-roles.json";
+import tenant from "../../../config/tenant-roles.json";
 
-const roleWithDefaultsSchema = roleSchema.pick({ name: true, permissions: true, scope: true }).extend({
-  default: z.enum([ "admin", "user", "workspace-admin", "workspace-user" ]).optional(),
-});
-export type DefaultRoleSchema = z.infer<typeof roleWithDefaultsSchema>;
+import { Permission } from "./types";
 
-const defaultGlobalRoles = roleWithDefaultsSchema.array().parse(global);
-const defaultWorkspaceRoles = roleWithDefaultsSchema.array().parse(workspace);
+const permissionKeys = Object.keys(Permission).filter(k => isNaN(Number(k)));
 
-const defaultAdminRole = defaultGlobalRoles.find(role => role.default === "admin");
-const defaultUserRole = defaultGlobalRoles.find(role => role.default === "user");
-const defaultWorkspaceAdminRole = defaultWorkspaceRoles.find(role => role.default === "workspace-admin");
-const defaultWorkspaceUserRole = defaultWorkspaceRoles.find(role => role.default === "workspace-user");
+const stringToPermission = z.enum(permissionKeys as [keyof typeof Permission])
+  .transform(key => Permission[key]);
 
-export const roles = {
-  workspace: defaultWorkspaceRoles as DefaultRoleSchema[],
-  global: defaultGlobalRoles as DefaultRoleSchema[],
-  admin: defaultAdminRole as DefaultRoleSchema,
-  user: defaultUserRole as DefaultRoleSchema,
-  workspaceAdmin: defaultWorkspaceAdminRole as DefaultRoleSchema,
-  workspaceUser: defaultWorkspaceUserRole as DefaultRoleSchema
-}
+export const roleSchema = z.object({
+  key: z.string(),
+  name: z.string(),
+  permissions: z.array(stringToPermission),
+  scope: z.enum(["GLOBAL", "TENANT"]),
+  tenantId: z.string().uuid().nullable(),
+  creatorId: z.string().uuid().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date().nullable(),
+  default: z.enum([ "admin", "user", "tenant-admin", "tenant-user" ]).optional(),
+})
+export type RoleSchema = z.infer<typeof roleSchema>;
 
-export const syncGlobalRoles = async () => {
-  console.log("Syncing global roles...");
+const rolesSchema = z.array(roleSchema).superRefine((roles, ctx) => {
+  const seen = new Set<string>();
 
-  const roles = await prisma.role.findMany({ where: { scope: "GLOBAL" } });
-  if (roles.length === 0) {
-    console.log("Creating default global roles...");
-    await prisma.role.createMany({
-      data: defaultGlobalRoles.map(role => ({ ...role, scope: "GLOBAL" }))
-    });
-  } else {
-    console.log("Updating default global roles...");
-    for (const role of defaultGlobalRoles) {
-      const existingRole = roles.find(r => r.name === role.name);
-      if (!existingRole) {
-        await prisma.role.create({
-          data: { ...role, scope: "GLOBAL" }
-        });
-        console.log(`Created role ${role.name}`);
-      } else if (role.permissions.some(p => !existingRole.permissions.includes(p))) {
-        await prisma.role.update({
-          where: { id: existingRole.id },
-          data: { ...role, scope: "GLOBAL" }
-        });
-        console.log(`Updated role ${role.name}`);
-      }
+  for (const role of roles) {
+    const key = `${role.scope}-${role.key}`;
+    if (seen.has(key)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Duplicated key '${role.key}' in scope '${role.scope}'`,
+        path: [roles.indexOf(role), "key"]
+      });
     }
+    seen.add(key);
   }
-  console.log("Global roles synced");
-}
+});
+export type RolesSchema = z.infer<typeof rolesSchema>;
+
+const defaultGlobalRoles = rolesSchema.parse(global);
+const defaultTenantRoles = rolesSchema.parse(tenant);
+
+const defaultGlobalAdminRole = defaultGlobalRoles.find(role => role.default === "admin");
+const defaultGlobalUserRole = defaultGlobalRoles.find(role => role.default === "user");
+const defaultTenantAdminRole = defaultTenantRoles.find(role => role.default === "tenant-admin");
+const defaultTenantUserRole = defaultTenantRoles.find(role => role.default === "tenant-user");
+
+export const ROLES = Object.freeze({
+  global: {
+    default: defaultGlobalRoles as RolesSchema,
+    admin: defaultGlobalAdminRole as RoleSchema,
+    user: defaultGlobalUserRole as RoleSchema,
+  },
+  tenant: {
+    default: defaultTenantRoles as RolesSchema,
+    admin: defaultTenantAdminRole as RoleSchema,
+    user: defaultTenantUserRole as RoleSchema
+  }
+});
