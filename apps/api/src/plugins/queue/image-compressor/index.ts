@@ -6,7 +6,7 @@ import Stream from "stream";
 import { CompressImagePayload } from "./schema";
 
 const streamToBuffer = async (readableStream: Stream.Readable): Promise<Buffer> => {
-  const chunks: any[] = [];
+  const chunks: Uint8Array[] = [];
   for await (const chunk of readableStream) chunks.push(chunk);
   return Buffer.concat(chunks);
 }

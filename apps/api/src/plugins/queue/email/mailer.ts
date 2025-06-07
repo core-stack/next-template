@@ -28,9 +28,9 @@ export const nodemailerTransporter = nodemailer.createTransport({
 
 export interface MailOptionsWithTemplate extends SendMailOptions {
   template: string;
-  context: any;
+  context: unknown;
 }
 
 export interface Transporter {
-  sendMail: (opts: MailOptionsWithTemplate) => Promise<any>;
+  sendMail: (opts: MailOptionsWithTemplate) => Promise<void>;
 }

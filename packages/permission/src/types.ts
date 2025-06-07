@@ -4,10 +4,10 @@ export enum Permission {
   UPDATE_USER = 1 << 2,       // 4
   DELETE_USER = 1 << 3,       // 8
   BAN_USER = 1 << 4,          // 16
-  MANAGE_WORKSPACE = 1 << 5,  // 32
+  MANAGE_TENANT = 1 << 5,  // 32
 
-  UPDATE_WORKSPACE = 1 << 6,  // 64
-  DELETE_WORKSPACE = 1 << 7,  // 128
+  UPDATE_TENANT = 1 << 6,  // 64
+  DELETE_TENANT = 1 << 7,  // 128
 
   GET_MEMBERS = 1 << 8,       // 256
   UPDATE_MEMBER = 1 << 9,     // 512

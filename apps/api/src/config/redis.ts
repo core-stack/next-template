@@ -1,6 +1,8 @@
+import { env } from "@packages/env";
 import { RedisOptions } from "bullmq";
 
+const url = new URL(env.REDIS_URL);
 export const redisConnection: RedisOptions = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379', 10),
+  host: url.host || 'localhost',
+  port: parseInt(url.port || '6379', 10),
 };

@@ -1,8 +1,7 @@
 import { Member, PrismaClient, Role, User } from "@/generated/prisma";
 import fp from "fastify-plugin";
 
-import { UnauthorizedError } from "../../../../api/src/modules/auth/error";
-
+import { UnauthorizedError } from "./error";
 import { AccessToken, JWT, RefreshToken } from "./jwt";
 import { Provider } from "./providers/types";
 import { Session } from "./session";

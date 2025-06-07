@@ -27,7 +27,7 @@ export const authMiddleware = middleware(async ({ ctx, next }) => {
         domain: "/",
       });
     }
-  } catch (error) {
+  } catch {
     throw new TRPCError({ code: 'UNAUTHORIZED' });
   }
 

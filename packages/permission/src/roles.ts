@@ -15,12 +15,8 @@ export const roleSchema = z.object({
   name: z.string(),
   permissions: z.array(stringToPermission),
   scope: z.enum(["GLOBAL", "TENANT"]),
-  tenantId: z.string().uuid().nullable(),
-  creatorId: z.string().uuid().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date().nullable(),
   default: z.enum([ "admin", "user", "tenant-admin", "tenant-user" ]).optional(),
-})
+});
 export type RoleSchema = z.infer<typeof roleSchema>;
 
 const rolesSchema = z.array(roleSchema).superRefine((roles, ctx) => {
