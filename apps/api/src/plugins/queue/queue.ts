@@ -18,7 +18,7 @@ export const addQueue = <T>(
     { ...opts?.workerOpts, connection: redisConnection }
   );
   worker.on("completed", (job) => {
-    app.log.debug(`[PLUGIN] Job ${job.id} completed successfully`);
+    app.log.info(`[PLUGIN] Job ${job.id} completed successfully`);
   });
   worker.on("failed", (job, err) => {
     app.log.error(`[PLUGIN] Job ${job?.id} failed with error: ${err.message}`);

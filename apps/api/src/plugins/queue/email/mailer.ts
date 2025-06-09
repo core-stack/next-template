@@ -12,7 +12,7 @@ fs.readdirSync(templatesDir).forEach(file => {
     const filePath = path.join(templatesDir, file);
     const content = fs.readFileSync(filePath, 'utf-8');
     const template = Handlebars.compile(content);
-    compiledTemplates[file] = template;
+    compiledTemplates[file.replace(".hbs", "")] = template;
   }
 });
 
