@@ -20,7 +20,8 @@ async function main() {
         options: {
           colorize: true,
           translateTime: 'HH:MM:ss',
-          ignore: 'pid,hostname',
+          ignore: 'pid,hostname,plugin',
+          messageFormat: '[{plugin}] {msg}',
         }
       }
     }
