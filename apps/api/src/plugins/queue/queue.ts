@@ -1,7 +1,5 @@
-import { Job, Queue, QueueOptions, Worker, WorkerOptions } from 'bullmq';
-import { FastifyInstance } from 'fastify';
-
-import { redisConnection } from '@/config/redis';
+import { Job, Queue, QueueOptions, RedisOptions, Worker, WorkerOptions } from "bullmq";
+import { FastifyInstance } from "fastify";
 
 export const addQueue = <T>(
   name: string,
@@ -9,6 +7,8 @@ export const addQueue = <T>(
   process: (app: FastifyInstance, job: Job<T>) => Promise<void>,
   opts?: { queueOpts: QueueOptions, workerOpts?: WorkerOptions }
 ) => {
+  const redisConnection: RedisOptions = { url: app.env.REDIS_URL };
+
   app.log.info(`[PLUGIN] Adding queue: ${name}`);
   const queue = new Queue<T>(name, { ...opts?.queueOpts, connection: redisConnection });
 

@@ -1,7 +1,6 @@
-import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
-
-import { comparePassword } from '@/plugins/auth/utils';
-import { LoginSchema, loginSchema } from '@packages/schemas';
+import { comparePassword } from "@/plugins/auth/utils";
+import { LoginSchema, loginSchema } from "@packages/schemas";
+import { FastifyReply, FastifyRequest, RouteShorthandOptions } from "fastify";
 
 export default async function handler(req: FastifyRequest<{ Body: LoginSchema }>, reply: FastifyReply) {
   const { email, password, redirect } = req.body;
@@ -13,9 +12,9 @@ export default async function handler(req: FastifyRequest<{ Body: LoginSchema }>
     }
   });
   if (!user) return reply.status(401).send({ message: "Email ou senha incorretos" });
-  
+
   if (!user.password) return reply.status(401).send({ message: "Email ou senha incorretos" });
-  
+
   const valid = await comparePassword(password, user.password);
   if (!valid) return reply.status(401).send({ message: "Email ou senha incorretos" });
 

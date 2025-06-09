@@ -1,8 +1,7 @@
-import fastGlob from 'fast-glob';
-import { FastifyInstance, FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
-import fp from 'fastify-plugin';
-import { ZodTypeProvider } from 'fastify-type-provider-zod';
-import path from 'path';
+import fastGlob from "fast-glob";
+import { FastifyInstance, FastifyReply, FastifyRequest, RouteShorthandOptions } from "fastify";
+import fp from "fastify-plugin";
+import path from "path";
 
 const HTTP_METHODS = ["get", "post", "put", "delete", "patch", "all"] as const;
 type HttpMethod = typeof HTTP_METHODS[number];
@@ -40,7 +39,6 @@ async function findMiddleware(dir: string): Promise<((req: FastifyRequest, reply
 
 // Loader
 export async function registerRoutes(app: FastifyInstance, baseDir = path.resolve("src/routers")) {
-  app = app.withTypeProvider<ZodTypeProvider>();
   const files = await fastGlob(
     HTTP_METHODS.map((method) => `**/${method}.ts`),
     { cwd: baseDir, absolute: true }
@@ -59,13 +57,18 @@ export async function registerRoutes(app: FastifyInstance, baseDir = path.resolv
 
     const handler = mod.default;
     const options: RouteShorthandOptions = mod.options || {};
+    const ignore = mod.ignore || false;
+    if (ignore) {
+      app.log.warn(`[PLUGIN] Route ${routePath} is ignored`);
+      continue;
+    }
     const middleware = await findMiddleware(parsed.dir);
 
     const middlewares: any[] = [];
     if (middleware) middlewares.push(middleware);
     if (mod.middlewares) middlewares
       .push(...mod.middlewares.map((m: any) => async (req: FastifyRequest, reply: FastifyReply) => m(req.server, req, reply)));
-      
+
     if (options.preHandler) {
       const existing = Array.isArray(options.preHandler) ? options.preHandler : [options.preHandler];
       middlewares.push(...existing);

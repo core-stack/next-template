@@ -1,11 +1,9 @@
-import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
-import moment from 'moment';
-import fromZodSchema from 'zod-to-json-schema';
-
-import { hashPassword } from '@/plugins/auth/utils';
-import { EmailTemplate } from '@/plugins/queue/email/schema';
-import { ROLES } from '@packages/permission';
-import { CreateAccountSchema, createAccountSchema, errorSchema } from '@packages/schemas';
+import { hashPassword } from "@/plugins/auth/utils";
+import { EmailTemplate } from "@/plugins/queue/email/schema";
+import { ROLES } from "@packages/permission";
+import { CreateAccountSchema, createAccountSchema, errorSchema } from "@packages/schemas";
+import { FastifyReply, FastifyRequest, RouteShorthandOptions } from "fastify";
+import moment from "moment";
 
 export default async function handler(req:FastifyRequest<{ Body: CreateAccountSchema }>, reply: FastifyReply) {
   const { email, password, name } = req.body;
@@ -52,9 +50,9 @@ export default async function handler(req:FastifyRequest<{ Body: CreateAccountSc
 
 export const options: RouteShorthandOptions = {
   schema: {
-    body: fromZodSchema(createAccountSchema),
+    body: createAccountSchema,
     response: {
-      400: fromZodSchema(errorSchema),
+      400: errorSchema,
       201: {},
     }
   }

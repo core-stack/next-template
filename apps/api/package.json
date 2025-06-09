@@ -27,8 +27,6 @@
     "@aws-sdk/client-s3": "^3.800.0",
     "@aws-sdk/s3-request-presigner": "^3.800.0",
     "@fastify/cookie": "^11.0.2",
-    "@fastify/swagger": "^9.5.1",
-    "@fastify/swagger-ui": "^5.2.3",
     "@packages/config-eslint": "workspace:*",
     "@packages/env": "workspace:*",
     "@packages/permission": "workspace:*",
@@ -51,9 +49,7 @@
     "pino-pretty": "^13.0.0",
     "prisma": "^6.8.2",
     "sharp": "^0.34.1",
-    "zod": "^3.25.23",
-    "zod-to-json-schema": "^3.24.5",
-    "zod-to-openapi": "^0.2.1"
+    "zod": "^3.25.23"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
