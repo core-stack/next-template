@@ -1,10 +1,9 @@
-import { env } from "@packages/env";
-import fp from "fastify-plugin";
+import fp from 'fastify-plugin';
+
+import { env } from '@packages/env';
 
 export default fp(async (app) => {
   const logger = app.log.child({ plugin: 'ENV' });
-
-  logger.info("Registering env plugin");
   app.decorate("env", env);
   logger.info("Env plugin registered successfully");
 });

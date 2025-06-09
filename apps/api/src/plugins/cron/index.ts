@@ -1,9 +1,9 @@
-import FastGlob from "fast-glob";
-import fp from "fastify-plugin";
-import cron from "node-cron";
-import path from "path";
+import FastGlob from 'fast-glob';
+import fp from 'fastify-plugin';
+import cron from 'node-cron';
+import path from 'path';
 
-import { cronJobOptionsSchema } from "./types";
+import { cronJobOptionsSchema } from './types';
 
 type Options = {
   baseDir?: string
@@ -13,7 +13,6 @@ export default fp(async (
   { baseDir = path.resolve("src/cron") }: Options
 ) => {
   const logger = app.log.child({ plugin: 'CRON' });
-  logger.info("Registering cron plugin");
   const files = await FastGlob("*.ts", { cwd: baseDir, absolute: true });
   if (files.length === 0) {
     logger.warn("No cron jobs found");

@@ -1,16 +1,17 @@
-import fastifyCookie from "@fastify/cookie";
-import { env } from "@packages/env";
-import Fastify from "fastify";
-import { serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
+import Fastify from 'fastify';
+import { serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod';
 
-import authPlugin from "./plugins/auth";
-import bootstrapPlugin from "./plugins/bootstrap";
-import cronPlugin from "./plugins/cron";
-import envPlugin from "./plugins/env";
-import pathRegisterPlugin from "./plugins/path-register";
-import prismaPlugin from "./plugins/prisma";
-import queuePlugin from "./plugins/queue";
-import storagePlugin from "./plugins/storage";
+import fastifyCookie from '@fastify/cookie';
+import { env } from '@packages/env';
+
+import authPlugin from './plugins/auth';
+import bootstrapPlugin from './plugins/bootstrap';
+import cronPlugin from './plugins/cron';
+import envPlugin from './plugins/env';
+import pathRegisterPlugin from './plugins/path-register';
+import prismaPlugin from './plugins/prisma';
+import queuePlugin from './plugins/queue';
+import storagePlugin from './plugins/storage';
 
 async function main() {
   const app = Fastify({
@@ -70,7 +71,7 @@ async function main() {
     region: env.AWS_REGION,
   });
 
-  await app.register(pathRegisterPlugin, { logLevel: "warn" });
+  await app.register(pathRegisterPlugin);
 
   await app.listen({ port: env.API_PORT });
 }

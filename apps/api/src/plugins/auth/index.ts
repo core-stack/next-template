@@ -1,13 +1,14 @@
-import { Member, PrismaClient, Role, User } from "@/generated/prisma";
-import fp from "fastify-plugin";
+import fp from 'fastify-plugin';
 
-import { UnauthorizedError } from "./error";
-import { AccessToken, JWT, RefreshToken } from "./jwt";
-import { Provider } from "./providers/types";
-import { Session } from "./session";
-import { MemoryStore } from "./store/memory";
-import { RedisStore, RedisStoreOptions } from "./store/redis";
-import { Store } from "./store/types";
+import { Member, PrismaClient, Role, User } from '@/generated/prisma';
+
+import { UnauthorizedError } from './error';
+import { AccessToken, JWT, RefreshToken } from './jwt';
+import { Provider } from './providers/types';
+import { Session } from './session';
+import { MemoryStore } from './store/memory';
+import { RedisStore, RedisStoreOptions } from './store/redis';
+import { Store } from './store/types';
 
 export class Auth {
   constructor(
@@ -167,9 +168,8 @@ type AuthOptions = {
   }
 }
 export default fp(async (app, opts: AuthOptions) => {
-  const logger = app.log.child({ plugin: 'cron' });
+  const logger = app.log.child({ plugin: 'AUTH' });
 
-  logger.info("Registering auth plugin");
   const store = opts.store.type === "redis" ?
     new RedisStore<Session>(opts.store.options) :
     new MemoryStore<Session>();

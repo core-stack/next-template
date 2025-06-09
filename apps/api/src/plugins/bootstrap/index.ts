@@ -1,14 +1,42 @@
-import fp from "fastify-plugin";
+import FastGlob from 'fast-glob';
+import fp from 'fastify-plugin';
+import path from 'path';
 
-import { bootstrapGlobalRoles } from "./roles";
-
-export default fp(async (app) => {
+type Options = {
+  baseDir?: string
+};
+export default fp(async (
+  app,
+  { baseDir = path.resolve("src/bootstrap") }: Options
+) => {
   const logger = app.log.child({ plugin: 'BOOTSTRAP' });
-
-  if (!app.prisma) {
-    throw new Error("Prisma client is not available in the app instance");
-  }
   logger.info("Registering bootstrap plugin");
-  await bootstrapGlobalRoles(app);
-  logger.info("Bootstrap plugin registered successfully");
+  const files = await FastGlob("*.ts", { cwd: baseDir, absolute: true });
+  if (files.length === 0) {
+    logger.warn("No bootstrap found");
+    return;
+  }
+  for (const file of files) {
+    const parsed = path.parse(file);
+    const mod = await import(file);
+
+    if (!mod.default) {
+      logger.error(`Bootstrap ${parsed.name} has no default export`);
+      continue;
+    }
+
+    const job = mod.default;
+
+    if (typeof job !== "function") {
+      logger.error(`Bootstrap ${parsed.name} is not a valid function`);
+      continue;
+    }
+
+    try {
+      await job({ ...app, log: logger });
+      logger.info(`Bootstrap ${parsed.name} run successfully`);
+    } catch (error) {
+      logger.error(`Failed to run bootstrap ${parsed.name}: ${error}`);
+    }
+  }
 });
