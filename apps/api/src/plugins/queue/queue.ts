@@ -7,9 +7,11 @@ export const addQueue = <T>(
   process: (app: FastifyInstance, job: Job<T>) => Promise<void>,
   opts?: { queueOpts: QueueOptions, workerOpts?: WorkerOptions }
 ) => {
+  const logger = app.log.child({ plugin: 'QUEUE REGISTER' });
+
   const redisConnection: RedisOptions = { url: app.env.REDIS_URL };
 
-  app.log.info(`[PLUGIN] Adding queue: ${name}`);
+  logger.info(`Adding queue: ${name}`);
   const queue = new Queue<T>(name, { ...opts?.queueOpts, connection: redisConnection });
 
   const worker = new Worker<T>(
@@ -18,10 +20,10 @@ export const addQueue = <T>(
     { ...opts?.workerOpts, connection: redisConnection }
   );
   worker.on("completed", (job) => {
-    app.log.info(`[PLUGIN] Job ${job.id} completed successfully`);
+    logger.info(`Job ${job.id} completed successfully`);
   });
   worker.on("failed", (job, err) => {
-    app.log.error(`[PLUGIN] Job ${job?.id} failed with error: ${err.message}`);
+    logger.error(`Job ${job?.id} failed with error: ${err.message}`);
   });
   return { queue, worker };
 }

@@ -1,16 +1,17 @@
-import fp from 'fastify-plugin';
-
-import { PrismaClient } from '@/generated/prisma';
+import { PrismaClient } from "@/generated/prisma";
+import fp from "fastify-plugin";
 
 export default fp(async (app) => {
-  app.log.info("[PLUGIN] Registering Prisma plugin");
+  const logger = app.log.child({ plugin: 'DATABASE' });
+
+  logger.info("Registering Prisma plugin");
   const prisma = new PrismaClient();
   await prisma.$connect();
   app.decorate('prisma', prisma);
   app.addHook('onClose', async () => {
     await prisma.$disconnect();
   });
-  app.log.info("[PLUGIN] Prisma plugin registered successfully");
+  logger.info("Prisma plugin registered successfully");
 });
 
 declare module 'fastify' {

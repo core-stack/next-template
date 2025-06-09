@@ -167,7 +167,9 @@ type AuthOptions = {
   }
 }
 export default fp(async (app, opts: AuthOptions) => {
-  app.log.info("[PLUGIN] Registering auth plugin");
+  const logger = app.log.child({ plugin: 'cron' });
+
+  logger.info("Registering auth plugin");
   const store = opts.store.type === "redis" ?
     new RedisStore<Session>(opts.store.options) :
     new MemoryStore<Session>();
@@ -187,7 +189,7 @@ export default fp(async (app, opts: AuthOptions) => {
     app.prisma
   );
   app.decorate("auth", auth);
-  app.log.info("[PLUGIN] Auth plugin registered successfully");
+  logger.info("Auth plugin registered successfully");
 })
 
 declare module "fastify" {

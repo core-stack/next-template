@@ -1,7 +1,6 @@
-import fp from 'fastify-plugin';
-
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import fp from "fastify-plugin";
 
 type S3Options = {
   endpoint?: string;
@@ -74,10 +73,12 @@ export class S3Service {
 }
 
 export default fp(async (fastify, opts: S3Options) => {
-  fastify.log.info("[PLUGIN] Registering S3 storage plugin");
+  const logger = fastify.log.child({ plugin: 'STORAGE' });
+
+  logger.info("Registering S3 storage plugin");
   const s3Service = new S3Service(opts);
   fastify.decorate("storage", s3Service);
-  fastify.log.info("[PLUGIN] S3 storage plugin registered successfully");
+  logger.info("S3 storage plugin registered successfully");
 });
 
 declare module 'fastify' {

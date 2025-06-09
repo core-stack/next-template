@@ -42,6 +42,8 @@ export async function registerRoutes(
   app: FastifyInstance,
   { baseDir = path.resolve("src/routers"), logLevel }: Options
 ) {
+  const logger = app.log.child({ plugin: 'ROUTER' });
+
   const files = await fastGlob(
     HTTP_METHODS.map((method) => `**/${method}.ts`),
     { cwd: baseDir, absolute: true }
@@ -54,7 +56,7 @@ export async function registerRoutes(
     const mod = await import(file);
 
     if (!mod.default) {
-      app.log.error(`[PLUGIN] Route ${routePath} has no default export`);
+      logger.error(`Route ${routePath} has no default export`);
       continue;
     }
 
@@ -62,7 +64,7 @@ export async function registerRoutes(
     const options: RouteShorthandOptions = mod.options || {};
     const ignore = mod.ignore || false;
     if (ignore) {
-      app.log.warn(`[PLUGIN] Route ${routePath} is ignored`);
+      logger.warn(`Route ${routePath} is ignored`);
       continue;
     }
     const middleware = await findMiddleware(parsed.dir);
@@ -86,7 +88,7 @@ export async function registerRoutes(
       ...options,
     });
 
-    app.log.info(`[PLUGIN] [${method.toUpperCase()}] ${routePath} registered successfully`);
+    logger.info(`[${method.toUpperCase()}] ${routePath} registered successfully`);
   }
 }
 
@@ -96,7 +98,9 @@ type Options = {
 };
 
 export default fp(async (app, opts: Options) => {
-  app.log.info("[PLUGIN] Registering path-register plugin");
+  const logger = app.log.child({ plugin: 'ROUTER' });
+
+  logger.info("Registering path-register plugin");
   await registerRoutes(app, opts);
-  app.log.info("[PLUGIN] Path-register plugin registered successfully");
+  logger.info("Path-register plugin registered successfully");
 });

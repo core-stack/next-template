@@ -12,7 +12,7 @@ export default fp(async (
   app,
   { baseDir = path.resolve("src/cron") }: Options
 ) => {
-  const logger = app.log.child({ plugin: 'cron' });
+  const logger = app.log.child({ plugin: 'CRON' });
   logger.info("Registering cron plugin");
   const files = await FastGlob("*.ts", { cwd: baseDir, absolute: true });
   if (files.length === 0) {

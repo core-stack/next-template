@@ -1,6 +1,5 @@
-import { FastifyInstance } from 'fastify';
-
-import { permissionsToNumber, ROLES } from '@packages/permission';
+import { permissionsToNumber, ROLES } from "@packages/permission";
+import { FastifyInstance } from "fastify";
 
 export const bootstrapGlobalRoles = async ({ prisma, log }: FastifyInstance) => {
   log.info("[PLUGIN] Bootstrapping global roles...");
