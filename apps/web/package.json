@@ -18,7 +18,6 @@
     "@hookform/resolvers": "^5.0.1",
     "@packages/env": "workspace:*",
     "@packages/permission": "workspace:*",
-    "@packages/prisma": "workspace:*",
     "@prisma/client": "^6.8.2",
     "@radix-ui/react-avatar": "^1.1.3",
     "@radix-ui/react-dialog": "^1.1.11",

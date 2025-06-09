@@ -1,13 +1,14 @@
-import { Member, PrismaClient, Role, User } from "@/generated/prisma";
-import fp from "fastify-plugin";
+import fp from 'fastify-plugin';
 
-import { UnauthorizedError } from "./error";
-import { AccessToken, JWT, RefreshToken } from "./jwt";
-import { Provider } from "./providers/types";
-import { Session } from "./session";
-import { MemoryStore } from "./store/memory";
-import { RedisStore, RedisStoreOptions } from "./store/redis";
-import { Store } from "./store/types";
+import { Member, PrismaClient, Role, User } from '@/generated/prisma';
+
+import { UnauthorizedError } from './error';
+import { AccessToken, JWT, RefreshToken } from './jwt';
+import { Provider } from './providers/types';
+import { Session } from './session';
+import { MemoryStore } from './store/memory';
+import { RedisStore, RedisStoreOptions } from './store/redis';
+import { Store } from './store/types';
 
 export class Auth {
   constructor(
@@ -166,7 +167,7 @@ type AuthOptions = {
   }
 }
 export default fp(async (app, opts: AuthOptions) => {
-  app.log.info("Registering auth plugin");
+  app.log.info("[PLUGIN] Registering auth plugin");
   const store = opts.store.type === "redis" ?
     new RedisStore<Session>(opts.store.options) :
     new MemoryStore<Session>();
@@ -186,7 +187,7 @@ export default fp(async (app, opts: AuthOptions) => {
     app.prisma
   );
   app.decorate("auth", auth);
-  app.log.info("Auth plugin registered successfully");
+  app.log.info("[PLUGIN] Auth plugin registered successfully");
 })
 
 declare module "fastify" {

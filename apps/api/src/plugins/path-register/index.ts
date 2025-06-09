@@ -1,0 +1,92 @@
+import fastGlob from 'fast-glob';
+import { FastifyInstance, FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
+import fp from 'fastify-plugin';
+import { ZodTypeProvider } from 'fastify-type-provider-zod';
+import path from 'path';
+
+const HTTP_METHODS = ["get", "post", "put", "delete", "patch", "all"] as const;
+type HttpMethod = typeof HTTP_METHODS[number];
+
+// Convert [id] to :id and [...slug] to *
+function segmentToRoute(seg: string): string {
+  if (seg.startsWith("[...") && seg.endsWith("]")) return "*";
+  if (seg.startsWith("[") && seg.endsWith("]")) return `:${seg.slice(1, -1)}`;
+  return seg;
+}
+
+// Join segments to build route
+function buildRouteFromPath(fullPath: string, baseDir: string): string {
+  const relative = path.relative(baseDir, fullPath);
+  const segments = relative.split(path.sep).slice(0, -1); // remove file (ex: get.ts)
+  const routeSegments = segments.map(segmentToRoute);
+  return "/" + routeSegments.filter(Boolean).join("/");
+}
+
+// Try to find middleware.ts in the folder
+async function findMiddleware(dir: string): Promise<((req: FastifyRequest, reply: FastifyReply) => Promise<void>) | null> {
+  try {
+    const mod = await import(path.resolve(dir, "middleware.ts"));
+    const middlewareFn = mod.default;
+    if (typeof middlewareFn === "function") {
+      return async (req, reply) => {
+        await middlewareFn(req.server, req, reply);
+      };
+    }
+  } catch {
+    // not found, ignore
+  }
+  return null;
+}
+
+// Loader
+export async function registerRoutes(app: FastifyInstance, baseDir = path.resolve("src/routers")) {
+  app = app.withTypeProvider<ZodTypeProvider>();
+  const files = await fastGlob(
+    HTTP_METHODS.map((method) => `**/${method}.ts`),
+    { cwd: baseDir, absolute: true }
+  );
+
+  for (const file of files) {
+    const parsed = path.parse(file);
+    const method = parsed.name as HttpMethod;
+    const routePath = buildRouteFromPath(file, baseDir);
+    const mod = await import(file);
+
+    if (!mod.default) {
+      app.log.error(`[PLUGIN] Route ${routePath} has no default export`);
+      continue;
+    }
+
+    const handler = mod.default;
+    const options: RouteShorthandOptions = mod.options || {};
+    const middleware = await findMiddleware(parsed.dir);
+
+    const middlewares: any[] = [];
+    if (middleware) middlewares.push(middleware);
+    if (mod.middlewares) middlewares
+      .push(...mod.middlewares.map((m: any) => async (req: FastifyRequest, reply: FastifyReply) => m(req.server, req, reply)));
+      
+    if (options.preHandler) {
+      const existing = Array.isArray(options.preHandler) ? options.preHandler : [options.preHandler];
+      middlewares.push(...existing);
+    }
+
+    app.route({
+      method: method.toUpperCase(),
+      url: routePath === "" ? "/" : routePath,
+      handler,
+      preHandler: middlewares.length ? middlewares : undefined,
+      ...options,
+    });
+
+    app.log.info(`[PLUGIN] [${method.toUpperCase()}] ${routePath} registered successfully`);
+  }
+}
+
+type Options = { baseDir?: string };
+
+export default fp(async (app, opts: Options) => {
+  app.log.info("[PLUGIN] Registering path-register plugin");
+  await registerRoutes(app, opts.baseDir);
+  app.log.info("[PLUGIN] Path-register plugin registered successfully");
+});

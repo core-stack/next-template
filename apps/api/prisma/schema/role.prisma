@@ -1,21 +1,19 @@
 enum RoleScope {
-  WORKSPACE
+  TENANT
   GLOBAL
 }
 model Role {
   id String @id @default(uuid())
 
-  key String?
+  key String
 
   name String
   permissions Int
 
-  scope RoleScope @default(WORKSPACE)
+  scope RoleScope @default(TENANT)
 
-  tenantId String?    @map("tenant_id")
+  tenantId String? @map("tenant_id")
   tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  tenantKey String @default("")
 
   users   User[]
 
@@ -28,6 +26,6 @@ model Role {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([tenantKey, name, scope], map: "tenant_id_name_scope_idx")
+  @@unique([key, scope])
   @@map("roles")
 }

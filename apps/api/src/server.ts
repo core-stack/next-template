@@ -1,25 +1,39 @@
-import fastifyCookie from "@fastify/cookie";
-import { env } from "@packages/env";
-import Fastify from "fastify";
+import Fastify from 'fastify';
+import { serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod';
 
-import authPlugin from "./plugins/auth";
-import bootstrapPlugin from "./plugins/bootstrap";
-import cronPlugin from "./plugins/cron";
-import envPlugin from "./plugins/env";
-import prismaPlugin from "./plugins/prisma";
-import queuePlugin from "./plugins/queue";
-import storagePlugin from "./plugins/storage";
-import trpcPlugin from "./trpc/adapter";
+import fastifyCookie from '@fastify/cookie';
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUI from '@fastify/swagger-ui';
+import { env } from '@packages/env';
+
+import authPlugin from './plugins/auth';
+import bootstrapPlugin from './plugins/bootstrap';
+import envPlugin from './plugins/env';
+import pathRegisterPlugin from './plugins/path-register';
+import prismaPlugin from './plugins/prisma';
+import storagePlugin from './plugins/storage';
 
 async function main() {
-  const app = Fastify({ logger: true });
-
+  const app = Fastify({
+    logger: {
+      transport: {
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+          translateTime: 'HH:MM:ss',
+          ignore: 'pid,hostname',
+        }
+      }
+    }
+  }).withTypeProvider<ZodTypeProvider>();
+  app.setValidatorCompiler(validatorCompiler);
+  app.setSerializerCompiler(serializerCompiler);
   await app.register(fastifyCookie, { secret: "supersecret", parseOptions: {} });
 
   await app.register(envPlugin);
   await app.register(prismaPlugin);
-  await app.register(queuePlugin);
-  await app.register(cronPlugin);
+  // await app.register(queuePlugin);
+  // await app.register(cronPlugin);
   await app.register(authPlugin, {
     jwt: {
       secret: env.JWT_SECRET,
@@ -38,7 +52,24 @@ async function main() {
     defaultBucket: env.AWS_BUCKET,
     region: env.AWS_REGION,
   });
-  await app.register(trpcPlugin);
+
+  await app.register(fastifySwagger, {
+    openapi: {
+      info: {
+        title: "API Docs",
+        description: "Documentação da API usando Zod + Fastify",
+        version: "1.0.0",
+      },
+    },
+    // transform: jsonSchemaTransform
+  });
+  
+  await app.register(fastifySwaggerUI, {
+    routePrefix: "/docs",
+    logLevel: "silent",
+  });
+  
+  await app.register(pathRegisterPlugin);
 
   await app.listen({ port: env.API_PORT });
 }

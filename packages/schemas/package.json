@@ -1,5 +1,5 @@
 {
-  "name": "@packages/permission",
+  "name": "@packages/schemas",
   "version": "1.0.0",
   "type": "module",
   "private": true,
