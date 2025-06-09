@@ -25,6 +25,23 @@ async function main() {
       }
     }
   }).withTypeProvider<ZodTypeProvider>();
+  app.setErrorHandler((error, _, reply) => {
+    if (error.validation) {
+      const fields = error.validation.map((err: any) => ({
+        [err.instancePath.replace('/', '')]: err.message
+      }))
+
+      reply.status(400).send({
+        status: 400,
+        message: 'Validation error',
+        errors: { fields },
+      })
+      return
+    }
+
+    reply.status(500).send({ status: 500, message: 'Internal Server Error' })
+  })
+
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
   await app.register(fastifyCookie, { secret: "supersecret", parseOptions: {} });
@@ -52,7 +69,7 @@ async function main() {
     region: env.AWS_REGION,
   });
 
-  await app.register(pathRegisterPlugin);
+  await app.register(pathRegisterPlugin, { logLevel: "warn" });
 
   await app.listen({ port: env.API_PORT });
 }

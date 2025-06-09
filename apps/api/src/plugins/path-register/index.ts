@@ -38,7 +38,10 @@ async function findMiddleware(dir: string): Promise<((req: FastifyRequest, reply
 }
 
 // Loader
-export async function registerRoutes(app: FastifyInstance, baseDir = path.resolve("src/routers")) {
+export async function registerRoutes(
+  app: FastifyInstance,
+  { baseDir = path.resolve("src/routers"), logLevel }: Options
+) {
   const files = await fastGlob(
     HTTP_METHODS.map((method) => `**/${method}.ts`),
     { cwd: baseDir, absolute: true }
@@ -47,7 +50,7 @@ export async function registerRoutes(app: FastifyInstance, baseDir = path.resolv
   for (const file of files) {
     const parsed = path.parse(file);
     const method = parsed.name as HttpMethod;
-    const routePath = buildRouteFromPath(file, baseDir);
+    const routePath = buildRouteFromPath(file, baseDir!);
     const mod = await import(file);
 
     if (!mod.default) {
@@ -78,6 +81,7 @@ export async function registerRoutes(app: FastifyInstance, baseDir = path.resolv
       method: method.toUpperCase(),
       url: routePath === "" ? "/" : routePath,
       handler,
+      logLevel: logLevel,
       preHandler: middlewares.length ? middlewares : undefined,
       ...options,
     });
@@ -86,10 +90,13 @@ export async function registerRoutes(app: FastifyInstance, baseDir = path.resolv
   }
 }
 
-type Options = { baseDir?: string };
+type Options = {
+  baseDir?: string
+  logLevel?: "info" | "warn" | "error" | "silent" | "debug" | "trace"
+};
 
 export default fp(async (app, opts: Options) => {
   app.log.info("[PLUGIN] Registering path-register plugin");
-  await registerRoutes(app, opts.baseDir);
+  await registerRoutes(app, opts);
   app.log.info("[PLUGIN] Path-register plugin registered successfully");
 });

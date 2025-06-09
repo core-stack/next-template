@@ -1,7 +1,7 @@
 import { hashPassword } from "@/plugins/auth/utils";
 import { EmailTemplate } from "@/plugins/queue/email/schema";
 import { ROLES } from "@packages/permission";
-import { CreateAccountSchema, createAccountSchema, errorSchema } from "@packages/schemas";
+import { CreateAccountSchema, createAccountSchema } from "@packages/schemas";
 import { FastifyReply, FastifyRequest, RouteShorthandOptions } from "fastify";
 import moment from "moment";
 
@@ -51,9 +51,5 @@ export default async function handler(req:FastifyRequest<{ Body: CreateAccountSc
 export const options: RouteShorthandOptions = {
   schema: {
     body: createAccountSchema,
-    response: {
-      400: errorSchema,
-      201: {},
-    }
   }
 }
