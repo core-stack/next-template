@@ -23,12 +23,12 @@ export default async function handler(req: FastifyRequest<{ Body: LoginSchema }>
   reply.setCookie("access-token", token.accessToken, {
     maxAge: token.accessTokenDuration,
     httpOnly: true,
-    domain: "/",
+    path: "/",
   });
   reply.setCookie("refresh-token", token.refreshToken, {
     maxAge: token.refreshTokenDuration,
     httpOnly: true,
-    domain: "/",
+    path: "/",
   });
   return reply.status(200).send({ redirect: redirect || req.cookies["default-tenant"] || "/t" });
 }

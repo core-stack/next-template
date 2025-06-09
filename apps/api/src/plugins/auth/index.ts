@@ -1,14 +1,13 @@
-import fp from 'fastify-plugin';
+import { Member, PrismaClient, Role, User } from "@/generated/prisma";
+import fp from "fastify-plugin";
 
-import { Member, PrismaClient, Role, User } from '@/generated/prisma';
-
-import { UnauthorizedError } from './error';
-import { AccessToken, JWT, RefreshToken } from './jwt';
-import { Provider } from './providers/types';
-import { Session } from './session';
-import { MemoryStore } from './store/memory';
-import { RedisStore, RedisStoreOptions } from './store/redis';
-import { Store } from './store/types';
+import { UnauthorizedError } from "./error";
+import { AccessToken, JWT, RefreshToken } from "./jwt";
+import { Provider } from "./providers/types";
+import { Session } from "./session";
+import { MemoryStore } from "./store/memory";
+import { RedisStore, RedisStoreOptions } from "./store/redis";
+import { Store } from "./store/types";
 
 export class Auth {
   constructor(
@@ -89,6 +88,7 @@ export class Auth {
     if (!token) throw new UnauthorizedError();
     const { sessionId } = token;
     const session = await this.store.get(sessionId);
+
     if (!session) throw new UnauthorizedError();
     session.lastSeen = new Date();
     await this.store.set(sessionId, session);
