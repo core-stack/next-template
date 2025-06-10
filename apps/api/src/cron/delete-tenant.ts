@@ -1,6 +1,7 @@
-import { CronJobOptions } from "@/plugins/cron/types";
-import { EmailTemplate } from "@/plugins/queue/email/schema";
-import { FastifyInstance } from "fastify";
+import { FastifyInstance } from 'fastify';
+
+import { CronJobOptions } from '@/plugins/cron/types';
+import { EmailTemplate } from '@/queue/schemas/email';
 
 export default async function cron (app: FastifyInstance) {
   const tenants = await app.prisma.tenant.findMany({

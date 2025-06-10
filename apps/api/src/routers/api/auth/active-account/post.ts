@@ -1,7 +1,8 @@
-import { EmailTemplate } from "@/plugins/queue/email/schema";
-import { ActiveAccountSchema, activeAccountSchema } from "@packages/schemas";
-import { FastifyReply, FastifyRequest, RouteShorthandOptions } from "fastify";
-import moment from "moment";
+import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
+import moment from 'moment';
+
+import { EmailTemplate } from '@/queue/schemas/email';
+import { ActiveAccountSchema, activeAccountSchema } from '@packages/schemas';
 
 export default async function handler(req: FastifyRequest<{ Body: ActiveAccountSchema }>, reply: FastifyReply) {
   const { token } = req.body;

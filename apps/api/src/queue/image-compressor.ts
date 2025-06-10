@@ -1,9 +1,15 @@
-import { Job } from "bullmq";
-import { FastifyInstance } from "fastify";
-import sharp from "sharp";
-import Stream from "stream";
+import { Job } from 'bullmq';
+import { FastifyInstance } from 'fastify';
+import sharp from 'sharp';
+import Stream from 'stream';
+import { z } from 'zod';
 
-import { CompressImagePayload } from "./schema";
+export const compressImageSchema = z.object({
+  key: z.string(),
+  width: z.number(),
+  height: z.number(),
+});
+export type CompressImagePayload = z.infer<typeof compressImageSchema>;
 
 const streamToBuffer = async (readableStream: Stream.Readable): Promise<Buffer> => {
   const chunks: Uint8Array[] = [];

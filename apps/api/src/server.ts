@@ -8,9 +8,9 @@ import authPlugin from './plugins/auth';
 import bootstrapPlugin from './plugins/bootstrap';
 import cronPlugin from './plugins/cron';
 import envPlugin from './plugins/env';
-import pathRegisterPlugin from './plugins/path-register';
 import prismaPlugin from './plugins/prisma';
 import queuePlugin from './plugins/queue';
+import routerPlugin from './plugins/router';
 import storagePlugin from './plugins/storage';
 
 async function main() {
@@ -71,7 +71,7 @@ async function main() {
     region: env.AWS_REGION,
   });
 
-  await app.register(pathRegisterPlugin);
+  await app.register(routerPlugin);
 
   await app.listen({ port: env.API_PORT });
 }

@@ -1,7 +1,7 @@
-import fastGlob from "fast-glob";
-import { FastifyInstance, FastifyReply, FastifyRequest, RouteShorthandOptions } from "fastify";
-import fp from "fastify-plugin";
-import path from "path";
+import fastGlob from 'fast-glob';
+import { FastifyInstance, FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
+import fp from 'fastify-plugin';
+import path from 'path';
 
 const HTTP_METHODS = ["get", "post", "put", "delete", "patch", "all"] as const;
 type HttpMethod = typeof HTTP_METHODS[number];
@@ -98,9 +98,5 @@ type Options = {
 };
 
 export default fp(async (app, opts: Options) => {
-  const logger = app.log.child({ plugin: 'ROUTER' });
-
-  logger.info("Registering path-register plugin");
   await registerRoutes(app, opts);
-  logger.info("Path-register plugin registered successfully");
 });
