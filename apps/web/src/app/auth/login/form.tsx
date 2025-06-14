@@ -1,20 +1,20 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
+import { Mail } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { FcGoogle } from 'react-icons/fc';
+
+import { Button } from '@/components/ui/button';
 import {
   Form, FormControl, FormError, FormField, FormItem, FormLabel, FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "@/hooks/use-toast";
-import { trpc } from "@/lib/trpc/client";
-import { loginSchema, LoginSchema } from "@/lib/trpc/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { FcGoogle } from "react-icons/fc";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { useApiMutation } from '@/hooks/use-api-mutation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, LoginSchema } from '@packages/schemas';
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -23,22 +23,20 @@ export function LoginForm() {
     defaultValues: {
       email: "",
       password: "",
+      redirect: searchParams.get("redirect") ?? undefined
     },
   });
 
   const isLoading = form.formState.isSubmitting;
   const router = useRouter();
-  const { mutate, error } = trpc.auth.login.useMutation();
-  const onSubmit = form.handleSubmit(async (data) => {
-    mutate(
-      { ...data, redirect: searchParams.get("redirect") || undefined },
-      {
-        onSuccess: () => router.push(data.redirect ?? "/w"),
-        onError: ({ message }) => toast({ title: "Erro ao fazer login", description: message, variant: "destructive" })
+  const { mutate, error } = useApiMutation('/api/auth/login', { mutationKey: ["/api/auth/login"] });
+  const onSubmit = form.handleSubmit(async (body) => {
+    mutate({ body }, {
+      onSuccess: ({ redirect }) => {
+        router.push(redirect);
       }
-    );
-  })
-
+    });
+  });
   return (
     <div className="grid gap-6">
       <Form {...form}>
@@ -82,9 +80,7 @@ export function LoginForm() {
               </FormItem>
             )}
           />
-          {
-            error?.message && <FormError>{error.message}</FormError>
-          }
+          { error?.message && <FormError>{error.message}</FormError> }
           <Button type="submit" className="w-full" isLoading={isLoading}>
             Entrar
           </Button>

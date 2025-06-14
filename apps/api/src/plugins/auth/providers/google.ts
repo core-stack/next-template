@@ -1,6 +1,4 @@
-import axios from "axios";
-
-import { CallbackResponse, Provider } from "./types";
+import { CallbackResponse, Provider } from './types';
 
 type Opts = {
   GOOGLE_CLIENT_ID: string;
@@ -22,21 +20,36 @@ export const GoogleProvider = ({ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIREC
       return url.toString();
     },
     callback: async (code: string): Promise<CallbackResponse> => {
-      const tokenRes = await axios.post("https://oauth2.googleapis.com/token", {
-        code,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: REDIRECT_URI,
-        grant_type: "authorization_code",
+      const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code,
+          client_id: GOOGLE_CLIENT_ID,
+          client_secret: GOOGLE_CLIENT_SECRET,
+          redirect_uri: REDIRECT_URI,
+          grant_type: "authorization_code",
+        }),
       });
 
-      const { access_token } = tokenRes.data;
-
-      const profileRes = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
-        headers: { Authorization: `Bearer ${access_token}` },
+      if (!tokenRes.ok) {
+        throw new Error(`Erro ao obter token: ${tokenRes.statusText}`);
+      }
+      const { access_token } = (await tokenRes.json()).data;
+      const profileRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`
+        }
       });
 
-      const profile = profileRes.data;
+      if (!profileRes.ok) {
+        throw new Error(`Erro ao obter token: ${profileRes.statusText}`);
+      }
+      const profile = (await profileRes.json()).data;
       return {
         providerAccountId: profile.sub,
         email: profile.email,

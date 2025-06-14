@@ -1,6 +1,6 @@
 import fp from 'fastify-plugin';
 
-import { Member, PrismaClient, Role, User } from '@/generated/prisma';
+import { Member, PrismaClient, Role, User } from '@/__generated__/prisma';
 
 import { UnauthorizedError } from './error';
 import { AccessToken, JWT, RefreshToken } from './jwt';
@@ -22,7 +22,7 @@ export class Auth {
     return this.providers[provider].getAuthUrl();
   }
 
-  async oauth2Callback(provider: string, code: string, ) {
+  async oauth2Callback(provider: string, code: string) {
     const { providerAccountId, email, name, image } = await this.providers[provider].callback(code);
 
     const account = await this.prisma.account.upsert({

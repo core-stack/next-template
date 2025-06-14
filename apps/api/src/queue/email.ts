@@ -5,7 +5,7 @@ import Handlebars from 'handlebars';
 import nodemailer, { SendMailOptions } from 'nodemailer';
 import path from 'path';
 
-import { env } from '@packages/env';
+import { env } from '@/env';
 
 import { EmailPayload } from './schemas/email';
 

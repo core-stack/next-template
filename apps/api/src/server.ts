@@ -2,8 +2,8 @@ import Fastify from 'fastify';
 import { serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import fastifyCookie from '@fastify/cookie';
-import { env } from '@packages/env';
 
+import { env } from './env';
 import authPlugin from './plugins/auth';
 import bootstrapPlugin from './plugins/bootstrap';
 import cronPlugin from './plugins/cron';

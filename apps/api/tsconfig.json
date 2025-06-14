@@ -15,5 +15,5 @@
       ]
     }
   },
-  "include": ["src", "src/generated"],
+  "include": ["src", "src/__generated__"],
 }

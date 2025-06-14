@@ -1,6 +1,6 @@
 import fp from 'fastify-plugin';
 
-import { PrismaClient } from '@/generated/prisma';
+import { PrismaClient } from '@/__generated__/prisma';
 
 export default fp(async (app) => {
   const logger = app.log.child({ plugin: 'DATABASE' });

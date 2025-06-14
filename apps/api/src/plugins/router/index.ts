@@ -40,7 +40,7 @@ async function findMiddleware(dir: string): Promise<((req: FastifyRequest, reply
 // Loader
 export async function registerRoutes(
   app: FastifyInstance,
-  { baseDir = path.resolve("src/routers"), logLevel }: Options
+  { baseDir = path.resolve("src/routes"), logLevel }: Options
 ) {
   const logger = app.log.child({ plugin: 'ROUTER' });
 

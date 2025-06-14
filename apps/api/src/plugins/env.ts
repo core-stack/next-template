@@ -1,6 +1,6 @@
 import fp from 'fastify-plugin';
 
-import { env } from '@packages/env';
+import { env, Env } from '@/env';
 
 export default fp(async (app) => {
   const logger = app.log.child({ plugin: 'ENV' });
@@ -10,6 +10,6 @@ export default fp(async (app) => {
 
 declare module 'fastify' {
   interface FastifyInstance {
-    env: typeof env;
+    env: Env;
   }
 }
