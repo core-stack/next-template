@@ -16,4 +16,8 @@
     }
   },
   "include": ["src", "src/__generated__"],
+  "references": [
+    { "path": "../../packages/common" },
+    { "path": "../../packages/env" },
+  ]
 }

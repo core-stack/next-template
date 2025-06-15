@@ -14,14 +14,14 @@ const toRoutePath = (file: string) =>
     .replace(/^.*src\/routes\//, "")
     .replace(/\.(ts|js)$/, "")
     .replace(/\[\.{3}[^\]]+\]/g, "*") // [...slug] => *
-    .replace(/\[([^\]]+)\]/g, ":$1"); // [id] => :id
+    .replace(/\[([^\]]+)\]/g, "_$1"); // [id] => :id
 
 const toRouteName = (file: string) =>
   file
     .replace(/^.*src\/routes\//, "")
     .replace(/\.(ts|js)$/, "")
     .replace(/\[\.{3}[^\]]+\]/g, "*") // [...slug] => *
-    .replace(/\[([^\]]+)\]/g, ":$1") // [id] => :id
+    .replace(/\[([^\]]+)\]/g, "_$1") // [id] => :id
     .replace(/\//g, "_")
 async function main() {
   let files = await fastGlob([path.join(process.cwd(), "/src/routes/**/{get,post,put,delete,patch}.ts")]);

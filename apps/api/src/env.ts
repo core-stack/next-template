@@ -1,15 +1,19 @@
+import dotenv from 'dotenv';
 import { z } from 'zod';
 
 import { getEnv } from '@packages/env';
 
+dotenv.config();
+const envBool = z.union([z.literal("true"), z.literal("false")]).transform(v => v === "true");
 const envSchema = z.object({
-  DISABLED_WORKSPACES_DELETE_AFTER: z.number(),
+  DISABLED_WORKSPACES_DELETE_AFTER: z.coerce.number().default(90 * 24 * 60 * 60 * 1000), // 90 days
   
   JWT_SECRET: z.string(),
-  JWT_ACCESS_TOKEN_DURATION: z.number().default(60 * 5), // 5 min
-  JWT_REFRESH_TOKEN_DURATION: z.number().default(60 * 60 * 24 * 30), // 30 days
+  JWT_ACCESS_TOKEN_DURATION: z.coerce.number().default(60 * 5 * 1000), // 5 min
+  JWT_REFRESH_TOKEN_DURATION: z.coerce.number().default(60 * 60 * 24 * 30 * 1000), // 30 days
 
-  ACTIVE_ACCOUNT_TOKEN_EXPIRES: z.number(),
+  ACTIVE_ACCOUNT_TOKEN_EXPIRES: z.coerce.number().default(60 * 60 * 1000), // 1h
+  ALLOW_CREATE_ACCOUNT: envBool,
   
   REDIS_URL: z.string().url(),
 
@@ -20,15 +24,15 @@ const envSchema = z.object({
   AWS_PUBLIC_BUCKET_BASE_URL: z.string(),
   AWS_BUCKET: z.string(),
 
-  API_PORT: z.number(),
-  FRONTEND_URL: z.string().url(),
+  API_PORT: z.coerce.number().default(4000),
+  FRONTEND_URL: z.string().url().default("http://localhost:3000"),
 
-  SMTP_ENABLED: z.boolean(),
+  SMTP_ENABLED: envBool.default("false"),
   SMTP_HOST: z.string(),
-  SMTP_PORT: z.number(),
-  SMTP_SECURE: z.boolean(),
+  SMTP_PORT: z.coerce.number(),
+  SMTP_SECURE: envBool.default("false"),
   SMTP_USER: z.string(),
-  SMTP_ENV: z.enum(["development", "production", "test"]),
+  SMTP_ENV: z.enum(["development", "production", "test"]).default("development"),
   SMTP_TEST_EMAIL: z.string().optional(),
   SMTP_FROM: z.string(),
   SMTP_PASSWORD: z.string(),

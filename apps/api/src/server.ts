@@ -72,7 +72,7 @@ async function main() {
   });
 
   await app.register(routerPlugin);
-
+  
   await app.listen({ port: env.API_PORT });
 }
 main();

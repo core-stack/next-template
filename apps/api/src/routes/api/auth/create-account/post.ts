@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
 import moment from 'moment';
 import z from 'zod';
 
+import { env } from '@/env';
 import { hashPassword } from '@/plugins/auth/utils';
 import { EmailTemplate } from '@/queue/schemas/email';
 import { ROLES } from '@packages/permission';
@@ -62,3 +63,6 @@ export const options: RouteShorthandOptions = {
     }
   }
 }
+console.log(env.ALLOW_CREATE_ACCOUNT);
+
+export const ignore = !env.ALLOW_CREATE_ACCOUNT;

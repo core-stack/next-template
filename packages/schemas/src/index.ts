@@ -1,5 +1,4 @@
 export * from "./auth.schema";
-export * from "./error.schema";
 export * from "./invite.schema";
 export * from "./tenant.schema";
 export * from "./member.schema";
