@@ -63,6 +63,5 @@ export const options: RouteShorthandOptions = {
     }
   }
 }
-console.log(env.ALLOW_CREATE_ACCOUNT);
 
 export const ignore = !env.ALLOW_CREATE_ACCOUNT;

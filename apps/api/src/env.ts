@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { getEnv } from '@packages/env';
 
 dotenv.config();
-const envBool = z.union([z.literal("true"), z.literal("false")]).transform(v => v === "true");
+const envBool = z.string().transform(v => v === "true");
 const envSchema = z.object({
   DISABLED_WORKSPACES_DELETE_AFTER: z.coerce.number().default(90 * 24 * 60 * 60 * 1000), // 90 days
   
@@ -13,7 +13,7 @@ const envSchema = z.object({
   JWT_REFRESH_TOKEN_DURATION: z.coerce.number().default(60 * 60 * 24 * 30 * 1000), // 30 days
 
   ACTIVE_ACCOUNT_TOKEN_EXPIRES: z.coerce.number().default(60 * 60 * 1000), // 1h
-  ALLOW_CREATE_ACCOUNT: envBool,
+  ALLOW_CREATE_ACCOUNT: envBool.default("true"),
   
   REDIS_URL: z.string().url(),
 

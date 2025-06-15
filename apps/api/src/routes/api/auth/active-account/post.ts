@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
 import moment from 'moment';
 
+import { env } from '@/env';
 import { EmailTemplate } from '@/queue/schemas/email';
 import { ActiveAccountSchema, activeAccountSchema } from '@packages/schemas';
 
@@ -44,3 +45,5 @@ export default async function handler(req: FastifyRequest<{ Body: ActiveAccountS
 }
 
 export const options: RouteShorthandOptions = { schema: { body: activeAccountSchema } };
+
+export const ignore = !env.ALLOW_CREATE_ACCOUNT;
