@@ -19,7 +19,8 @@ export const getUpdateImagePresignedUrlSchema = z.object({
   contentType: z.string().min(1),
   fileSize: z.number().max(5 * 1024 * 1024), // 5MB
 });
-
+export type GetUpdateImagePresignedUrlSchema = z.infer<typeof getUpdateImagePresignedUrlSchema>;
 export const confirmUploadSchema = z.object({
   key: z.string().min(1),
 })
+export type ConfirmUploadSchema = z.infer<typeof confirmUploadSchema>;
