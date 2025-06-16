@@ -14,15 +14,16 @@ const toRoutePath = (file: string) =>
     .replace(/^.*src\/routes\//, "")
     .replace(/\.(ts|js)$/, "")
     .replace(/\[\.{3}[^\]]+\]/g, "*") // [...slug] => *
-    .replace(/\[([^\]]+)\]/g, "_$1"); // [id] => :id
+    .replace(/\[([^\]]+)\]/g, ":$1"); // [id] => :id
 
 const toRouteName = (file: string) =>
   file
     .replace(/^.*src\/routes\//, "")
     .replace(/\.(ts|js)$/, "")
-    .replace(/\[\.{3}[^\]]+\]/g, "*") // [...slug] => *
-    .replace(/\[([^\]]+)\]/g, "_$1") // [id] => :id
-    .replace(/\//g, "_")
+    .replaceAll(/\[\.{3}[^\]]+\]/g, "*") // [...slug] => *
+    .replaceAll(/\[([^\]]+)\]/g, "_$1") // [id] => :id
+    .replaceAll(/\//g, "_")
+    .replaceAll("-", "_")
 async function main() {
   let files = await fastGlob([path.join(process.cwd(), "/src/routes/**/{get,post,put,delete,patch}.ts")]);
   
@@ -33,11 +34,11 @@ async function main() {
     const mod = await import(path.resolve(file));
     const method = path.basename(file, ".ts").toUpperCase(); // "get" -> "GET"
     const routePath = toRoutePath(file);
-    const routeName = toRouteName(file);
+    const routeName = snakeToCamel(toRouteName(file));
 
-    const name = snakeToCamel(routeName.replace(/^api_/, "").replace("-", "_"));
     const options = mod.options;
-
+    console.log(routeName);
+    
     if (!options?.schema) continue;
 
     const parts: string[] = [];
@@ -49,12 +50,11 @@ async function main() {
         if (response) {
           const names: Record<string, number> = {};
           for (const [key, value] of Object.entries(response)) {
-            const { node } = zodToTs(value, `${name}_${key}`);
+            const { node } = zodToTs(value, `${routeName}_${key}`);
             const typeName = "Response" + key;
             parts.push(`export type ${typeName} = ${printNode(node)}`);
-            names[`${name}.${typeName}`] = Number(key);
+            names[`${routeName}.${typeName}`] = Number(key);
           }
-          console.log(names);
           
           const successResponses = Object.entries(names).filter(([, value]) => value < 400).map(([name]) => name);
           const errorResponses = Object.entries(names).filter(([, value]) => value >= 400).map(([name]) => name);
@@ -72,18 +72,18 @@ async function main() {
       }
       const schema = options.schema[key];
       if (schema) {
-        const { node } = zodToTs(schema, `${name}_${key}`);
+        const { node } = zodToTs(schema, `${routeName}_${key}`);
         const typeName = snakeToCamel(key);
         parts.push(`export type ${typeName} = ${printNode(node)}`);
-        fields.push(`${key}: {} as ${name}.${typeName}`);
+        fields.push(`${key}: {} as ${routeName}.${typeName}`);
       } else {
         fields.push(`${key}: {} as any`);
       }
     }
 
-    const fullNamespace = `export namespace ${name} {\n${parts.join("\n")}\n}`;
-    if (!routeMap[name]) routeMap[name] = [];
-    routeMap[name].push(fullNamespace);
+    const fullNamespace = `export namespace ${routeName} {\n${parts.join("\n")}\n}`;
+    if (!routeMap[routeName]) routeMap[routeName] = [];
+    routeMap[routeName].push(fullNamespace);
 
     const entry = `  "${routePath.replace(`/${method.toLowerCase()}`, "")}": {
     method: "${method}",
@@ -107,6 +107,12 @@ export type ApiPath = keyof ApiRoutes;
 export type RouteData<Path extends ApiPath> = ApiRoutes[Path];
 `;
   const commonPath = path.join(process.cwd(), "../../packages/common")
+  // verify if __generated__ folder exists
+  try {
+    await fs.readdir(path.join(commonPath, "src/__generated__"));
+  } catch (error) {
+    await fs.mkdir(path.join(commonPath, "src/__generated__")); 
+  }
   await fs.writeFile(path.join(commonPath, "src/__generated__/api.ts"), output);
   console.log("✅ Types and apiRoutes generated!");
 }
