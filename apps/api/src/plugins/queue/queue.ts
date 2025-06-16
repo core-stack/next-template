@@ -5,7 +5,7 @@ export const addQueue = <T>(
   name: string,
   app: FastifyInstance,
   process: (app: FastifyInstance, job: Job<T>) => Promise<void>,
-  opts?: { queueOpts: QueueOptions, workerOpts?: WorkerOptions }
+  opts?: { queueOpts?: QueueOptions, workerOpts?: WorkerOptions }
 ) => {
   const redisConnection: RedisOptions = { url: app.env.REDIS_URL };
 

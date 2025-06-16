@@ -1,4 +1,4 @@
-import { Queue } from 'bullmq';
+import { Queue, QueueOptions as BullQueueOptions, WorkerOptions } from 'bullmq';
 import FastGlob from 'fast-glob';
 import fp from 'fastify-plugin';
 import path from 'path';
@@ -15,6 +15,12 @@ type Queues = {
   email: Queue<EmailPayload>;
   ["compress-image"]: Queue<CompressImagePayload>;
 };
+
+export type QueueOptions = {
+  ignore?: boolean
+  queueOpts?: BullQueueOptions
+  workerOpts?: WorkerOptions
+}
 
 type Options = {
   baseDir?: string
@@ -40,7 +46,7 @@ export default fp(async (
     }
 
     const job = mod.default;
-    const options = mod.options || {};
+    const options: QueueOptions = mod.options || {};
 
     if (typeof job !== "function") {
       logger.error(`Queue ${parsed.name} is not a valid function`);
@@ -52,7 +58,12 @@ export default fp(async (
     }
 
     try {
-      const { queue } = addQueue(parsed.name, { ...app, log: logger }, job);
+      const { queue } = addQueue(
+        parsed.name, 
+        { ...app, log: logger }, 
+        job, 
+        { queueOpts: options.queueOpts, workerOpts: options.workerOpts }
+      );
       queues.push(queue);
     } catch (err) {
       logger.error(`Queue ${parsed.name} failed with error: ${err}`);
