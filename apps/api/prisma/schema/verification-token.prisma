@@ -1,5 +1,6 @@
 enum VerificationType {
   ACTIVE_ACCOUNT
+  RESET_PASSWORD
 }
 
 model VerificationToken {

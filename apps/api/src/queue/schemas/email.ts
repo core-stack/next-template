@@ -3,7 +3,7 @@ import { z } from 'zod';
 export enum EmailTemplate {
   ACTIVE_ACCOUNT = "active-account",
   CHANGE_PASSWORD = "change-password",
-  FORGOT_PASSWORD = "forgot-password",
+  FORGET_PASSWORD = "forget-password",
   INVITE = "invite",
   NOTIFICATION = "notification",
   TENANT_DELETED = "tenant-deleted",
@@ -11,7 +11,7 @@ export enum EmailTemplate {
   TENANT_WILL_BE_DELETED = "tenant-will-be-deleted", // days after deletion
 }
 
-const forgotPasswordSchema = z.object({
+const forgetPasswordSchema = z.object({
   resetUrl: z.string().url(),
   name: z.string().nullable(),
 });
@@ -52,8 +52,8 @@ export const emailPayloadSchema = z.discriminatedUnion("template", [
     to: z.string().email(),
     subject: z.string(),
     from: z.string().optional(),
-    template: z.literal(EmailTemplate.FORGOT_PASSWORD),
-    context: forgotPasswordSchema,
+    template: z.literal(EmailTemplate.FORGET_PASSWORD),
+    context: forgetPasswordSchema,
   }),
   z.object({
     to: z.string().email(),

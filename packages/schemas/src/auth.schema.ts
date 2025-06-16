@@ -21,3 +21,14 @@ export const activeAccountSchema = z.object({
   token: z.string().uuid(),
 });
 export type ActiveAccountSchema = z.infer<typeof activeAccountSchema>;
+
+export const forgetPasswordSchema = z.object({
+  email: z.string().email(),
+})
+export type ForgetPasswordSchema = z.infer<typeof forgetPasswordSchema>;
+
+export const resetPasswordSchema = z.object({
+  token: z.string().uuid(),
+  password: passwordSchema,
+})
+export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;

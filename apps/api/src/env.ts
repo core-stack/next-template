@@ -13,6 +13,7 @@ const envSchema = z.object({
   JWT_REFRESH_TOKEN_DURATION: z.coerce.number().default(60 * 60 * 24 * 30 * 1000), // 30 days
 
   ACTIVE_ACCOUNT_TOKEN_EXPIRES: z.coerce.number().default(60 * 60 * 1000), // 1h
+  RESET_PASSWORD_TOKEN_EXPIRES: z.coerce.number().default(60 * 60 * 1000), // 1h
   ALLOW_CREATE_ACCOUNT: envBool.default("true"),
   
   REDIS_URL: z.string().url(),
