@@ -1,16 +1,16 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { Session } from "../session";
+import { Session } from '../session';
 
-export const authMiddleware = async (app: FastifyInstance, req: FastifyRequest, reply: FastifyReply) => {
+export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) => {
   const accessToken = req.cookies['access-token'];
   const refreshToken = req.cookies['refresh-token'];
 
   let session: Session | undefined;
   try {
-    session = await app.auth.getSession(accessToken);
+    session = await req.server.auth.getSession(accessToken);
     if (!session && refreshToken) {
-      const refreshResult = await app.auth.refreshToken(refreshToken);
+      const refreshResult = await req.server.auth.refreshToken(refreshToken);
       session = refreshResult.session;
 
       reply.setCookie("access-token", refreshResult.token.accessToken, {

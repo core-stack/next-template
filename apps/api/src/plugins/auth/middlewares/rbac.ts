@@ -1,9 +1,9 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { can, mergePermissions, numberToPermissions, Permission } from '@packages/permission';
 
 export const rbacMiddleware = (...requiredPermissions: Permission[]) => {
-  return async (_: FastifyInstance, req: FastifyRequest, reply: FastifyReply) => {
+  return async (req: FastifyRequest, reply: FastifyReply) => {
     const { session, params } = req;
     if (!session) return reply.code(401).send({ error: 'UNAUTHORIZED' });
 

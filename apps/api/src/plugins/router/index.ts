@@ -1,10 +1,11 @@
 import fastGlob from 'fast-glob';
-import { FastifyInstance, FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
+import { FastifyInstance, preHandlerHookHandler, RouteShorthandOptions } from 'fastify';
 import fp from 'fastify-plugin';
 import path from 'path';
 
 const HTTP_METHODS = ["get", "post", "put", "delete", "patch", "all"] as const;
 type HttpMethod = typeof HTTP_METHODS[number];
+export type Middleware = preHandlerHookHandler; // Use Fastify's type for middleware
 
 // Convert [id] to :id and [...slug] to *
 function segmentToRoute(seg: string): string {
@@ -22,19 +23,31 @@ function buildRouteFromPath(fullPath: string, baseDir: string): string {
 }
 
 // Try to find middleware.ts in the folder
-async function findMiddleware(dir: string): Promise<((req: FastifyRequest, reply: FastifyReply) => Promise<void>) | null> {
-  try {
-    const mod = await import(path.resolve(dir, "middleware.ts"));
-    const middlewareFn = mod.default;
-    if (typeof middlewareFn === "function") {
-      return async (req, reply) => {
-        await middlewareFn(req.server, req, reply);
-      };
+async function findMiddlewares(routeDir: string, baseDir: string): Promise<Middleware[]> {
+  const middlewares: Middleware[] = [];
+  let currentDir = routeDir;
+
+  // Percorre todas as pastas pai até chegar ao baseDir
+  while (currentDir.startsWith(baseDir)) {
+    const middlewarePath = path.join(currentDir, 'middleware.ts');
+    
+    try {
+      // Usando import dinâmico com caminho completo
+      const mod = await import(middlewarePath);
+      if (typeof mod.default === 'function') {
+        middlewares.push(mod.default);
+      }
+    } catch (error) {
+      // Arquivo não encontrado, continuamos a busca
     }
-  } catch {
-    // not found, ignore
+
+    // Move para a pasta pai
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) break; // Evita loop infinito
+    currentDir = parentDir;
   }
-  return null;
+
+  return middlewares;
 }
 
 // Loader
@@ -67,13 +80,10 @@ export async function registerRoutes(
       logger.warn(`Route ${routePath} is ignored`);
       continue;
     }
-    const middleware = await findMiddleware(parsed.dir);
+    const middlewares = await findMiddlewares(parsed.dir, baseDir);
 
-    const middlewares: any[] = [];
-    if (middleware) middlewares.push(middleware);
-    if (mod.middlewares) middlewares
-      .push(...mod.middlewares.map((m: any) => async (req: FastifyRequest, reply: FastifyReply) => m(req.server, req, reply)));
-
+    if (mod.middlewares) middlewares.push(...(mod.middlewares as Middleware[]));
+    
     if (options.preHandler) {
       const existing = Array.isArray(options.preHandler) ? options.preHandler : [options.preHandler];
       middlewares.push(...existing);
@@ -84,11 +94,11 @@ export async function registerRoutes(
       url: routePath === "" ? "/" : routePath,
       handler,
       logLevel: logLevel,
-      preHandler: middlewares.length ? middlewares : undefined,
+      preHandler: middlewares.length > 0 ? middlewares : undefined,
       ...options,
     });
-
-    logger.info(`[${method.toUpperCase()}] ${routePath} registered successfully`);
+    const logMiddlewares = middlewares.map((m) => m.name || 'anonymous').join(" > ");
+    logger.info(`[${method.toUpperCase()}] ${logMiddlewares.length ? `(${logMiddlewares})` : ""} ${routePath} registered successfully`);
   }
 }
 
