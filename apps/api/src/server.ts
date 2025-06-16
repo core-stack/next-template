@@ -8,6 +8,7 @@ import authPlugin from './plugins/auth';
 import bootstrapPlugin from './plugins/bootstrap';
 import cronPlugin from './plugins/cron';
 import envPlugin from './plugins/env';
+import i18nPlugin from './plugins/i18n';
 import prismaPlugin from './plugins/prisma';
 import queuePlugin from './plugins/queue';
 import routerPlugin from './plugins/router';
@@ -52,6 +53,7 @@ async function main() {
   await app.register(prismaPlugin);
   await app.register(queuePlugin);
   await app.register(cronPlugin);
+  await app.register(i18nPlugin);
   await app.register(authPlugin, {
     jwt: {
       secret: env.JWT_SECRET,

@@ -14,7 +14,8 @@
     "db:migrate:dev": "cd apps/api && pnpm run db:migrate:dev",
     "db:push": "cd apps/api && pnpm run db:push",
     "db:studio": "cd apps/api && pnpm run db:studio",
-    "generate:api": "cd apps/api && pnpm generate:api"
+    "generate:api": "cd apps/api && pnpm generate:api",
+    "generate:i18n": "cd apps/api && pnpm generate:i18n"
   },
   "devDependencies": {
     "@swc/helpers": "^0.5.17",
