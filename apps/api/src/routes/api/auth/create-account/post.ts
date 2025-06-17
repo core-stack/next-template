@@ -5,6 +5,7 @@ import z from 'zod';
 import { env } from '@/env';
 import { hashPassword } from '@/plugins/auth/utils';
 import { EmailTemplate } from '@/queue/schemas/email';
+import { errorResponseSchema } from '@/schemas/error-response.schema';
 import { ROLES } from '@packages/permission';
 import { CreateAccountSchema, createAccountSchema } from '@packages/schemas';
 
@@ -16,7 +17,7 @@ export default async function handler(req:FastifyRequest<{ Body: CreateAccountSc
 
   // hash password
   const hashedPassword = await hashPassword(password);
-  await req.server.prisma.$transaction(async (tx) => {
+  return await req.server.prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
       data: {
         email, name, password: hashedPassword,
@@ -47,8 +48,12 @@ export default async function handler(req:FastifyRequest<{ Body: CreateAccountSc
       }
     });
 
-    return reply.status(201).send({});
+    return reply.status(201).send({
+      message: /*i18n*/("Account created successfully"),
+      status: 201
+    });
   });
+
 }
 const successSchema = z.object({
   message: z.string(),
@@ -59,7 +64,7 @@ export const options: RouteShorthandOptions = {
     body: createAccountSchema,
     response: {
       201: successSchema,
-      400: z.object({ message: z.string() })
+      400: errorResponseSchema
     }
   }
 }

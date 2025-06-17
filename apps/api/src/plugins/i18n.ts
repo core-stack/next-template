@@ -12,11 +12,12 @@ export default fp(async (fastify) => {
       fallbackLng: 'en',
       preload: ['en', 'pt'],
       backend: {
-        loadPath: path.join(__dirname, '../../locales/{{lng}}.json'),
+        loadPath: path.join(__dirname, '../../../../locales/{{lng}}.json'),
       },
     });
 
-  fastify.register(middleware.plugin, {
-    i18next,
+  fastify.addHook('onRequest', async (req) => {
+    const lng = req.headers['accept-language']?.split(',')[0] || 'en';
+    req.t = i18next.getFixedT(lng);
   });
 });

@@ -77,8 +77,6 @@ export class Auth {
       lastSeen: new Date(),
       id: sessionId,
     };
-    console.log("Created session", session);
-
     await this.store.set(session.id, session, { expiry: token.refreshTokenDuration });
     return { token, session };
   }
