@@ -11,7 +11,7 @@
     "copy:generated": "cp -r src/__generated__ dist/__generated__",
     "clean": "rm -rf ./dist",
     "build": "pnpm clean && tsc -p tsconfig.json && pnpm copy:generated && tsc-alias",
-    "start": "node dist/server.js",
+    "start": "NODE_ENV=production node dist/server.js",
     "db:generate": "dotenv -e ../../.env -- prisma generate",
     "db:migrate": "dotenv -e ../../.env -- prisma migrate deploy",
     "db:migrate:dev": "dotenv -e ../../.env -- prisma migrate dev",
@@ -69,9 +69,11 @@
     "tsc-alias": "^1.8.16",
     "tsup": "^8.5.0",
     "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "@types/bun": "latest"
   },
   "prisma": {
     "schema": "./prisma/schema"
-  }
+  },
+  "private": true
 }

@@ -26,7 +26,7 @@ export default fp(async (app) => {
   const logger = app.log.child({ plugin: 'QUEUE' });
 
   const isProd = process.env.NODE_ENV === 'production';
-  const baseDir = path.resolve(isProd ? 'dist/bootstrap' : 'src/bootstrap');
+  const baseDir = path.resolve(isProd ? 'dist/queue' : 'src/queue');
   const ext = isProd ? '*.js' : '*.ts';
   
   const files = await FastGlob(ext, { cwd: baseDir, absolute: true });

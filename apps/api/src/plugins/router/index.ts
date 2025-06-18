@@ -1,5 +1,5 @@
 import fastGlob from 'fast-glob';
-import { FastifyInstance, preHandlerHookHandler, RouteShorthandOptions } from 'fastify';
+import { FastifyInstance, preHandlerHookHandler } from 'fastify';
 import fp from 'fastify-plugin';
 import path from 'path';
 
@@ -9,8 +9,8 @@ export type Middleware = preHandlerHookHandler; // Use Fastify's type for middle
 
 
 const isProd = process.env.NODE_ENV === 'production';
-const baseDir = path.resolve(isProd ? 'dist/bootstrap' : 'src/bootstrap');
-const ext = isProd ? '*.js' : '*.ts';
+const baseDir = path.resolve(isProd ? 'dist/routes' : 'src/routes');
+const ext = isProd ? 'js' : 'ts';
 // Convert [id] to :id and [...slug] to *
 function segmentToRoute(seg: string): string {
   if (seg.startsWith("[...") && seg.endsWith("]")) return "*";
@@ -62,28 +62,21 @@ export async function registerRoutes(app: FastifyInstance) {
     HTTP_METHODS.map((method) => `**/${method}.${ext}`),
     { cwd: baseDir, absolute: true }
   );
-
+  console.log(HTTP_METHODS.map((method) => `**/${method}.${ext}`));
+  
   for (const file of files) {
     const parsed = path.parse(file);
     const method = parsed.name as HttpMethod;
     const routePath = buildRouteFromPath(file, baseDir);
-    const mod = await import(file);
+    const { default: handler, options = {}, ignore, middlewares: modMiddlewares } = await import(file);
 
-    if (!mod.default) {
-      logger.error(`Route ${routePath} has no default export`);
-      continue;
-    }
-
-    const handler = mod.default;
-    const options: RouteShorthandOptions = mod.options || {};
-    const ignore = mod.ignore || false;
     if (ignore) {
       logger.warn(`Route ${routePath} is ignored`);
       continue;
     }
     const middlewares = await findMiddlewares(parsed.dir, baseDir);
 
-    if (mod.middlewares) middlewares.push(...(mod.middlewares as Middleware[]));
+    if (modMiddlewares) middlewares.push(...(modMiddlewares as Middleware[]));
     
     if (options.preHandler) {
       const existing = Array.isArray(options.preHandler) ? options.preHandler : [options.preHandler];

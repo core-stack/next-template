@@ -8,7 +8,7 @@ import { cronJobOptionsSchema } from './types';
 export default fp(async (app) => {
   const logger = app.log.child({ plugin: 'CRON' });
   const isProd = process.env.NODE_ENV === 'production';
-  const baseDir = path.resolve(isProd ? 'dist/bootstrap' : 'src/bootstrap');
+  const baseDir = path.resolve(isProd ? 'dist/cron' : 'src/cron');
   const ext = isProd ? '*.js' : '*.ts';
   
   const files = await FastGlob(ext, { cwd: baseDir, absolute: true });
@@ -18,16 +18,8 @@ export default fp(async (app) => {
   }
   for (const file of files) {
     const parsed = path.parse(file);
-    const mod = await import(file);
-
-    if (!mod.default) {
-      logger.error(`Cron job ${parsed.name} has no default export`);
-      continue;
-    }
-
-    const job = mod.default;
-    const options = mod.options || {};
-
+    const { default: job, options = {} } = await import(file);
+    
     if (typeof job !== "function") {
       logger.error(`Cron job ${parsed.name} is not a valid function`);
       continue;
