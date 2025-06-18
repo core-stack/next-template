@@ -7,6 +7,10 @@ const HTTP_METHODS = ["get", "post", "put", "delete", "patch", "all"] as const;
 type HttpMethod = typeof HTTP_METHODS[number];
 export type Middleware = preHandlerHookHandler; // Use Fastify's type for middleware
 
+
+const isProd = process.env.NODE_ENV === 'production';
+const baseDir = path.resolve(isProd ? 'dist/bootstrap' : 'src/bootstrap');
+const ext = isProd ? '*.js' : '*.ts';
 // Convert [id] to :id and [...slug] to *
 function segmentToRoute(seg: string): string {
   if (seg.startsWith("[...") && seg.endsWith("]")) return "*";
@@ -29,7 +33,7 @@ async function findMiddlewares(routeDir: string, baseDir: string): Promise<Middl
 
   // Percorre todas as pastas pai até chegar ao baseDir
   while (currentDir.startsWith(baseDir)) {
-    const middlewarePath = path.join(currentDir, 'middleware.ts');
+    const middlewarePath = path.join(currentDir, `middleware.${ext}`);
     
     try {
       // Usando import dinâmico com caminho completo
@@ -51,21 +55,18 @@ async function findMiddlewares(routeDir: string, baseDir: string): Promise<Middl
 }
 
 // Loader
-export async function registerRoutes(
-  app: FastifyInstance,
-  { baseDir = path.resolve("src/routes"), logLevel }: Options
-) {
+export async function registerRoutes(app: FastifyInstance) {
   const logger = app.log.child({ plugin: 'ROUTER' });
 
   const files = await fastGlob(
-    HTTP_METHODS.map((method) => `**/${method}.ts`),
+    HTTP_METHODS.map((method) => `**/${method}.${ext}`),
     { cwd: baseDir, absolute: true }
   );
 
   for (const file of files) {
     const parsed = path.parse(file);
     const method = parsed.name as HttpMethod;
-    const routePath = buildRouteFromPath(file, baseDir!);
+    const routePath = buildRouteFromPath(file, baseDir);
     const mod = await import(file);
 
     if (!mod.default) {
@@ -93,7 +94,6 @@ export async function registerRoutes(
       method: method.toUpperCase(),
       url: routePath === "" ? "/" : routePath,
       handler,
-      logLevel: logLevel,
       preHandler: middlewares.length > 0 ? middlewares : undefined,
       ...options,
     });
@@ -102,11 +102,7 @@ export async function registerRoutes(
   }
 }
 
-type Options = {
-  baseDir?: string
-  logLevel?: "info" | "warn" | "error" | "silent" | "debug" | "trace"
-};
 
-export default fp(async (app, opts: Options) => {
-  await registerRoutes(app, opts);
+export default fp(async (app) => {
+  await registerRoutes(app);
 });

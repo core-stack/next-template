@@ -37,7 +37,7 @@ export const GoogleProvider = ({ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIREC
       if (!tokenRes.ok) {
         throw new Error(`Erro ao obter token: ${tokenRes.statusText}`);
       }
-      const { access_token } = (await tokenRes.json()).data;
+      const { access_token } = (await tokenRes.json() as any).data;
       const profileRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
         method: "GET",
         headers: {
@@ -49,7 +49,7 @@ export const GoogleProvider = ({ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIREC
       if (!profileRes.ok) {
         throw new Error(`Erro ao obter token: ${profileRes.statusText}`);
       }
-      const profile = (await profileRes.json()).data;
+      const profile = (await profileRes.json() as any).data;
       return {
         providerAccountId: profile.sub,
         email: profile.email,

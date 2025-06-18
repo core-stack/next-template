@@ -37,7 +37,6 @@ async function main() {
     const routeName = snakeToCamel(toRouteName(file));
 
     const options = mod.options;
-    console.log(routeName);
     
     if (!options?.schema) continue;
 
@@ -60,7 +59,6 @@ async function main() {
           const errorResponses = Object.entries(names).filter(([, value]) => value >= 400).map(([name]) => name);
           const responseType = successResponses.length ? successResponses.join(" | ") : "unknown";
           const errorType = errorResponses.length ? errorResponses.join(" | ") : "unknown";
-          console.log(errorType);
 
           fields.push(`response: {} as ${responseType}`);
           fields.push(`error: {} as ${errorType}`);
