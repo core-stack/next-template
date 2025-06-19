@@ -1,25 +1,24 @@
 import { ArrowRight, CheckCircle, XCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { publicCaller } from '@/lib/trpc/server';
-import { TRPCError } from '@trpc/server';
+import { fetchApi } from '@/lib/fetcher';
 
 type ActivateAccountPageProps = {
   params: Promise<{ token: string }>;
 };
 
 export default async function ActivateAccountPage({ params }: ActivateAccountPageProps) {
+  const t = await getTranslations();
   const { token } = await params;
-  let errorMessage: string | undefined = !!token ? undefined : "Token de ativação inválido";
+  let errorMessage: string | undefined = !!token ? undefined : t/*i18n*/("Invalid activation code");
   if (!errorMessage) {
-    try {
-      await publicCaller.auth.activateAccount({ token });
-    } catch (error) {
-      if (error instanceof TRPCError && error.code === "BAD_REQUEST") {
-        errorMessage = error.message;
-      }
+    const res = await fetchApi("/api/auth/active-account", { body: { token } });
+    if (!res.success) {
+      errorMessage = res.error?.message || t/*i18n*/("Invalid activation code");
     }
   }
 
@@ -28,8 +27,8 @@ export default async function ActivateAccountPage({ params }: ActivateAccountPag
       <div className="w-full max-w-md mx-auto">
         <Card className="border-border/40 shadow-xl">
           <CardHeader>
-            <CardTitle className='text-center'>Ativação de Conta</CardTitle>
-            <CardDescription className='text-center'>Estamos processando a ativação da sua conta</CardDescription>
+            <CardTitle className='text-center'>{t/*i18n*/("Account Activation")}</CardTitle>
+            <CardDescription className='text-center'>{t/*i18n*/("We are activating your account")}</CardDescription>
           </CardHeader>
           <CardContent className="pb-8 px-8">
             {errorMessage ? <ActivationError error={errorMessage} /> : <ActivationSuccess />}
@@ -41,6 +40,8 @@ export default async function ActivateAccountPage({ params }: ActivateAccountPag
 }
 
 const ActivationSuccess = () => {
+  const t = useTranslations();
+
   return (
     <div className="text-center py-6 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-center">
@@ -52,14 +53,14 @@ const ActivationSuccess = () => {
         </div>
       </div>
       <div className="space-y-3">
-        <h2 className="text-2xl font-semibold text-foreground">Conta Ativada!</h2>
+        <h2 className="text-2xl font-semibold text-foreground">{t/*i18n*/("Account Activated!")}</h2>
         <p className="text-muted-foreground max-w-sm mx-auto">
-          Sua conta foi ativada com sucesso. Agora você pode fazer login para acessar sua conta.
+          {t/*i18n*/("Your account was activated successfully. Now you can log in to access your account.")}
         </p>
       </div>
       <Button asChild size="lg" className="mt-4 px-8 font-medium">
         <Link href="/login" className="flex items-center">
-          Continuar para Login <ArrowRight className="ml-2 h-4 w-4" />
+          {t/*i18n*/("Continue to Login")} <ArrowRight className="ml-2 h-4 w-4" />
         </Link>
       </Button>
     </div>
@@ -67,21 +68,23 @@ const ActivationSuccess = () => {
 }
 
 const ActivationError = ({ error }: { error: string }) => {
+  const t = useTranslations();
+
   return (
     <div className="text-center py-6 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-center">
         <div className="relative">
-          <div className="relative rounded-full p-4 bg-red-100 dark:bg-red-900/30">
-            <XCircle className="h-16 w-16 text-red-600 dark:text-red-500" />
+          <div className="relative rounded-full p-4 bg-destructive/20">
+            <XCircle className="h-16 w-16 text-destructive" />
           </div>
         </div>
       </div>
       <div className="space-y-3">
-        <h2 className="text-2xl font-semibold text-foreground">Falha na Ativação</h2>
+        <h2 className="text-2xl font-semibold text-foreground">{t/*i18n*/("Failed to Activate Account")}</h2>
         <p className="text-muted-foreground max-w-sm mx-auto">{error}</p>
       </div>
       <Button asChild variant="outline" size="lg" className="mt-4 px-8 font-medium">
-        <Link href="/login">Voltar para Login</Link>
+        <Link href="/login">{t/*i18n*/("Back to Login")}</Link>
       </Button>
     </div>
   )

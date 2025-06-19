@@ -72,5 +72,17 @@
   "Sign in": "Sign in",
   "email@example": "email@example",
   "Create an account": "Create an account",
-  "Create your account to access the platform": "Create your account to access the platform"
+  "Create your account to access the platform": "Create your account to access the platform",
+  "Activation link invalid": "Activation link invalid",
+  "Account activation": "Account activation",
+  "Activation link expired": "Activation link expired",
+  "Account activated": "Account activated",
+  "Invalid activation code": "Invalid activation code",
+  "Account Activation": "Account Activation",
+  "We are activating your account": "We are activating your account",
+  "Account Activated!": "Account Activated!",
+  "Your account was activated successfully. Now you can log in to access your account.": "Your account was activated successfully. Now you can log in to access your account.",
+  "Continue to Login": "Continue to Login",
+  "Failed to Activate Account": "Failed to Activate Account",
+  "Back to Login": "Back to Login"
 }

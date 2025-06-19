@@ -3,6 +3,8 @@ import moment from 'moment';
 
 import { env } from '@/env';
 import { EmailTemplate } from '@/queue/schemas/email';
+import { errorResponseSchema } from '@/schemas/error-response.schema';
+import { successResponseSchema } from '@/schemas/success-response.schema';
 import { ActiveAccountSchema, activeAccountSchema } from '@packages/schemas';
 
 export default async function handler(req: FastifyRequest<{ Body: ActiveAccountSchema }>, reply: FastifyReply) {
@@ -11,7 +13,7 @@ export default async function handler(req: FastifyRequest<{ Body: ActiveAccountS
     where: { token, type: "ACTIVE_ACCOUNT" },
     include: { user: true }
   });
-  if (!verificationToken) return reply.code(400).send({ message: "Link de ativação inválido" });
+  if (!verificationToken) return reply.code(400).send({ message: /*i18n*/("Activation link invalid") });
 
   if (moment().isAfter(verificationToken.expires)) {
     return req.server.prisma.$transaction(async (tx) => {
@@ -27,23 +29,31 @@ export default async function handler(req: FastifyRequest<{ Body: ActiveAccountS
       });
       await req.server.queue.email.add("", {
         to: verificationToken.user.email!,
-        subject: "Ativação de conta",
+        subject: /*i18n*/("Account activation"),
         template: EmailTemplate.ACTIVE_ACCOUNT,
         context: {
           name: verificationToken.user.name!,
           activationUrl: `${req.server.env.FRONTEND_URL}/auth/activate/${newToken.token}`
         }
       });
-      return reply.code(400).send({ message: "O link de ativação expirou. Um novo link foi enviado para o seu email." });
+      return reply.code(400).send({ message: /*i18n*/("Activation link expired") });
     });
   }
   const user = verificationToken.user;
 
   await req.server.prisma.user.update({ where: { id: user.id }, data: { emailVerified: new Date() } });
   await req.server.prisma.verificationToken.deleteMany({ where: { userId: user.id, type: "ACTIVE_ACCOUNT" } });
-  return { message: "Conta ativada com sucesso" };
+  return { message: /*i18n*/("Account activated") };
 }
 
-export const options: RouteShorthandOptions = { schema: { body: activeAccountSchema } };
+export const options: RouteShorthandOptions = { 
+  schema: {
+    body: activeAccountSchema,
+    response: {
+      200: successResponseSchema,
+      400: errorResponseSchema
+    }
+  }
+};
 
 export const ignore = !env.ALLOW_CREATE_ACCOUNT;
