@@ -1,19 +1,23 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
-import { trpc } from "@/lib/trpc/client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail } from "lucide-react";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { FcGoogle } from "react-icons/fc";
+import { Mail } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { FcGoogle } from 'react-icons/fc';
+
+import { FormInput } from '@/components/form/input';
+import { Button } from '@/components/ui/button';
+import { Form } from '@/components/ui/form';
+import { Separator } from '@/components/ui/separator';
+import { useApiMutation } from '@/hooks/use-api-mutation';
+import { useToast } from '@/hooks/use-toast';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { createAccountSchema, CreateAccountSchema } from '@packages/schemas';
 
 export function CreateAccountForm() {
   const { toast } = useToast();
+  const t = useTranslations()
   const form = useForm<CreateAccountSchema>({
     resolver: zodResolver(createAccountSchema),
     defaultValues: {
@@ -25,18 +29,18 @@ export function CreateAccountForm() {
   });
 
   const isLoading = form.formState.isSubmitting;
-  const { mutate } = trpc.auth.createAccount.useMutation();
+  const { mutate } = useApiMutation("/api/auth/create-account");
   const onSubmit = form.handleSubmit(async (data) => {
-    mutate(data, {
+    mutate({ body: data }, {
       onSuccess: () => {
         toast({
-          title: "Conta criada com sucesso",
-          description: "Um email de ativação foi enviado para você. Por favor, verifique sua caixa de entrada.",
+          title: t/*i18n*/("Account created"),
+          description: t/*i18n*/("Check your email to confirm your account"),
         })
       },
       onError: (error) => {
         toast({
-          title: "Erro ao criar conta",
+          title: t/*i18n*/("Error creating account"),
           description: error.message,
           variant: "destructive",
         })
@@ -48,74 +52,36 @@ export function CreateAccountForm() {
     <div className="grid gap-6">
       <Form {...form}>
         <form onSubmit={onSubmit} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nome</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Seu nome"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    disabled={isLoading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <FormInput 
+            name='name'
+            label={t/*i18n*/("Name")}
+            placeholder={t/*i18n*/("John Doe")}
+            autoCapitalize="none"
+            autoCorrect="off"
           />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="nome@exemplo.com"
-                    type="email"
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    autoCorrect="off"
-                    disabled={isLoading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <FormInput
+            name='email'
+            label={t/*i18n*/("Email")}
+            placeholder={`${t/*i18n*/("email@example")}.com`}
+            type="email"
+            autoCapitalize="none"
+            autoComplete="email"
+            autoCorrect="off"
           />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Senha</FormLabel>
-                <FormControl>
-                  <Input type="password" disabled={isLoading} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirmar Senha</FormLabel>
-                <FormControl>
-                  <Input type="password" disabled={isLoading} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <FormInput
+            name='password'
+            label={t/*i18n*/("Password")}
+            placeholder={t/*i18n*/("Password")}
+            type="password"
+            />
+          <FormInput
+            name='confirmPassword'
+            placeholder={t/*i18n*/("Confirm Password")}
+            label={t/*i18n*/("Confirm Password")}
+            type="password"
           />
           <Button type="submit" className="w-full" isLoading={isLoading}>
-            Criar conta
+            {t/*i18n*/("Create account")}
           </Button>
         </form>
       </Form>
@@ -124,7 +90,7 @@ export function CreateAccountForm() {
           <Separator className="w-full" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Ou continue com</span>
+          <span className="bg-background px-2 text-muted-foreground">{t/*i18n*/("Or continue with")}</span>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
@@ -138,9 +104,9 @@ export function CreateAccountForm() {
         </Button>
       </div>
       <div className="text-center text-sm text-muted-foreground">
-        Já tem uma conta?{" "}
+        {t/*i18n*/("Already have an account?")}{" "}
         <Link href="/auth/login" className="underline underline-offset-4 hover:text-primary">
-          Entrar
+          {t/*i18n*/("Sign in")}
         </Link>
       </div>
     </div>

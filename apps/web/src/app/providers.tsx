@@ -1,16 +1,18 @@
-import { Toaster } from "@/components/ui/toaster";
-import { ThemeProvider } from "@/context/theme";
-import { TRPCProvider } from "@/lib/trpc/provider";
+import { NextIntlClientProvider } from 'next-intl';
+
+import { Toaster } from '@/components/ui/toaster';
+import { QueryClientContext } from '@/context/query-client';
+import { ThemeProvider } from '@/context/theme';
 
 export function Providers({ children }: { children: React.ReactNode}) {
   return (
-    <>
-      <TRPCProvider>
+    <NextIntlClientProvider>
+      <QueryClientContext>
         <ThemeProvider defaultTheme="system" storageKey="theme">
           {children}
         </ThemeProvider>
-      </TRPCProvider>
-      <Toaster />
-    </>
+        <Toaster />
+      </QueryClientContext>
+    </NextIntlClientProvider>
   )
 }

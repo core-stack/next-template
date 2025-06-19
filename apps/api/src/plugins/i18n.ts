@@ -17,7 +17,7 @@ export default fp(async (fastify) => {
     });
 
   fastify.addHook('onRequest', async (req) => {
-    const lng = req.headers['accept-language']?.split(',')[0] || 'en';
+    const lng = req.headers['locale'] || 'en';
     req.t = i18next.getFixedT(lng);
   });
 });

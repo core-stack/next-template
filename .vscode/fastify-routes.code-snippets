@@ -17,5 +17,6 @@
       "};"
     ],
     "description": "Fastify route handler with Prisma, Zod, and auth session creation"
-  }
+  },
+  
 }

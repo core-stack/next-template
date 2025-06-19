@@ -6,7 +6,12 @@ export const createAccountSchema = z.object({
   name: z.string({ message: /*i18n*/("The name is required") }).min(2, /*i18n*/("The name must be at least 2 characters")),
   email: z.string({ message: /*i18n*/("The email is required") }).email(/*i18n*/("The email is invalid")),
   password: passwordSchema,
+  confirmPassword: passwordSchema,
+}).refine(data => data.password === data.confirmPassword, {
+  message: /*i18n*/("Passwords do not match"),
+  path: ["confirmPassword"],
 });
+
 export type CreateAccountSchema = z.infer<typeof createAccountSchema>;
 
 export const loginSchema = z.object({
