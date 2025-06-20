@@ -1,13 +1,13 @@
 
-import { WorkspacesHeader } from "@/components/workspace-header";
+import { TenantsHeader } from '@/components/tenant-header';
 
-import { CreateWorkspaceButton } from "./components/create-button";
-import { WorkspaceList } from "./components/list";
+import { CreateWorkspaceButton } from './components/create-button';
+import { WorkspaceList } from './components/list';
 
 export default async function Workspaces() {
   return (
     <>
-      <WorkspacesHeader />
+      <TenantsHeader />
       <div className="container py-10 m-auto">
         <div className="flex items-center justify-between mb-8">
           <div>

@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
 
 import { errorResponseSchema } from '@/schemas/error-response.schema';
+import { getSelfSchema } from '@packages/schemas';
 
 export default async function handler(req: FastifyRequest, reply: FastifyReply) {
   const user = await req.server.prisma.user.findUnique({
@@ -10,7 +11,7 @@ export default async function handler(req: FastifyRequest, reply: FastifyReply) 
       name: true,
       role: true,
       image: true,
-      members: { include: { tenant: { select: { id: true, slug: true } }} }
+      members: { include: { role: true, tenant: { select: { id: true, slug: true } }} }
     },
     where: { id: req.session.user.id },
   });
@@ -21,6 +22,7 @@ export default async function handler(req: FastifyRequest, reply: FastifyReply) 
 export const options: RouteShorthandOptions = {
   schema: {
     response: {
+      200: getSelfSchema,
       401: errorResponseSchema,
       404: errorResponseSchema
     }

@@ -1,12 +1,13 @@
 import type { Metadata } from "next"
-import { WorkspacesHeader } from "@/components/workspace-header";
-import { auth } from "@/lib/auth";
-import { caller } from "@/lib/trpc/server";
-import { PreWorkspaceSchema } from "@packages/prisma";
-import { TRPCError } from "@trpc/server";
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation';
 
-import { ReactivateWorkspaceForm } from "./reactivate-form";
+import { TenantsHeader } from '@/components/tenant-header';
+import { auth } from '@/lib/auth';
+import { caller } from '@/lib/trpc/server';
+import { PreWorkspaceSchema } from '@packages/prisma';
+import { TRPCError } from '@trpc/server';
+
+import { ReactivateWorkspaceForm } from './reactivate-form';
 
 interface ReactivateWorkspacePageProps {
   params: Promise<{ slug: string }>
@@ -41,7 +42,7 @@ export default async function ReactivateWorkspacePage({ params }: ReactivateWork
 
   return (
     <>
-      <WorkspacesHeader />
+      <TenantsHeader />
       <div className="container py-10">
         <div className="max-w-3xl mx-auto">
           <ReactivateWorkspaceForm workspace={workspace} />

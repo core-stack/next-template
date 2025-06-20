@@ -1,37 +1,41 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
-import { RouterOutput } from "@/lib/trpc/app.router";
-import { trpc } from "@/lib/trpc/client";
-import { Building, Calendar, Check, Users, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Building, Calendar, Check, Users, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
+} from '@/components/ui/card';
+import { useApiMutation } from '@/hooks/use-api-mutation';
+import { toast } from '@/hooks/use-toast';
+import { ApiInviteIdGet } from '@packages/common';
 
 type InviteAcceptanceProps = {
-  invite: RouterOutput["invite"]["getByIdWithWorkspace"];
+  invite: ApiInviteIdGet.Response200
 }
 
 export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
+  const t = useTranslations();
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<"pending" | "accepted" | "rejected" | "error">("pending");
   const router = useRouter();
-  const { mutateAsync: acceptInvite } = trpc.invite.accept.useMutation();
-  const { mutateAsync: rejectInvite } = trpc.invite.reject.useMutation();
+  const {} = useApiMutation("")
   const handleAccept = async () => {
     setIsLoading(true);
     try {
       await acceptInvite({ id: invite.id as string });
       setStatus("accepted");
       toast({
-        title: "Convite aceito",
-        description: `Você agora é membro do workspace ${invite.workspace.name}`,
+        title: t/*i18n*/("Convite aceito"),
+        description: `Você agora é membro do  ${invite.tenant.name}`,
       });
 
       setTimeout(() => {
-        router.push(`/w/${invite.workspace.slug}`);
+        router.push(`/w/${invite.tenant.slug}`);
       }, 2000);
     } catch (error) {
       console.error("Erro ao aceitar convite:", error);

@@ -27,7 +27,7 @@ function buildRouteFromPath(fullPath: string, baseDir: string): string {
 }
 
 // Try to find middleware.ts in the folder
-async function findMiddlewares(routeDir: string, baseDir: string): Promise<Middleware[]> {
+async function findMiddlewares(app: FastifyInstance, routeDir: string, baseDir: string): Promise<Middleware[]> {
   const middlewares: Middleware[] = [];
   let currentDir = routeDir;
 
@@ -40,6 +40,12 @@ async function findMiddlewares(routeDir: string, baseDir: string): Promise<Middl
       const mod = await import(middlewarePath);
       if (typeof mod.default === 'function') {
         middlewares.push(mod.default);
+      } if (Array.isArray(mod.default)) {
+        if (mod.default.length === 0) continue;
+        if (mod.default.some(m => typeof m !== 'function')) {
+          app.log.warn(`Middleware ${middlewarePath} is not a valid function`);
+        }
+        middlewares.push(...mod.default);
       }
     } catch (error) {
       // Arquivo não encontrado, continuamos a busca
@@ -62,8 +68,7 @@ export async function registerRoutes(app: FastifyInstance) {
     HTTP_METHODS.map((method) => `**/${method}.${ext}`),
     { cwd: baseDir, absolute: true }
   );
-  console.log(HTTP_METHODS.map((method) => `**/${method}.${ext}`));
-  
+  const registeredRoutes: { path: string, middlewares: string[], method: HttpMethod }[] = [];
   for (const file of files) {
     const parsed = path.parse(file);
     const method = parsed.name as HttpMethod;
@@ -74,7 +79,7 @@ export async function registerRoutes(app: FastifyInstance) {
       logger.warn(`Route ${routePath} is ignored`);
       continue;
     }
-    const middlewares = await findMiddlewares(parsed.dir, baseDir);
+    const middlewares = await findMiddlewares(app, parsed.dir, baseDir);
 
     if (modMiddlewares) middlewares.push(...(modMiddlewares as Middleware[]));
     
@@ -90,9 +95,16 @@ export async function registerRoutes(app: FastifyInstance) {
       preHandler: middlewares.length > 0 ? middlewares : undefined,
       ...options,
     });
-    const logMiddlewares = middlewares.map((m) => m.name || 'anonymous').join(" > ");
-    logger.info(`[${method.toUpperCase()}] ${logMiddlewares.length ? `(${logMiddlewares})` : ""} ${routePath} registered successfully`);
+    registeredRoutes.push({
+      method,
+      path: routePath,
+      middlewares: middlewares.map((m) => m.name || 'anonymous')
+    });
   }
+  registeredRoutes
+    .sort((a, b) => a.path.localeCompare(b.path))
+    .forEach((r) => logger.info(`[${r.method.toUpperCase()}] ${r.middlewares.length ? `(${r.middlewares})` : ""} ${r.path}`));
+  
 }
 
 

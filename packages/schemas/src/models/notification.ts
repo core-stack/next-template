@@ -1,9 +1,6 @@
 import { z } from 'zod';
 
-import { preMemberSchema } from './member';
-import { preTenantSchema } from './workspace';
-
-export const preNotificationSchema = z.object({
+export const notificationSchema = z.object({
   id: z.string().uuid(),
 
   title: z.string(),
@@ -20,12 +17,4 @@ export const preNotificationSchema = z.object({
   createdAt: z.date(),
   readAt: z.date().nullable(),
 });
-export type PreNotificationSchema = z.infer<typeof preNotificationSchema>;
-
-export const notificationSchema = preNotificationSchema.extend({
-  workspace: preTenantSchema,
-  createdBy: preMemberSchema,
-  destination: preMemberSchema
-});
-
-export type NotificationSchema = z.infer<typeof notificationSchema>;
+export type PreNotificationSchema = z.infer<typeof notificationSchema>;

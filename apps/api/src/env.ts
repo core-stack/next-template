@@ -6,6 +6,7 @@ import { getEnv } from '@packages/env';
 dotenv.config();
 const envBool = z.string().transform(v => v === "true");
 const envSchema = z.object({
+  DEFAULT_INVITE_EXPIRES: z.coerce.number().default(7 * 60 * 60 * 24 * 1000), // 7 day
   DISABLED_WORKSPACES_DELETE_AFTER: z.coerce.number().default(90 * 24 * 60 * 60 * 1000), // 90 days
   
   JWT_SECRET: z.string(),

@@ -19,7 +19,7 @@
     "db:studio": "dotenv -e ../../.env -- prisma studio --browser none",
     "db:format": "prisma format",
     "predev": "pnpm run db:generate && pnpm run generate:api",
-    "generate:api": "tsx scripts/generate-api-types.ts",
+    "generate:api": "tsx scripts/generate-api-types.ts && cd ../../packages/common && pnpm build",
     "generate:i18n": "tsx scripts/generate-i18n.ts"
   },
   "keywords": [],

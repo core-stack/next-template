@@ -15,7 +15,8 @@
     "./*": "./dist/*"
   },
   "scripts": {
-    "build": "bunchee",
+    "clean": "rm -rf ./dist",
+    "build": "pnpm clean && bunchee",
     "dev": "bunchee",
     "lint": "eslint src/",
     "check-types": "tsc --noEmit"

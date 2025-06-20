@@ -84,5 +84,17 @@
   "Your account was activated successfully. Now you can log in to access your account.": "",
   "Continue to Login": "",
   "Failed to Activate Account": "",
-  "Back to Login": ""
+  "Back to Login": "",
+  "Tenants": "",
+  "Profile": "",
+  "Help and Support": "",
+  "Logout": "",
+  "You are not logged in": "",
+  "You can`t access this tenant": "",
+  "You don't have permission to access this resource": "",
+  "Convite aceito": "",
+  "Invite not found": "",
+  "Workspace not found": "",
+  "You have been invited to ": "",
+  "Invites sent successfully": ""
 }

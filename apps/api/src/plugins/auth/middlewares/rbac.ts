@@ -5,7 +5,7 @@ import { can, mergePermissions, numberToPermissions, Permission } from '@package
 export const rbacMiddleware = (...requiredPermissions: Permission[]) => {
   return async (req: FastifyRequest, reply: FastifyReply) => {
     const { session, params } = req;
-    if (!session) return reply.code(401).send({ error: 'UNAUTHORIZED' });
+    if (!session) return reply.code(401).send({ error: 'UNAUTHORIZED', message: /*i18n*/("You are not logged in") });
 
     let permissions = numberToPermissions(session.user.permissions);
     if (params && typeof params === 'object' && 'slug' in params) {
@@ -17,12 +17,12 @@ export const rbacMiddleware = (...requiredPermissions: Permission[]) => {
       if (tenant) {
         permissions = mergePermissions(permissions, tenant.permissions);
       } else {
-        return reply.code(403).send({ error: 'FORBIDDEN', message: 'You can`t access this tenant' });
+        return reply.code(403).send({ error: 'FORBIDDEN', message: /*i18n*/("You can`t access this tenant") });
       }
     }
 
     if (!can(permissions, requiredPermissions)) {
-      return reply.code(403).send({ error: 'FORBIDDEN' });
+      return reply.code(403).send({ error: 'FORBIDDEN', message: /*i18n*/("You don't have permission to access this resource") });
     }
   };
 }

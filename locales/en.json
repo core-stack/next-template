@@ -84,5 +84,17 @@
   "Your account was activated successfully. Now you can log in to access your account.": "Your account was activated successfully. Now you can log in to access your account.",
   "Continue to Login": "Continue to Login",
   "Failed to Activate Account": "Failed to Activate Account",
-  "Back to Login": "Back to Login"
+  "Back to Login": "Back to Login",
+  "Tenants": "Tenants",
+  "Profile": "Profile",
+  "Help and Support": "Help and Support",
+  "Logout": "Logout",
+  "You are not logged in": "You are not logged in",
+  "You can`t access this tenant": "You can`t access this tenant",
+  "You don't have permission to access this resource": "You don't have permission to access this resource",
+  "Convite aceito": "Convite aceito",
+  "Invite not found": "Invite not found",
+  "Workspace not found": "Workspace not found",
+  "You have been invited to ": "You have been invited to ",
+  "Invites sent successfully": "Invites sent successfully"
 }

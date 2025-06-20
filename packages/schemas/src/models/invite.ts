@@ -1,9 +1,6 @@
 import { z } from 'zod';
 
-import { preUserSchema } from './user';
-import { preTenantSchema } from './workspace';
-
-export const preInviteSchema = z.object({
+export const inviteSchema = z.object({
   id: z.string().uuid(),
   workspaceId: z.string().uuid(),
   email: z.string().email(),
@@ -13,10 +10,4 @@ export const preInviteSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date().nullable(),
 });
-export type PreInviteSchema = z.infer<typeof preInviteSchema>;
-
-export const inviteSchema = preInviteSchema.extend({
-  workspace: preTenantSchema,
-  user: preUserSchema.nullable(),
-})
 export type InviteSchema = z.infer<typeof inviteSchema>;

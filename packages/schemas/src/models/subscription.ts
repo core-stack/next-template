@@ -1,10 +1,6 @@
 import { z } from 'zod';
 
-import { SubscriptionStatus } from '@prisma/client';
-
-import { preTenantSchema } from './workspace';
-
-export const preSubscriptionSchema = z.object({
+export const subscriptionSchema = z.object({
   id: z.string().uuid(),
   plan: z.string(),
   workspaceId: z.string().uuid(),
@@ -14,10 +10,7 @@ export const preSubscriptionSchema = z.object({
   stripePriceId: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  status: z.nativeEnum(SubscriptionStatus),
+  status: z.enum(["active", "canceled", "incomplete", "incomplete_expired", "past_due", "trialing", "unpaid"]),
 });
-export type PreSubscriptionSchema = z.infer<typeof preSubscriptionSchema>;
 
-export const subscriptionSchema = preSubscriptionSchema.extend({
-  workspace: preTenantSchema
-})
+export type SubscriptionSchema = z.infer<typeof subscriptionSchema>;

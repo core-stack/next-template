@@ -1,16 +1,6 @@
 import { z } from 'zod';
 
-export const inviteSchema = z.object({
-  id: z.string().uuid(/*i18n*/("ID must be a valid UUID")),
-  workspaceId: z.string().uuid(/*i18n*/("Workspace ID must be a valid UUID")),
-  email: z.string().email(/*i18n*/("The email is invalid")),
-  roleId: z.string().uuid(/*i18n*/("Role ID must be a valid UUID")),
-  userId: z.string().uuid(/*i18n*/("User ID must be a valid UUID")).nullable(),
-  expiresAt: z.date({ message: /*i18n*/("Expiration date is required") }),
-  createdAt: z.date({ message: /*i18n*/("Creation date is required") }),
-  updatedAt: z.date({ message: /*i18n*/("Update date must be a valid date") }).nullable(),
-});
-export type InviteSchema = z.infer<typeof inviteSchema>;
+import { inviteSchema, tenantSchema } from './models';
 
 export const inviteMemberSchema = z.object({
   slug: z.string({ message: /*i18n*/("Slug is required") })
@@ -43,10 +33,8 @@ export const getInviteSchema = z.object({
 
 export type GetInviteSchema = z.infer<typeof getInviteSchema>;
 
-export const getInviteByWorkspaceSchema = z.object({
-  slug: z.string({ message: /*i18n*/("Slug is required") })
-    .trim()
-    .min(1, /*i18n*/("Slug cannot be empty"))
-});
 
-export type GetInviteByWorkspaceSchema = z.infer<typeof getInviteByWorkspaceSchema>;
+export const inviteWithTenantSchema = inviteSchema.extend({
+  tenant: tenantSchema
+});
+export type InviteWithTenantSchema = z.infer<typeof inviteWithTenantSchema>;

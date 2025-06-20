@@ -3,7 +3,6 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
 const ROOT = path.resolve(__dirname, '../../../');
-console.log(ROOT);
 
 const LOCALES_DIR = path.join(ROOT, 'locales');
 const LANGUAGES = ['en', 'pt'];

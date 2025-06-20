@@ -1,4 +1,4 @@
-import { WorkspacesHeader } from "@/components/workspace-header";
+import { TenantsHeader } from '@/components/tenant-header';
 
 import type { ReactNode } from "react"
 
@@ -9,7 +9,7 @@ interface InviteLayoutProps {
 export default function InviteLayout({ children }: InviteLayoutProps) {
   return (
     <>
-      <WorkspacesHeader />
+      <TenantsHeader />
       <main>{children}</main>
     </>
   )

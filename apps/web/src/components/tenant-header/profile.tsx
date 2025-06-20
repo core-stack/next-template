@@ -1,21 +1,24 @@
 "use client";
 import { HelpCircle, LogOut, User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { trpc } from '@/lib/trpc/client';
+import { useApiMutation } from '@/hooks/use-api-mutation';
+import { useApiQuery } from '@/hooks/use-api-query';
 import { cn } from '@/lib/utils';
 
 export const UserProfile = () => {
-  const { data: user } = trpc.user.self.useQuery();
-  const router = useRouter()
+  const router = useRouter();
+  const t = useTranslations();
+  const { data: user } = useApiQuery("/api/user/self");
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { mutate } = trpc.auth.logout.useMutation();
+  const { mutate } = useApiMutation("/api/auth/logout");
   const handleLogout = () => {
-    mutate(undefined, { onSuccess: () => router.push("/auth/login") });
+    mutate({}, { onSuccess: () => router.push("/auth/login") });
   }
 
   return (
@@ -51,14 +54,14 @@ export const UserProfile = () => {
             className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
           >
             <User className="h-4 w-4" />
-            <span>Meu Perfil</span>
+            <span>{t/*i18n*/("Profile")}</span>
           </Link>
           <Link
             href="/help"
             className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
           >
             <HelpCircle className="h-4 w-4" />
-            <span>Ajuda e Suporte</span>
+            <span>{t/*i18n*/("Help and Support")}</span>
           </Link>
         </div>
 
@@ -68,7 +71,7 @@ export const UserProfile = () => {
             className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted w-full text-left text-red-500 hover:text-red-600"
           >
             <LogOut className="h-4 w-4" />
-            <span>Sair</span>
+            <span>{t/*i18n*/("Logout")}</span>
           </button>
         </div>
       </PopoverContent>

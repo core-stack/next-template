@@ -1,10 +1,13 @@
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Building, User } from "lucide-react";
-import Link from "next/link";
+import { Building, User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
-import { UserProfile } from "./profile";
+import { ThemeToggle } from '@/components/theme-toggle';
 
-export function WorkspacesHeader() {
+import { UserProfile } from './profile';
+
+export function TenantsHeader() {
+  const t = useTranslations()
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center m-auto justify-between">
@@ -14,16 +17,16 @@ export function WorkspacesHeader() {
             <span className="font-bold">SaaS Template</span>
           </Link>
           <nav className="hidden md:flex gap-6">
-            <Link href="/w" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link href="/t" className="text-sm font-medium transition-colors hover:text-primary">
               <span className="flex items-center gap-1">
                 <Building className="h-4 w-4" />
-                Workspaces
+                {t/*i18n*/("Tenants")}
               </span>
             </Link>
             <Link href="/profile" className="text-sm font-medium transition-colors hover:text-primary">
               <span className="flex items-center gap-1">
                 <User className="h-4 w-4" />
-                Perfil
+                {t/*i18n*/("Profile")}
               </span>
             </Link>
           </nav>
