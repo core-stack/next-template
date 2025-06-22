@@ -2,13 +2,13 @@
   "name": "next-template",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "clean": "turbo run clean",
-    "dev": "turbo dev",
-    "start": "turbo run start",
-    "test": "turbo run test",
-    "check-types": "turbo run check-types",
-    "lint": "turbo run lint",
+    "build": "pnpm -r build",
+    "clean": "pnpm -r clean",
+    "dev": "pnpm -r dev",
+    "start": "pnpm -r start",
+    "test": "pnpm -r test",
+    "check-types": "pnpm -r check-types",
+    "lint": "pnpm -r lint",
     "db:migrate": "cd apps/api && pnpm db:migrate",
     "db:migrate:dev": "cd apps/api && pnpm db:migrate:dev",
     "db:push": "cd apps/api && pnpm db:push",
@@ -19,10 +19,8 @@
     "generate:i18n": "cd apps/api && pnpm generate:i18n"
   },
   "devDependencies": {
-    "@swc/helpers": "^0.5.17",
     "dotenv-cli": "^7.4.4",
-    "prettier": "^3.5.3",
-    "turbo": "^2.5.3"
+    "prettier": "^3.5.3"
   },
   "packageManager": "pnpm@9.15.9",
   "engines": {

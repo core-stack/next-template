@@ -81,7 +81,6 @@
   "Account Activation": "",
   "We are activating your account": "",
   "Account Activated!": "",
-  "Your account was activated successfully. Now you can log in to access your account.": "",
   "Continue to Login": "",
   "Failed to Activate Account": "",
   "Back to Login": "",
@@ -96,5 +95,11 @@
   "Invite not found": "",
   "Workspace not found": "",
   "You have been invited to ": "",
-  "Invites sent successfully": ""
+  "Invites sent successfully": "",
+  "slug is required": "",
+  "Invite accepted": "",
+  "Invite rejected": "",
+  "Invite deleted": "",
+  "Your account was activated successfully": "",
+  "Now you can log in to access your account": ""
 }

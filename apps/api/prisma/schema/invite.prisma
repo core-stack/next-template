@@ -1,20 +1,19 @@
-
 model Invite {
   id String @id @default(uuid())
 
-  tenantId String    @map("tenant_id")
+  tenantId String @map("tenant_id")
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   email String
 
   roleId String @map("role_id")
-  role Role @relation(fields: [roleId], references: [id])
+  role   Role   @relation(fields: [roleId], references: [id])
 
   userId String? @map("user_id")
   user   User?   @relation(fields: [userId], references: [id])
 
   creatorId String @map("creator_id")
-  creator Member @relation(fields: [creatorId], references: [id])
+  creator   Member @relation(fields: [creatorId], references: [id])
 
   expiresAt DateTime
   createdAt DateTime @default(now())

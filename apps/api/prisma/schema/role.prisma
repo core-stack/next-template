@@ -2,12 +2,13 @@ enum RoleScope {
   TENANT
   GLOBAL
 }
+
 model Role {
   id String @id @default(uuid())
 
   key String
 
-  name String
+  name        String
   permissions Int
 
   scope RoleScope @default(TENANT)
@@ -15,10 +16,10 @@ model Role {
   tenantId String? @map("tenant_id")
   tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  users   User[]
+  users User[]
 
   creatorId String? @map("creator_id")
-  creator Member? @relation(fields: [creatorId], references: [id], onDelete: Cascade, name: "creator")
+  creator   Member? @relation(fields: [creatorId], references: [id], onDelete: Cascade, name: "creator")
 
   members Member[] @relation(name: "members")
   invites Invite[]

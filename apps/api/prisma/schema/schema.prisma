@@ -15,7 +15,7 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
+  id String @id @default(uuid())
 
   name          String?
   email         String?   @unique
@@ -23,18 +23,16 @@ model User {
   emailVerified DateTime? @map("email_verified")
   image         String?
 
-  roleId        String @map("role_id")
-  role          Role   @relation(fields: [roleId], references: [id])
+  roleId String @map("role_id")
+  role   Role   @relation(fields: [roleId], references: [id])
 
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime? @map("updated_at")
 
-  createdAt     DateTime? @map("created_at")
-  updatedAt     DateTime? @map("updated_at")
-
-  accounts      Account[]
-  invites       Invite[]
-  members       Member[]
+  accounts          Account[]
+  invites           Invite[]
+  members           Member[]
   verificationToken VerificationToken[]
 
   @@map("users")
 }
-

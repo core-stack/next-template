@@ -26,7 +26,8 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ]
+      ],
+      "@packages/*": ["../../packages/*/src"]
     },
     "target": "ES2017"
   },
@@ -38,5 +39,11 @@
   ],
   "exclude": [
     "node_modules"
+  ],
+  "references": [
+    { "path": "../../packages/common" },
+    { "path": "../../packages/env" },
+    { "path": "../../packages/permission" },
+    { "path": "../../packages/schemas" },
   ]
 }

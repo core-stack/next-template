@@ -15,7 +15,7 @@ model Subscription {
 
   plan String @default("free")
 
-  tenantId String    @unique @map("tenant_id")
+  tenantId String @unique @map("tenant_id")
   tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   stripeSubscriptionId String? @unique @map("stripe_subscription_id")

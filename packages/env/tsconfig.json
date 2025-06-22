@@ -1,24 +1,21 @@
 {
   "extends": "@packages/config-typescript/base.json",
   "compilerOptions": {
-    "lib": [
-      "ES2015"
-    ],
-    "outDir": "./dist",
-    "types": [
-      "node"
-    ],
-    "composite": true,
+    "lib": ["ES2020"],
+    "module": "ESNext",
+    "target": "ES2020",
+    "moduleResolution": "Node",
     "declaration": true,
+    "composite": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
     "noEmit": false,
     "allowImportingTsExtensions": false,
-    "moduleResolution": "bundler"
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": ["node"]
   },
-  "include": [
-    "."
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

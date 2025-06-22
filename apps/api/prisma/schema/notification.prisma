@@ -6,7 +6,7 @@ model Notification {
   link        String?
   read        Boolean @default(false)
 
-  tenantId String    @map("tenant_id")
+  tenantId String @map("tenant_id")
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdById String? @map("created_by_id")
@@ -15,7 +15,7 @@ model Notification {
   destinationId String @map("destination_id")
   destination   Member @relation(fields: [destinationId], references: [id], name: "destination", onDelete: Cascade)
 
-  createdAt DateTime  @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
   readAt    DateTime
 
   @@map("notifications")

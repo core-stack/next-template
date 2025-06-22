@@ -55,7 +55,7 @@ const ActivationSuccess = () => {
       <div className="space-y-3">
         <h2 className="text-2xl font-semibold text-foreground">{t/*i18n*/("Account Activated!")}</h2>
         <p className="text-muted-foreground max-w-sm mx-auto">
-          {t/*i18n*/("Your account was activated successfully. Now you can log in to access your account.")}
+          {t/*i18n*/("Your account was activated successfully") + ". " + t/*i18n*/("Now you can log in to access your account") + "."}
         </p>
       </div>
       <Button asChild size="lg" className="mt-4 px-8 font-medium">

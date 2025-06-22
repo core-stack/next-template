@@ -4,12 +4,12 @@ enum VerificationType {
 }
 
 model VerificationToken {
-  type       VerificationType
-  token      String  @unique @default(uuid())
-  expires    DateTime
+  type    VerificationType
+  token   String           @unique @default(uuid())
+  expires DateTime
 
-  userId             String  @map("user_id")
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("verification_tokens")
 }

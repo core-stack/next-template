@@ -9,13 +9,16 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "./dist",
+    "emitDeclarationOnly": false,
     "baseUrl": "./",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
+      "@/*": ["./src/*"],
       "@packages/*": ["../../packages/*/src"]
-    }
+    },
+    "plugins": [
+      { "transform": "typescript-transform-paths", "useRootDirs": true, "exclude": ["**/packages/**"] },
+      { "transform": "typescript-transform-paths", "useRootDirs": true, "afterDeclarations": true, "exclude": ["**/packages/**"]  },
+    ]
   },
   "exclude": ["node_modules", "dist", "coverage"],
   "include": ["src", "src/__generated__"],

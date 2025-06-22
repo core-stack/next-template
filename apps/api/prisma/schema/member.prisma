@@ -10,7 +10,7 @@ model Member {
   userId String @map("user_id")
   user   User   @relation(fields: [userId], references: [id])
 
-  tenantId String    @map("tenant_id")
+  tenantId String @map("tenant_id")
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   notifications        Notification[] @relation("destination")
@@ -18,7 +18,7 @@ model Member {
   invites              Invite[]
 
   roleId String @map("role_id")
-  role Role @relation(fields: [roleId], references: [id], name: "members")
+  role   Role   @relation(fields: [roleId], references: [id], name: "members")
 
   creatorRole Role[] @relation(name: "creator")
 
