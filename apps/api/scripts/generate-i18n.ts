@@ -22,7 +22,7 @@ function generateLocales() {
   const files = globSync('**/*.ts?(x)', {
     cwd: ROOT,
     absolute: true,
-    ignore: ['**/node_modules/**', '**/dist/**', '**/.git/**', '**/.turbo/**'],
+    ignore: ['**/node_modules/**', '**/dist/**', '**/.git/**'],
   });
 
   const strings = new Set<string>();
