@@ -1,15 +1,19 @@
 import { NextIntlClientProvider } from 'next-intl';
 
 import { Toaster } from '@/components/ui/toaster';
+import { DialogProvider } from '@/context/dialog';
 import { QueryClientContext } from '@/context/query-client';
 import { ThemeProvider } from '@/context/theme';
+import { dialogs } from '@/dialogs';
 
 export function Providers({ children }: { children: React.ReactNode}) {
   return (
     <NextIntlClientProvider>
       <QueryClientContext>
         <ThemeProvider defaultTheme="system" storageKey="theme">
-          {children}
+          <DialogProvider dialogs={dialogs}>
+            {children}
+          </DialogProvider>
         </ThemeProvider>
         <Toaster />
       </QueryClientContext>

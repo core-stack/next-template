@@ -33,6 +33,7 @@
     "@bull-board/api": "^6.0.0",
     "@bull-board/fastify": "^6.0.0",
     "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^11.0.1",
     "@packages/common": "workspace:*",
     "@packages/config-eslint": "workspace:*",
     "@packages/env": "workspace:*",

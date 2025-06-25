@@ -1,5 +1,7 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import React, { createContext, useCallback, useState } from "react";
+"use client";
+import React, { createContext, useCallback, useState } from 'react';
+
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 export type DialogComponents = Record<string, React.ComponentType<any>>;
 

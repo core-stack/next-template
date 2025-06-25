@@ -45,5 +45,5 @@ export const getSelfSchema = z.object({
       id: z.string({ message: /*i18n*/("ID is required") }).uuid(/*i18n*/("ID must be a valid UUID")),
       slug: z.string({ message: /*i18n*/("Slug is required") })
     })
-  })
+  }).array()
 });

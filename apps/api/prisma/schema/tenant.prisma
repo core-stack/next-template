@@ -5,8 +5,6 @@ model Tenant {
   name        String
   description String?
 
-  backgroundImage String // url | color
-
   subscription  Subscription?
   members       Member[]
   invites       Invite[]

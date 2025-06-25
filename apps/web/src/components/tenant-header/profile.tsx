@@ -8,15 +8,15 @@ import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useApiMutation } from '@/hooks/use-api-mutation';
-import { useApiQuery } from '@/hooks/use-api-query';
+import { useUser } from '@/hooks/use-user';
 import { cn } from '@/lib/utils';
 
 export const UserProfile = () => {
   const router = useRouter();
   const t = useTranslations();
-  const { data: user } = useApiQuery("/api/user/self");
+  const { data: user } = useUser();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { mutate } = useApiMutation("/api/auth/logout");
+  const { mutate } = useApiMutation("[POST] /api/auth/logout");
   const handleLogout = () => {
     mutate({}, { onSuccess: () => router.push("/auth/login") });
   }

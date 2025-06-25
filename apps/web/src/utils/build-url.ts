@@ -1,3 +1,5 @@
+import { env } from '@/env';
+
 export function buildUrl(path: string, params?: Record<string, any>, query?: Record<string, any>) {
   let finalPath = path;
   if (params) {
@@ -7,5 +9,7 @@ export function buildUrl(path: string, params?: Record<string, any>, query?: Rec
   }
 
   const search = query ? `?${new URLSearchParams(query).toString()}` : "";
-  return `/${finalPath}${search}`;
+  console.log(env.NEXT_PUBLIC_API_URL, finalPath, search);
+  
+  return `${env.NEXT_PUBLIC_API_URL}${finalPath}${search}`;
 }

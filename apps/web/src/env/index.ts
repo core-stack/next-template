@@ -1,5 +1,13 @@
-import { getEnv } from "@packages/env";
+"server-only";
+import 'dotenv/config';
 
-import { publicEnv } from "./env.public";
+import z from 'zod';
 
-export const env = { ...getEnv(), ...publicEnv };
+import { getEnv } from '@packages/env';
+
+import { publicEnv } from './env.public';
+
+export const envSchema = getEnv(z.object({
+  API_URL: z.string().url().default("http://localhost:4000"),
+}), process.env);
+export const env = { ...envSchema, ...publicEnv };

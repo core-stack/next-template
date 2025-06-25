@@ -9,7 +9,6 @@ type MutationArgs<Path extends ApiPath> = {
   querystring?: RouteData<Path>["querystring"];
   params?: RouteData<Path>["params"];
 };
-type MutationKey<Path extends ApiPath> = readonly [Path, ...unknown[]];
 export function useApiMutation<Path extends ApiPath>(
   key: Path,
   options?: Omit<UseMutationOptions<

@@ -9,6 +9,11 @@ import { Button } from './button';
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
     const [realType, setRealType] = React.useState(type);
+    const [isClient, setIsClient] = React.useState(false);
+
+    React.useEffect(() => {
+      setIsClient(true);
+    }, []);
     return (
       <div className='relative'>
         <input
@@ -21,7 +26,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           {...props}
         />
         {
-          type === "password" && (
+          type === "password" && isClient && (
             <Button 
               type="button"
               variant="ghost"

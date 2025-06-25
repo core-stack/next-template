@@ -5,13 +5,15 @@ import { env } from '@/env';
 import { EmailTemplate } from '@/queue/schemas/email';
 import { errorResponseSchema } from '@/schemas/error-response.schema';
 import { successResponseSchema } from '@/schemas/success-response.schema';
-import { InviteMemberSchema, inviteMemberSchema } from '@packages/schemas';
+import {
+  InviteMemberSchema, inviteMemberSchema, TenantSlugParamsSchema, tenantSlugParamsSchema
+} from '@packages/schemas';
 
 export default async function handler(
-  req: FastifyRequest<{ Body: InviteMemberSchema }>,
+  req: FastifyRequest<{ Body: InviteMemberSchema, Params: TenantSlugParamsSchema }>,
   reply: FastifyReply
 ) {
-  const tenant = await req.server.prisma.tenant.findUnique({ where: { slug: req.body.slug, disabledAt: null } });
+  const tenant = await req.server.prisma.tenant.findUnique({ where: { slug: req.params.slug, disabledAt: null } });
   if (!tenant) return reply.status(404).send({ message: /*i18n*/("Workspace not found") });
 
   for (const { email, role } of req.body.emails) {
@@ -81,6 +83,7 @@ export default async function handler(
 export const options: RouteShorthandOptions = {
   schema: {
     body: inviteMemberSchema,
+    params: tenantSlugParamsSchema,
     response: {
       200: successResponseSchema,
       401: errorResponseSchema,

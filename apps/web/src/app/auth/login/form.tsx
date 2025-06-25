@@ -30,9 +30,8 @@ export function LoginForm() {
     },
   });
 
-  const isLoading = form.formState.isSubmitting;
   const router = useRouter();
-  const { mutate, error } = useApiMutation('/api/auth/login');
+  const { mutate, error, isPending: isLoading } = useApiMutation('/api/auth/login');
   const onSubmit = form.handleSubmit(async (body) => {
     mutate({ body }, {
       onSuccess: ({ redirect }) => {
@@ -78,11 +77,11 @@ export function LoginForm() {
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <Button variant="outline" type="button" isLoading={isLoading}>
+        <Button variant="outline" type="button" disabled={isLoading}>
           <FcGoogle className="mr-2 h-4 w-4" />
           Google
         </Button>
-        <Button variant="outline" type="button" isLoading={isLoading}>
+        <Button variant="outline" type="button" disabled={isLoading}>
           <Mail className="mr-2 h-4 w-4" />
           Email
         </Button>

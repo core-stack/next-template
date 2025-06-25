@@ -1,46 +1,48 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
-import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useDialog } from "@/hooks/use-dialog";
-import { trpc } from "@/lib/trpc/client";
-import { inviteMemberSchema, InviteMemberSchema } from "@/lib/trpc/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, MinusCircle, PlusCircle } from "lucide-react";
-import { useParams } from "next/navigation";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Loader2, MinusCircle, PlusCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
+import { useFieldArray, useForm } from 'react-hook-form';
 
-import { DialogType } from "./";
+import { FormInput } from '@/components/form/input';
+import { FormSelect } from '@/components/form/select';
+import { Button } from '@/components/ui/button';
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Form } from '@/components/ui/form';
+import { useApiInvalidate } from '@/hooks/use-api-invalidate';
+import { useApiMutation } from '@/hooks/use-api-mutation';
+import { useDialog } from '@/hooks/use-dialog';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ROLES } from '@packages/permission';
+import { InviteMemberSchema, inviteMemberSchema } from '@packages/schemas';
+
+import { DialogType } from './';
 
 export function InviteMemberDialog() {
+  const invalidate = useApiInvalidate();
   const { slug } = useParams<{ slug: string }>();
+  const t = useTranslations();
   const form = useForm<InviteMemberSchema>({
     resolver: zodResolver(inviteMemberSchema),
     defaultValues: {
-      emails: [{ email: "", role: "WORKSPACE_MEMBER" }],
+      emails: [{ email: "", role: ROLES.global.user.key }],
       slug
     },
   });
   const { closeDialog } = useDialog();
   const isLoading = form.formState.isSubmitting;
 
-  const { fields, remove, insert } = useFieldArray({
-    control: form.control,
-    name: "emails"
-  })
+  const { fields, remove, insert } = useFieldArray({ control: form.control, name: "emails" })
   const removeField = (index: number) => remove(index);
   const addField = (index: number) => insert(index + 1, { email: "", role: "WORKSPACE_MEMBER" });
 
-  const utils = trpc.useUtils();
-  const { mutate } = trpc.invite.invite.useMutation();
+  const { mutate } = useApiMutation("[POST] /api/tenant/:slug/invite");
   async function onSubmit(data: InviteMemberSchema) {
     data.slug = slug;
-    mutate(data, {
+    mutate({ body: data, params: { slug } }, {
       onSuccess: () => {
-        utils.invite.getByWorkspace.invalidate();
+        invalidate("[GET] /api/tenant/:slug");
         form.reset();
         closeDialog(DialogType.INVITE_MEMBER);
       }
@@ -50,8 +52,8 @@ export function InviteMemberDialog() {
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Convidar membro</DialogTitle>
-        <DialogDescription>Envie um convite por email para adicionar um novo membro ao workspace.</DialogDescription>
+        <DialogTitle>{t/*i18n*/("Invite member")}</DialogTitle>
+        <DialogDescription>{t/*i18n*/("Send an invite to a member")}</DialogDescription>
       </DialogHeader>
 
       <Form {...form}>
@@ -59,40 +61,14 @@ export function InviteMemberDialog() {
           {
             fields.map((field, index) => (
               <div className='grid grid-cols-5 gap-2' key={field.id}>
-                <FormField
-                  control={form.control}
+                <FormInput
                   name={`emails.${index}.email`}
-                  render={({ field }) => (
-                    <FormItem className='col-span-3'>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="email@exemplo.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label={t/*i18n*/("Email")}
                 />
-
-                <FormField
-                  control={form.control}
+                <FormSelect
                   name={`emails.${index}.role`}
-                  render={({ field }) => (
-                    <FormItem className='col-span-1'>
-                      <FormLabel>Função</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione uma função" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="WORKSPACE_ADMIN">Admin</SelectItem>
-                          <SelectItem value="WORKSPACE_MEMBER">Membro</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label={t/*i18n*/("Role")}
+                  data={ROLES.tenant.default.map(role => ({ label: role.name, value: role.key }))}
                 />
                 <div className='flex items-end gap-1'>
                   <Button type="button" size="icon" variant="outline" onClick={() => addField(index)}>
@@ -113,12 +89,12 @@ export function InviteMemberDialog() {
           }
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => closeDialog(DialogType.INVITE_MEMBER)}>
-              Cancelar
+            <Button type="button" variant="outline" isLoading={isLoading} onClick={() => closeDialog(DialogType.INVITE_MEMBER)}>
+              {t/*i18n*/("Cancel")}
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" isLoading={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Enviar convite
+              {t/*i18n*/("Invite")}
             </Button>
           </DialogFooter>
         </form>

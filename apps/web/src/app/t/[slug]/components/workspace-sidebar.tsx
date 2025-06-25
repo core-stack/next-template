@@ -1,21 +1,22 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
+import { CreditCard, LayoutDashboard, Plus, Settings, Users, Zap } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+
+import { Button } from '@/components/ui/button';
 import {
   Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue
-} from "@/components/ui/select";
-import { usePermission } from "@/context/permission";
-import { DialogType } from "@/dialogs";
-import { useDialog } from "@/hooks/use-dialog";
-import { RouterOutput } from "@/lib/trpc/app.router";
-import { trpc } from "@/lib/trpc/client";
-import { cn } from "@/lib/utils";
-import { Permission } from "@packages/permission";
-import { CreditCard, LayoutDashboard, Plus, Settings, Users, Zap } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+} from '@/components/ui/select';
+import { usePermission } from '@/context/permission';
+import { DialogType } from '@/dialogs';
+import { useDialog } from '@/hooks/use-dialog';
+import { RouterOutput } from '@/lib/trpc/app.router';
+import { trpc } from '@/lib/trpc/client';
+import { cn } from '@/lib/utils';
+import { Permission } from '@packages/permission';
 
-import { MemberInfo } from "./member-info";
+import { MemberInfo } from './member-info';
 
 interface WorkspaceSidebarProps {
   slug: string
@@ -85,7 +86,7 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
             </SelectGroup>
             <SelectGroup>
               <button
-                onClick={() => openDialog({ type: DialogType.CREATE_WORKSPACE })}
+                onClick={() => openDialog({ type: DialogType.CREATE_TENANT })}
                 className='flex items-center gap-3 rounded-md w-full px-3 py-1.5 text-sm font-medium transition-colors bg-primary/10 text-primary'
               >
                 <Plus className="mr-2 h-4 w-4" />

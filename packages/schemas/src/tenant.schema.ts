@@ -7,6 +7,9 @@ export const tenantSlugSchema = z
 
 export type TenantSlugSchema = z.infer<typeof tenantSlugSchema>;
 
+export const tenantSlugParamsSchema = z.object({ slug: tenantSlugSchema });
+export type TenantSlugParamsSchema = z.infer<typeof tenantSlugParamsSchema>;
+
 export const tenantSchema = z.object({
   id: z.string({ message: /*i18n*/("ID is required") })
     .uuid(/*i18n*/("ID must be a valid UUID")),
@@ -14,36 +17,38 @@ export const tenantSchema = z.object({
     .min(2, /*i18n*/("Name must be at least 2 characters")),
   slug: tenantSlugSchema,
   description: z.string().nullable(),
-  backgroundImage: z.string({ message: /*i18n*/("Background image is required") }),
   disabledAt: z.date().nullable(),
   createdAt: z.date({ message: /*i18n*/("Creation date is required") }),
   updatedAt: z.date().nullable(),
 });
 export type TenantSchema = z.infer<typeof tenantSchema>;
 
+export const getTenantsList = tenantSchema.extend({ membersCount: z.number().positive() }).array();
+export type GetTenantsList = z.infer<typeof getTenantsList>;
+
 export const workspaceWithMemberCountSchema = tenantSchema.extend({
   memberCount: z.number({ message: /*i18n*/("Member count is required") })
 });
-export type WorkspaceWithMemberCountSchema = z.infer<typeof workspaceWithMemberCountSchema>;
+export type TenantWithMemberCountSchema = z.infer<typeof workspaceWithMemberCountSchema>;
 
-export const createWorkspaceSchema = tenantSchema
+export const createTenantSchema = tenantSchema
   .omit({
     id: true,
     disabledAt: true,
     updatedAt: true,
     createdAt: true,
   });
-export type CreateWorkspaceSchema = z.infer<typeof createWorkspaceSchema>;
+export type CreateTenantSchema = z.infer<typeof createTenantSchema>;
 
-export const updateWorkspaceSchema = tenantSchema
+export const updateTenantSchema = tenantSchema
   .omit({
     disabledAt: true,
     updatedAt: true,
     createdAt: true,
   });
-export type UpdateWorkspaceSchema = z.infer<typeof updateWorkspaceSchema>;
+export type UpdateTenantSchema = z.infer<typeof updateTenantSchema>;
 
-export const disableWorkspaceSchema = z.object({
+export const disableTenantSchema = z.object({
   slug: z.string({ message: /*i18n*/("Slug is required") })
     .trim()
     .min(1, /*i18n*/("Slug cannot be empty")),
@@ -53,4 +58,4 @@ export const disableWorkspaceSchema = z.object({
     .trim()
     .min(1, /*i18n*/("Confirmation text cannot be empty"))
 });
-export type DisableWorkspaceSchema = z.infer<typeof disableWorkspaceSchema>;
+export type DisableTenantSchema = z.infer<typeof disableTenantSchema>;

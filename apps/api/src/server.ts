@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import { serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import fastifyCookiePlugin from '@fastify/cookie';
+import cors from '@fastify/cors';
 
 import { env } from './env';
 import { errorHandler } from './error-handler';
@@ -32,7 +33,12 @@ async function main() {
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
-
+  
+  await app.register(cors, {
+    origin: env.FRONTEND_URL,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH','OPTIONS'],
+    credentials: true
+  });
   await app.register(i18nPlugin);
   await app.register(fastifyCookiePlugin, { secret: "supersecret", parseOptions: {} });
   await app.register(envPlugin);

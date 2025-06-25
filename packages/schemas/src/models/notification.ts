@@ -8,7 +8,7 @@ export const notificationSchema = z.object({
   link: z.string().nullable(),
   read: z.boolean(),
 
-  workspaceId: z.string(),
+  tenantId: z.string(),
 
   createdById: z.string().nullable(),
 

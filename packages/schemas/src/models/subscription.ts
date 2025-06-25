@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const subscriptionSchema = z.object({
   id: z.string().uuid(),
   plan: z.string(),
-  workspaceId: z.string().uuid(),
+  tenantId: z.string().uuid(),
   stripeSubscriptionId: z.string().nullable(),
   stripeCustomerId: z.string().nullable(),
   stripeProductId: z.string().nullable(),

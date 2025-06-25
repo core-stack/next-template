@@ -1,40 +1,41 @@
 "use client"
-import { trpc } from "@/lib/trpc/client";
-import { can as canPermission, Permission } from "@packages/permission";
-import { useParams } from "next/navigation";
-import React from "react";
+import { useParams } from 'next/navigation';
+import React from 'react';
+
+import { useUser } from '@/hooks/use-user';
+import { can as canPermission, Permission } from '@packages/permission';
 
 type PermissionContextType = {
   can: (permission: Permission | Permission[]) => boolean;
-  canWorkspace: (workspaceSlug: string, permission: Permission | Permission[]) => boolean;
+  canTenant: (tenantSlug: string, permission: Permission | Permission[]) => boolean;
 }
 export const PermissionContext = React.createContext<PermissionContextType>({
   can: () => false,
-  canWorkspace: () => false,
+  canTenant: () => false,
 });
 
 export const PermissionProvider = ({ children }: { children: React.ReactNode }) => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: user } = trpc.user.self.useQuery();
+  const { data: user } = useUser();
   const permissions = user?.members.map((member) => ({
-    workspaceId: member.workspaceId,
+    tenantId: member.tenantId,
     role: member.role,
-    slug: member.workspace.slug
+    slug: member.tenant.slug
   }));
 
-  const canWorkspace = (workspaceSlug: string, permission: Permission | Permission[]): boolean => {
+  const canTenant = (tenantSlug: string, permission: Permission | Permission[]): boolean => {
     if (permissions) {
       return canPermission(
-        permissions.find((p) => p.slug === workspaceSlug)?.role.permissions ?? [],
+        permissions.find((p) => p.slug === tenantSlug)?.role.permissions ?? [],
         Array.isArray(permission) ? permission : [permission]
       );
     }
     return false;
   }
-  const can = (permission: Permission | Permission[]): boolean => canWorkspace(slug, permission);
+  const can = (permission: Permission | Permission[]): boolean => canTenant(slug, permission);
 
   return (
-    <PermissionContext.Provider value={{ can, canWorkspace }}>
+    <PermissionContext.Provider value={{ can, canTenant }}>
       {children}
     </PermissionContext.Provider>
   )

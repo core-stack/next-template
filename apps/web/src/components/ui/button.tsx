@@ -52,7 +52,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
       >
-        {isLoading && <Spinner variant={variant} /> || props.children}
+        {isLoading && <Spinner variant={variant} />}
+        {props.children}
       </Comp>
     )
   }

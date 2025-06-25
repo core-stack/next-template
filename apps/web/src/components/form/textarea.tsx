@@ -1,15 +1,14 @@
-"use client";
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
-type Props = React.ComponentProps<"input"> & {
+type Props = React.ComponentProps<"textarea"> & {
   label?: string
   name: string
 }
-export const FormInput = (props: Props) => {
+export const FormTextarea = (props: Props) => {
   const form = useFormContext();
   const isLoading = form.formState.isSubmitting;
 
@@ -21,7 +20,7 @@ export const FormInput = (props: Props) => {
         <FormItem>
           {props.label && (<FormLabel>{props.label}</FormLabel>)}
           <FormControl>
-            <Input disabled={isLoading} {...field} {...props} />
+            <Textarea disabled={isLoading} {...field} {...props} />
           </FormControl>
           <FormMessage />
         </FormItem>

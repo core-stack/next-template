@@ -1,25 +1,21 @@
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { trpc } from "@/lib/trpc/client";
-import { cn } from "@/lib/utils";
-import { Bell, ChevronDown, HelpCircle, LogOut, Moon, Sun, User } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Bell, ChevronDown, HelpCircle, LogOut, Moon, Sun, User } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
 
-import { useNotifications } from "../../context/notifications";
-import { useTheme } from "../../context/theme";
-import { Button } from "../ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useNotifications } from '@/context/notifications';
+import { useTheme } from '@/context/theme';
+import { useUser } from '@/hooks/use-user';
+import { cn } from '@/lib/utils';
 
 export const MemberInfo = () => {
-  const { data: user } = trpc.user.self.useQuery();
+  const { data: user } = useUser();
   const { theme, setTheme } = useTheme();
-  const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { mutate } = trpc.auth.logout.useMutation();
   const handleLogout = () => {
-    mutate(undefined, { onSuccess: () => router.push("/auth/login") });
   }
   const { showNotifications, unreadNotifications } = useNotifications();
 

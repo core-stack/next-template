@@ -83,7 +83,7 @@ async function main() {
     if (!routeMap[routeName]) routeMap[routeName] = [];
     routeMap[routeName].push(fullNamespace);
 
-    const entry = `  "${routePath.replace(`/${method.toLowerCase()}`, "")}": {
+    const entry = `  "[${method}] ${routePath.replace(`/${method.toLowerCase()}`, "")}": {
     method: "${method}",
     ${fields.join(",\n    ")}
   }`;

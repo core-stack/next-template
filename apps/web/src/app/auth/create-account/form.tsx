@@ -29,7 +29,7 @@ export function CreateAccountForm() {
   });
 
   const isLoading = form.formState.isSubmitting;
-  const { mutate } = useApiMutation("/api/auth/create-account");
+  const { mutate } = useApiMutation("[POST] /api/auth/create-account");
   const onSubmit = form.handleSubmit(async (data) => {
     mutate({ body: data }, {
       onSuccess: () => {

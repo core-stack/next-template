@@ -4,10 +4,10 @@ import { AlertTriangle, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { TenantsHeader } from '@/components/tenant-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { WorkspacesHeader } from '@/components/workspace/workspace-header';
 
 export default function Error({
   error,
@@ -23,7 +23,7 @@ export default function Error({
  
   return (
     <>
-      <WorkspacesHeader />
+      <TenantsHeader />
       <div className="container py-10">
         <div className="max-w-3xl mx-auto">
           <div className="space-y-6">

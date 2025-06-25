@@ -5,7 +5,7 @@ export const roleSchema = z.object({
   name: z.string(),
   permissions: z.array(z.number().int()),
   scope: z.enum(["GLOBAL", "TENANT"]),
-  workspaceId: z.string().uuid().nullable(),
+  tenantId: z.string().uuid().nullable(),
   creatorId: z.string().uuid().nullable(),
   createdAt: z.date(),
   updatedAt: z.date().nullable(),

@@ -7,7 +7,7 @@ export const memberSchema = z.object({
   image: z.string().url().nullable(),
   fcmToken: z.string().nullable(),
   userId: z.string().uuid(),
-  workspaceId: z.string().uuid(),
+  tenantId: z.string().uuid(),
   owner: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date().nullable(),
