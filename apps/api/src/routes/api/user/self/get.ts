@@ -4,6 +4,7 @@ import { errorResponseSchema } from '@/schemas/error-response.schema';
 import { getSelfSchema } from '@packages/schemas';
 
 export default async function handler(req: FastifyRequest, reply: FastifyReply) {
+  req.server.log.debug(`GET /api/user/self`);
   const user = await req.server.prisma.user.findUnique({
     select: {
       id: true,

@@ -5,10 +5,11 @@ import { Session } from '../session';
 export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) => {
   const accessToken = req.cookies['access-token'];
   const refreshToken = req.cookies['refresh-token'];
-
+  
   let session: Session | undefined;
   try {
     session = await req.server.auth.getSession(accessToken);
+    
     if (!session && refreshToken) {
       const refreshResult = await req.server.auth.refreshToken(refreshToken);
       session = refreshResult.session;
@@ -30,4 +31,5 @@ export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) =
 
   if (!session) return reply.code(401).send({ error: 'UNAUTHORIZED' });
   req.session = session;
+  console.log("session: ", session);
 };

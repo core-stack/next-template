@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
 import z from 'zod';
 
 import { errorResponseSchema } from '@/schemas/error-response.schema';
-import { inviteWithTenantSchema } from '@packages/schemas';
+import { getInviteReplySchema } from '@packages/schemas';
 
 export default async function handler(
   req: FastifyRequest<{ Params: z.infer<typeof paramsSchema>, Querystring: z.infer<typeof queryParamsSchema> }>,
@@ -23,7 +23,7 @@ export const options: RouteShorthandOptions = {
     params: paramsSchema,
     querystring: queryParamsSchema,
     response: {
-      200: inviteWithTenantSchema,
+      200: getInviteReplySchema,
       400: errorResponseSchema,
       404: errorResponseSchema
     }

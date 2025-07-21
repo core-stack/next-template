@@ -1,7 +1,8 @@
-import { env } from '@/env';
+
 
 export function buildUrl(path: string, params?: Record<string, any>, query?: Record<string, any>) {
-  let finalPath = path;
+  const match = path.match(/\] (.+)$/)
+  let finalPath = match ? match[1] : "";
   if (params) {
     for (const [key, value] of Object.entries(params)) {
       finalPath = finalPath.replace(new RegExp(`[:[]${key}[]]?`, "g"), encodeURIComponent(String(value)));
@@ -9,7 +10,7 @@ export function buildUrl(path: string, params?: Record<string, any>, query?: Rec
   }
 
   const search = query ? `?${new URLSearchParams(query).toString()}` : "";
-  console.log(env.NEXT_PUBLIC_API_URL, finalPath, search);
+  console.log(`${finalPath}${search}`);
   
-  return `${env.NEXT_PUBLIC_API_URL}${finalPath}${search}`;
+  return `${finalPath}${search}`;
 }

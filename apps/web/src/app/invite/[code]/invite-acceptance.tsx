@@ -20,63 +20,56 @@ type InviteAcceptanceProps = {
 
 export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
   const t = useTranslations();
-  const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<"pending" | "accepted" | "rejected" | "error">("pending");
   const router = useRouter();
-  const {} = useApiMutation("")
+
+  const { mutate: acceptInvite, isPending: isAcceptLoading } = useApiMutation("[POST] /api/invite/:id/accept");
   const handleAccept = async () => {
-    setIsLoading(true);
-    try {
-      await acceptInvite({ id: invite.id as string });
-      setStatus("accepted");
-      toast({
-        title: t/*i18n*/("Convite aceito"),
-        description: `Você agora é membro do  ${invite.tenant.name}`,
-      });
-
-      setTimeout(() => {
-        router.push(`/w/${invite.tenant.slug}`);
-      }, 2000);
-    } catch (error) {
-      console.error("Erro ao aceitar convite:", error);
-      setStatus("error");
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao aceitar o convite. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    acceptInvite({ params: { id: invite.id } }, {
+      onSuccess: () => {
+        setStatus("accepted");
+        toast({
+          title: t/*i18n*/("Invite accepted"),
+          description: `${t/*i18n*/("Now you are a member of")}  ${invite.tenant.name}`,
+        });
+  
+        setTimeout(() => {
+          router.push(`/t/${invite.tenant.slug}`);
+        }, 2000);
+      }, 
+      onError: () => {
+        setStatus("error");
+        toast({
+          title: t/*i18n*/("Error"),
+          description: t/*i18n*/("An error occurred while accepting the invite, please try again"),
+          variant: "destructive",
+        });
+      }
+    });
   };
 
+  const { mutate: rejectInvite, isPending: isRejectLoading } = useApiMutation("[POST] /api/invite/:id/reject");
   const handleReject = async () => {
-    setIsLoading(true);
-    try {
-      await rejectInvite({ id: invite.id });
-
-      setStatus("rejected");
-      toast({
-        title: "Convite rejeitado",
-        description: "Você rejeitou o convite para o workspace",
-      });
-
-      setTimeout(() => {
-        router.push(`/w`);
-      }, 2000);
-    } catch (error) {
-      console.error("Erro ao rejeitar convite:", error);
-      setStatus("error");
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao rejeitar o convite. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    rejectInvite({ params: { id: invite.id } }, {
+      onSuccess: () => {
+        setStatus("rejected");
+        toast({ title: t/*i18n*/("Invite rejected") });
+  
+        setTimeout(() => {
+          router.push(`/t/${invite.tenant.slug}`);
+        }, 2000);
+      }, 
+      onError: () => {
+        setStatus("error");
+        toast({
+          title: t/*i18n*/("Error"),
+          description: t/*i18n*/("An error occurred while rejecting the invite, please try again"),
+          variant: "destructive",
+        });
+      }
+    });
   };
-
+  const isLoading = isAcceptLoading || isRejectLoading;
   const isExpired = new Date() > invite.expiresAt;
 
   const formatExpirationDate = (date: Date) => {
@@ -93,9 +86,9 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
           <Building className="h-8 w-8 text-primary" />
         </div>
-        <CardTitle className="text-2xl">Convite para Workspace</CardTitle>
+        <CardTitle className="text-2xl">{t/*i18n*/("Tenant Invite")}</CardTitle>
         <CardDescription>
-          Você foi convidado para participar do workspace <strong>{invite.workspace.name}</strong>
+          {t/*i18n*/("You have been invited to")} <strong>{invite.tenant.name}</strong>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -103,9 +96,9 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
               <Building className="h-4 w-4 text-muted-foreground" />
-              <span>Workspace:</span>
+              <span>{t/*i18n*/("Tenant")}:</span>
             </div>
-            <span className="font-medium">{invite.workspace.name}</span>
+            <span className="font-medium">{invite.tenant.name}</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
@@ -113,7 +106,7 @@ export function InviteAcceptance({ invite }: InviteAcceptanceProps) {
               <span>Função:</span>
             </div>
             <Badge variant="outline">
-              {invite.role === "WORKSPACE_ADMIN" ? "Administrador" : "Membro"}
+              {invite.role.name}
             </Badge>
           </div>
           <div className="flex items-center justify-between">

@@ -31,7 +31,7 @@ export function LoginForm() {
   });
 
   const router = useRouter();
-  const { mutate, error, isPending: isLoading } = useApiMutation('/api/auth/login');
+  const { mutate, error, isPending: isLoading } = useApiMutation('[POST] /api/auth/login');
   const onSubmit = form.handleSubmit(async (body) => {
     mutate({ body }, {
       onSuccess: ({ redirect }) => {

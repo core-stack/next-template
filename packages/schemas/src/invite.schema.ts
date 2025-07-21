@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { inviteSchema, tenantSchema } from './models';
+import { inviteSchema, roleSchema, tenantSchema } from './models';
 
 export const inviteMemberSchema = z.object({
   slug: z.string({ message: /*i18n*/("Slug is required") })
@@ -34,7 +34,8 @@ export const getInviteSchema = z.object({
 export type GetInviteSchema = z.infer<typeof getInviteSchema>;
 
 
-export const inviteWithTenantSchema = inviteSchema.extend({
-  tenant: tenantSchema
+export const getInviteReplySchema = inviteSchema.extend({
+  tenant: tenantSchema,
+  role: roleSchema
 });
-export type InviteWithTenantSchema = z.infer<typeof inviteWithTenantSchema>;
+export type InviteWithTenantSchema = z.infer<typeof getInviteReplySchema>;

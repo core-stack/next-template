@@ -20,7 +20,7 @@ export const UserProfile = () => {
   const handleLogout = () => {
     mutate({}, { onSuccess: () => router.push("/auth/login") });
   }
-
+  
   return (
     <Popover onOpenChange={setIsCollapsed} open={isCollapsed}>
       <PopoverTrigger asChild>

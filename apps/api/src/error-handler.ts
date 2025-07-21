@@ -24,6 +24,9 @@ export const errorHandler = (error: FastifyError, req: FastifyRequest, reply: Fa
     });
     return;
   }
+  if ((error as any).type === "ResponseSerializationError") {
 
+  }
+  req.server.log.error(error);
   reply.status(500).send({ status: 500, message: 'Internal Server Error' })
 }
