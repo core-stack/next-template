@@ -1,7 +1,7 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { memberSchema, roleSchema } from './models';
-import { passwordSchema } from './password.schema';
+import { memberSchema, roleSchema } from "./models";
+import { passwordSchema } from "./password.schema";
 
 export const updatePasswordSchema = z.object({
   currentPassword: passwordSchema,
@@ -31,7 +31,7 @@ export const confirmUploadSchema = z.object({
 });
 export type ConfirmUploadSchema = z.infer<typeof confirmUploadSchema>;
 
-export const getSelfSchema = z.object({
+export const getUserSchema = z.object({
   id: z.string({ message: /*i18n*/("ID is required") }).uuid(/*i18n*/("ID must be a valid UUID")),
   name: z.string().optional(),
   email: z.string({ message: /*i18n*/("Email is required") }).email(/*i18n*/("The email is invalid")),
@@ -39,11 +39,13 @@ export const getSelfSchema = z.object({
   image: z.string().optional(),
   createdAt: z.date({ message: /*i18n*/("Creation date is required") }),
   updatedAt: z.date({ message: /*i18n*/("Update date must be a valid date") }).optional(),
+  emailVerified: z.boolean(),
   members: memberSchema.extend({
     role: roleSchema,
     tenant: z.object({
       id: z.string({ message: /*i18n*/("ID is required") }).uuid(/*i18n*/("ID must be a valid UUID")),
-      slug: z.string({ message: /*i18n*/("Slug is required") })
+      slug: z.string({ message: /*i18n*/("Slug is required") }),
+      name: z.string()
     })
   })
 });

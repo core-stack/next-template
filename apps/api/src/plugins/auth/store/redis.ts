@@ -40,4 +40,48 @@ export class RedisStore<T> implements Store<T> {
   async delete(key: string): Promise<void> {
     await this.redis.del(this.makeKey(key));
   }
+
+  async getMany(
+    cursor: number = 0,
+    limit: number = 10
+  ): Promise<{ cursor: number, items: T[]}> {
+    const matchPattern = this.makeKey('*');
+
+    const [nextCursor, keys] = await this.redis.scan(
+      cursor,
+      'MATCH', matchPattern,
+      'COUNT', limit
+    );
+
+    if (keys.length === 0) {
+      return { cursor: 0, items: [] };
+    }
+
+    const values = await this.redis.mget(...keys);
+
+    const items: [string, T][] = keys.map((key, index) => {
+      const shortKey = key.substring(this.prefix.length + 1);
+      const value = values[index] ? JSON.parse(values[index] as string) as T : null;
+      return [shortKey, value];
+    }).filter(([, value]) => value !== null) as [string, T][];
+    const res = {
+      cursor: parseInt(nextCursor, 10),
+      items: items.map((i) => i[1]),
+    }
+    return res;
+  }
+
+  async getAll(): Promise<T[]> {
+    let cursor = 0;
+    const allItems: T[] = [];
+
+    do {
+      const { cursor: nextCursor, items } = await this.getMany(cursor, 100);
+      allItems.push(...items);
+      cursor = nextCursor;
+    } while (cursor !== 0);
+
+    return allItems;
+  }
+
 }

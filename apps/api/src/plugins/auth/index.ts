@@ -1,14 +1,14 @@
-import fp from 'fastify-plugin';
+import { Member, PrismaClient, Role, User } from "@/__generated__/prisma";
+import { isUUID } from "@/utils";
+import fp from "fastify-plugin";
 
-import { Member, PrismaClient, Role, User } from '@/__generated__/prisma';
-
-import { UnauthorizedError } from './error';
-import { AccessToken, JWT, RefreshToken } from './jwt';
-import { Provider } from './providers/types';
-import { Session } from './session';
-import { MemoryStore } from './store/memory';
-import { RedisStore, RedisStoreOptions } from './store/redis';
-import { Store } from './store/types';
+import { UnauthorizedError } from "./error";
+import { AccessToken, JWT, RefreshToken } from "./jwt";
+import { Provider } from "./providers/types";
+import { Session } from "./session";
+import { MemoryStore } from "./store/memory";
+import { RedisStore, RedisStoreOptions } from "./store/redis";
+import { Store } from "./store/types";
 
 export class Auth {
   constructor(
@@ -121,8 +121,15 @@ export class Auth {
     return session;
   }
 
-  async finishSession(refreshToken: string) {
-    const token = this.jwt.verifyToken<RefreshToken>(refreshToken);
+  async finishSession(refreshTokenOrSessionId: string) {
+    if (isUUID(refreshTokenOrSessionId)) {
+      const session = await this.store.get(refreshTokenOrSessionId);
+      if (!session) return;
+      session.lastSeen = new Date();
+      session.status = "revoked";
+      await this.store.set(session.id, session);
+    }
+    const token = this.jwt.verifyToken<RefreshToken>(refreshTokenOrSessionId);
     if (!token) return;
     const session = await this.store.get(token.sessionId);
     if (!session) return;
@@ -147,6 +154,10 @@ export class Auth {
     });
     if (!user) throw new UnauthorizedError();
     return await this.createSessionAndTokens(user);
+  }
+
+  listSessions(cursor: number = 0, limit: number = 10) {
+    return this.store.getMany(cursor, limit);
   }
 }
 type RedisOptions = {

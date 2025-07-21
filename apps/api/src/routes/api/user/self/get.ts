@@ -1,12 +1,14 @@
-import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
-
-import { errorResponseSchema } from '@/schemas/error-response.schema';
-import { getSelfSchema } from '@packages/schemas';
+import { errorResponseSchema } from "@/schemas/error-response.schema";
+import { getUserSchema } from "@packages/schemas";
+import { FastifyReply, FastifyRequest, RouteShorthandOptions } from "fastify";
 
 export default async function handler(req: FastifyRequest, reply: FastifyReply) {
   const user = await req.server.prisma.user.findUnique({
     select: {
       id: true,
+      emailVerified: true,
+      createdAt: true,
+      updatedAt: true,
       email: true,
       name: true,
       role: true,
@@ -16,13 +18,13 @@ export default async function handler(req: FastifyRequest, reply: FastifyReply) 
     where: { id: req.session.user.id },
   });
   if (!user) return reply.status(404).send({ message: "Usuário não encontrado" });
-  return user; 
+  return user;
 }
 
 export const options: RouteShorthandOptions = {
   schema: {
     response: {
-      200: getSelfSchema,
+      200: getUserSchema,
       401: errorResponseSchema,
       404: errorResponseSchema
     }

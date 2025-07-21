@@ -1,11 +1,10 @@
-import { ArrowRight, CheckCircle, XCircle } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
-
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { fetchApi } from '@/lib/fetcher';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { fetchApi } from "@/lib/fetcher";
+import { ArrowRight, CheckCircle, XCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 
 type ActivateAccountPageProps = {
   params: Promise<{ token: string }>;
@@ -55,7 +54,7 @@ const ActivationSuccess = () => {
       <div className="space-y-3">
         <h2 className="text-2xl font-semibold text-foreground">{t/*i18n*/("Account Activated!")}</h2>
         <p className="text-muted-foreground max-w-sm mx-auto">
-          {t/*i18n*/("Your account was activated successfully. Now you can log in to access your account.")}
+          {`${t/*i18n*/("Your account has been activated successfully")}!`}
         </p>
       </div>
       <Button asChild size="lg" className="mt-4 px-8 font-medium">

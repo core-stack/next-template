@@ -20,4 +20,45 @@ export class MemoryStore<T> implements Store<T> {
   delete(key: string): void {
     delete this.store[key];
   }
+
+  async getMany(cursor: number = 0, limit: number = 10): Promise<{ cursor: number, items: T[]}> {
+    this.cleanExpired();
+
+    const keys = Object.keys(this.store);
+    const result: T[] = [];
+
+    let currentIndex = cursor;
+    let itemsAdded = 0;
+
+    while (currentIndex < keys.length && itemsAdded < limit) {
+      const key = keys[currentIndex];
+      const item = this.store[key];
+
+      if (item) {
+        result.push(item.data);
+        itemsAdded++;
+      }
+
+      currentIndex++;
+    }
+
+    const nextCursor = currentIndex >= keys.length ? -1 : currentIndex;
+
+    return { cursor: nextCursor, items: result };
+  }
+
+  async getAll(): Promise<T[]> {
+    this.cleanExpired();
+    return Object.values(this.store).map(item => item.data);
+  }
+
+  private cleanExpired(): void {
+    const now = Date.now();
+    Object.keys(this.store).forEach(key => {
+      const item = this.store[key];
+      if (item.expiresAt && item.expiresAt <= now) {
+        delete this.store[key];
+      }
+    });
+  }
 }

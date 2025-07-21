@@ -81,7 +81,6 @@
   "Account Activation": "Account Activation",
   "We are activating your account": "We are activating your account",
   "Account Activated!": "Account Activated!",
-  "Your account was activated successfully. Now you can log in to access your account.": "Your account was activated successfully. Now you can log in to access your account.",
   "Continue to Login": "Continue to Login",
   "Failed to Activate Account": "Failed to Activate Account",
   "Back to Login": "Back to Login",
@@ -96,5 +95,10 @@
   "Invite not found": "Invite not found",
   "Workspace not found": "Workspace not found",
   "You have been invited to ": "You have been invited to ",
-  "Invites sent successfully": "Invites sent successfully"
+  "Invites sent successfully": "Invites sent successfully",
+  "slug is required": "slug is required",
+  "Your account has been activated successfully": "Your account has been activated successfully",
+  "Invite accepted": "Invite accepted",
+  "Invite rejected": "Invite rejected",
+  "Invite deleted": "Invite deleted"
 }
