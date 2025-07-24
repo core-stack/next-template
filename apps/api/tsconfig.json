@@ -18,7 +18,7 @@
     }
   },
   "exclude": ["node_modules", "dist", "coverage"],
-  "include": ["src", "src/__generated__"],
+  "include": ["src", "src/__generated__", "scripts"],
   "references": [
     { "path": "../../packages/common" },
     { "path": "../../packages/env" },

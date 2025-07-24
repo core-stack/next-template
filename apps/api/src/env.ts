@@ -42,6 +42,10 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   GOOGLE_REDIRECT_URI: z.string().optional(),
+
+  DEFAULT_USER_EMAIL: z.string().email().default("admin@example.com"),
+  DEFAULT_USER_PASSWORD: z.string().default("admin"),
+  DEFAULT_USER_NAME: z.string().default("admin"),
 });
 
 export const env = getEnv(envSchema, process.env);

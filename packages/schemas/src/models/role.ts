@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const roleSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
-  permissions: z.array(z.number().int()),
+  permissions: z.number().int(),
   scope: z.enum(["GLOBAL", "TENANT"]),
   tenantId: z.string().uuid().nullable(),
   creatorId: z.string().uuid().nullable(),

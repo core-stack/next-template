@@ -15,7 +15,8 @@
     "clean": "rm -rf ./dist",
     "lint": "eslint src/",
     "check-types": "tsc --noEmit",
-    "build": "pnpm clean && tsup"
+    "generate:api": "cd ../../apps/api && pnpm generate:api",
+    "build": "pnpm clean && pnpm generate:api && tsup"
   },
   "devDependencies": {
     "@packages/config-eslint": "workspace:*",

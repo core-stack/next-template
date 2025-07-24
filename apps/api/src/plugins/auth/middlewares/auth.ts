@@ -31,5 +31,4 @@ export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) =
 
   if (!session) return reply.code(401).send({ error: 'UNAUTHORIZED' });
   req.session = session;
-  console.log("session: ", session);
 };

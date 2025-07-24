@@ -12,6 +12,7 @@ export default async function handler(req: FastifyRequest, reply: FastifyReply) 
       name: true,
       role: true,
       image: true,
+      createdAt: true,
       members: { include: { role: true, tenant: { select: { id: true, slug: true } }} }
     },
     where: { id: req.session.user.id },

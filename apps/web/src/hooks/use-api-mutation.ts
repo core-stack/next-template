@@ -1,4 +1,5 @@
 import { buildUrl } from '@/utils/build-url';
+import { catchError } from '@/utils/catch-error';
 import { ApiPath, apiRoutes, RouteData } from '@packages/common';
 import {
   QueryKey, useMutation, UseMutationOptions, UseMutationResult
@@ -31,11 +32,16 @@ export function useApiMutation<Path extends ApiPath>(
         body: JSON.stringify(body ?? {}),
       });
 
-      if (!res.ok) {
-        throw new Error(`Erro na requisição: ${res.statusText}`);
+      const [json, err] = await catchError<RouteData<Path>["response"]>(res.json());
+      if (err !== null) {
+        throw err;
       }
 
-      return res.json() as Promise<RouteData<Path>["response"]>;
+      if (!res.ok) {
+        throw json;
+      }
+
+      return json;
     },
     mutationKey: options?.mutationKey ?? [key],
     ...options,

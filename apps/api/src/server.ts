@@ -36,7 +36,7 @@ async function main() {
   
   await app.register(cors, {
     origin: env.FRONTEND_URL,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH','OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true
   });
   await app.register(i18nPlugin);

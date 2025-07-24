@@ -10,7 +10,5 @@ export function buildUrl(path: string, params?: Record<string, any>, query?: Rec
   }
 
   const search = query ? `?${new URLSearchParams(query).toString()}` : "";
-  console.log(`${finalPath}${search}`);
-  
   return `${finalPath}${search}`;
 }

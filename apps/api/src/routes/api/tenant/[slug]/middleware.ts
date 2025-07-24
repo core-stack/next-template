@@ -1,3 +1,3 @@
-import { authMiddleware, tenantMiddleware } from '@/plugins/auth/middlewares';
+import { tenantMiddleware } from '@/plugins/auth/middlewares';
 
-export default [authMiddleware, tenantMiddleware];
+export default [tenantMiddleware];
