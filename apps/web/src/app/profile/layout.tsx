@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { WorkspacesHeader } from '../../components/workspace/workspace-header';
+import { TenantsHeader } from '@/components/tenant-header';
 
 interface ProfileLayoutProps {
   children: ReactNode
@@ -8,7 +8,7 @@ interface ProfileLayoutProps {
 export default function ProfileLayout({ children }: ProfileLayoutProps) {
   return (
     <>
-      <WorkspacesHeader />
+      <TenantsHeader />
       <main>{children}</main>
     </>
   )

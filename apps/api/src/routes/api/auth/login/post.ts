@@ -13,12 +13,12 @@ export default async function handler(req: FastifyRequest<{ Body: LoginSchema }>
       members: { include: { tenant: { select: { id: true, slug: true } }, role: true } }
     }
   });
-  if (!user) return reply.status(401).send({ message: "Email ou senha incorretos" });
+  if (!user) return reply.status(401).send({ message: /*i18n*/("Email or password invalid") });
 
-  if (!user.password) return reply.status(401).send({ message: "Email ou senha incorretos" });
+  if (!user.password) return reply.status(401).send({ message: /*i18n*/("Email or password invalid") });
 
   const valid = await comparePassword(password, user.password);
-  if (!valid) return reply.status(401).send({ message: "Email ou senha incorretos" });
+  if (!valid) return reply.status(401).send({ message: /*i18n*/("Email or password invalid") });
 
   const { token } = await req.server.auth.createSessionAndTokens(user);
 

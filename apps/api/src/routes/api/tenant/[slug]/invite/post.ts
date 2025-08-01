@@ -14,7 +14,7 @@ export default async function handler(
   reply: FastifyReply
 ) {
   const tenant = await req.server.prisma.tenant.findUnique({ where: { slug: req.params.slug, disabledAt: null } });
-  if (!tenant) return reply.status(404).send({ message: /*i18n*/("Workspace not found") });
+  if (!tenant) return reply.status(404).send({ message: /*i18n*/("Tenant not found") });
 
   for (const { email, role } of req.body.emails) {
     // verify if exists member with email

@@ -1,10 +1,13 @@
 import type { Metadata } from "next"
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { caller } from "@/lib/trpc/server";
 
-import { General } from "./components/general";
-import { UpdatePassword } from "./components/password";
+
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { fetchApi } from '@/lib/fetcher';
+
+import { General } from './components/general';
+import { ProfileHead } from './components/head';
+import { UpdatePassword } from './components/password';
 
 export const metadata: Metadata = {
   title: "Perfil",
@@ -12,27 +15,31 @@ export const metadata: Metadata = {
 }
 
 export default async function ProfilePage() {
-  const user = await caller.user.self();
+  const [user, hasPassword] = await Promise.all([
+    fetchApi("[GET] /api/user/self"),
+    fetchApi("[GET] /api/user/has-password")
+  ]);
+  if (!user.data) return null;
+  if (!hasPassword.data) return null;
   return (
     <div className="container py-10 m-auto">
       <div className="flex flex-col gap-6 max-w-3xl mx-auto">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Perfil</h1>
-          <p className="text-muted-foreground mt-1">Gerencie suas informações pessoais e preferências de conta</p>
+          <ProfileHead />
         </div>
         <Separator />
         <Tabs defaultValue="general" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="general">Geral</TabsTrigger>
-            <TabsTrigger value="password">Senha</TabsTrigger>
+            <TabsTrigger value="general">{/*i18n*/("General")}</TabsTrigger>
+            <TabsTrigger value="password">{/*i18n*/("Password")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">
-            <General user={user} />
+            <General user={user.data} />
           </TabsContent>
 
           <TabsContent value="password">
-            <UpdatePassword />
+            <UpdatePassword hasPassword={hasPassword.data.hasPassword} />
           </TabsContent>
         </Tabs>
       </div>

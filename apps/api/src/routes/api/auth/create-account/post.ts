@@ -13,7 +13,7 @@ export default async function handler(req:FastifyRequest<{ Body: CreateAccountSc
   const { email, password, name } = req.body;
   // verify email in use
   const userWithEmail = await req.server.prisma.user.findUnique({ where: { email: email } });
-  if (userWithEmail) return reply.status(400).send({ message: "Email já em uso" });
+  if (userWithEmail) return reply.status(400).send({ message: /*i18n*/("Email already in use") });
 
   // hash password
   const hashedPassword = await hashPassword(password);

@@ -1,21 +1,27 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { toast } from "@/hooks/use-toast";
-import { RouterOutput } from "@/lib/trpc/app.router";
-import { trpc } from "@/lib/trpc/client";
-import { UpdateProfileSchema, updateProfileSchema } from "@/lib/trpc/schema/user.schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { User } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useForm } from 'react-hook-form';
 
-import { ProfileImageUploader } from "./profile-image-uploader";
+import { Button } from '@/components/ui/button';
+import {
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
+} from '@/components/ui/card';
+import {
+  Form, FormControl, FormField, FormItem, FormLabel, FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useApiMutation } from '@/hooks/use-api-mutation';
+import { toast } from '@/hooks/use-toast';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ApiUserSelfGet } from '@packages/common';
+import { updateProfileSchema, UpdateProfileSchema } from '@packages/schemas';
+
+import { ProfileImageUploader } from './profile-image-uploader';
 
 type Props = {
-  user: RouterOutput["user"]["self"];
+  user: ApiUserSelfGet.Response200
 }
 export const General = ({ user }: Props) => {
   const form = useForm<UpdateProfileSchema>({
@@ -26,16 +32,17 @@ export const General = ({ user }: Props) => {
   });
   const isLoading = form.formState.isSubmitting;
   const isDirty = form.formState.isDirty;
-  const { mutate } = trpc.user.updateName.useMutation();
+  const { mutate } = useApiMutation("[PUT] /api/user/update-name");
+  const t = useTranslations();
   const onSubmit = form.handleSubmit(data => {
     mutate(
-      data,
+      { body: data },
       {
-        onSuccess: ({ name }) => {
-          form.reset({ name });
-          toast({ title: "Nome atualizado com sucesso" });
+        onSuccess: ({ message }) => {
+          form.reset(data);
+          toast({ title: t/*i18n*/("Name updated"), description: message });
         },
-        onError: ({ message }) => toast({ title: "Erro ao atualizar nome", description: message, variant: "destructive" })
+        onError: ({ message }) => toast({ title: t/*i18n*/("Error updating name"), description: message, variant: "destructive" })
       },
     )
   });

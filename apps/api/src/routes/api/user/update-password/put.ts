@@ -12,11 +12,12 @@ export default async function handler(
 ) {
   const { session } = req;
   const user = await req.server.prisma.user.findUnique({ where: { id: session.user.id } });
-  if (!user) return reply.status(404).send({ message: "Usuário não encontrado" });
+  if (!user) return reply.status(404).send({ message: /*i18n*/("User not found") });
 
   if (user.password) {
-    if (!req.body.currentPassword) return reply.status(400).send({ message: "Senha atual obrigatória" });
-    if (!await comparePassword(req.body.currentPassword, user.password)) return reply.status(400).send({ message: "Senha atual incorreta" });
+    if (!req.body.currentPassword) return reply.status(400).send({ message: /*i18n*/("Current password required") });
+    if (!await comparePassword(req.body.currentPassword, user.password)) 
+      return reply.status(400).send({ message: /*i18n*/("Current password invalid") });
   }
 
   await req.server.prisma.$transaction(async (tx) => {
@@ -34,7 +35,7 @@ export default async function handler(
     })
   });
 
-  return reply.status(200).send({ message: "Senha alterada com sucesso" });
+  return reply.status(200).send({ message: /*i18n*/("Password updated") });
 }
 
 export const options: RouteShorthandOptions = {

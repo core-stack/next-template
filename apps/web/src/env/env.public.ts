@@ -11,7 +11,7 @@ const publicEnvSchema = z.object({
   NEXT_PUBLIC_FIREBASE_APP_ID: z.string(),
   NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: z.string(),
   NEXT_PUBLIC_FIREBASE_VAPID_KEY: z.string(),
-  NEXT_PUBLIC_API_URL: z.string().url().default("http://localhost:3000").optional(),
+  NEXT_PUBLIC_API_URL: z.string().url().default("http://localhost:4000"),
 });
 
 export const publicEnv = publicEnvSchema.parse({

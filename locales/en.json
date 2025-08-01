@@ -121,5 +121,18 @@
   "Save changes": "Save changes",
   "Create": "Create",
   "Tenant created": "Tenant created",
-  "Tenant updated successfully": "Tenant updated successfully"
+  "Tenant updated successfully": "Tenant updated successfully",
+  "The password must be at least 5 characters": "The password must be at least 5 characters",
+  "Manage your personal information": "Manage your personal information",
+  "General": "General",
+  "Now you are a member of": "Now you are a member of",
+  "Error": "Error",
+  "An error occurred while accepting the invite, please try again": "An error occurred while accepting the invite, please try again",
+  "An error occurred while rejecting the invite, please try again": "An error occurred while rejecting the invite, please try again",
+  "Tenant Invite": "Tenant Invite",
+  "You have been invited to": "You have been invited to",
+  "Tenant": "Tenant",
+  "Name updated": "Name updated",
+  "Error updating name": "Error updating name",
+  "Manage your tenants": "Manage your tenants"
 }

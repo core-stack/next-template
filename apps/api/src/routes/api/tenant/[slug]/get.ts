@@ -10,7 +10,7 @@ export default async function handler(
 ) {
   const { slug } = req.params;
   const tenant = await req.server.prisma.tenant.findUnique({ where: { slug } });
-  if (!tenant) return reply.status(404).send({ message: "Tenant not found" });
+  if (!tenant) return reply.status(404).send({ message: /*i18n*/("Tenant not found") });
   return tenant;
 }
 

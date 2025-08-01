@@ -4,16 +4,7 @@ import { BarChart, Calendar, Clock, CreditCard, Layers, Users } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-interface WorkspaceOverviewProps {
-  workspace: {
-    id: string
-    name: string
-    projectCount?: number
-    memberCount?: number
-  }
-}
-
-export function WorkspaceOverview({ workspace }: WorkspaceOverviewProps) {
+export function WorkspaceOverview() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -23,7 +14,7 @@ export function WorkspaceOverview({ workspace }: WorkspaceOverviewProps) {
             <Layers className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{workspace.projectCount || 0}</div>
+            <div className="text-2xl font-bold"></div>
             <p className="text-xs text-muted-foreground">+2 no último mês</p>
           </CardContent>
         </Card>
@@ -33,7 +24,7 @@ export function WorkspaceOverview({ workspace }: WorkspaceOverviewProps) {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{workspace.memberCount || 0}</div>
+            <div className="text-2xl font-bold"></div>
             <p className="text-xs text-muted-foreground">+3 no último mês</p>
           </CardContent>
         </Card>

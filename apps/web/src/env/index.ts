@@ -8,6 +8,6 @@ import { getEnv } from '@packages/env';
 import { publicEnv } from './env.public';
 
 export const envSchema = getEnv(z.object({
-  API_URL: z.string().url().default("http://localhost:3000"),
+  API_URL: z.string().url().default("http://localhost:4000"),
 }), process.env);
 export const env = { ...envSchema, ...publicEnv };

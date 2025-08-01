@@ -1,3 +1,4 @@
+import { env } from '@/env';
 import { buildUrl } from '@/utils/build-url';
 import { ApiPath, apiRoutes, RouteData } from '@packages/common';
 
@@ -18,12 +19,11 @@ export async function fetchApi<Path extends ApiPath>(
     body?: RouteData<Path>["body"];
     headers?: Record<string, string>;
     cache?: RequestCache;
-    
   }
 ): Promise<FetchApiReturn<Path>> {
   const method = apiRoutes[path].method;
-  const url = buildUrl(path, opts?.params, opts?.query);
-
+  const baseUrl = env.API_URL;
+  const url = `${baseUrl}${buildUrl(path, opts?.params, opts?.query)}`;
   const res = await fetch(url, {
     method,
     headers: {

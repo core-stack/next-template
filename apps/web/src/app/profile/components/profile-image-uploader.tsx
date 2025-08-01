@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
 } from '@/components/ui/dialog';
+import { useApiInvalidate } from '@/hooks/use-api-invalidate';
+import { useApiMutation } from '@/hooks/use-api-mutation';
 import { useToast } from '@/hooks/use-toast';
-import { trpc } from '@/lib/trpc/client';
+import { useUpload } from '@/hooks/use-upload';
 import { getCroppedImg } from '@/utils/cropImage';
 
 interface ProfileImageUploaderProps {
@@ -28,10 +30,7 @@ export function ProfileImageUploader({ user }: ProfileImageUploaderProps) {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [showCropDialog, setShowCropDialog] = useState(false);
-
-  const utils = trpc.useUtils();
-  const getPresignedUrl = trpc.user.getUpdateImagePresignedUrl.useMutation();
-  const confirmUpload = trpc.user.confirmUpload.useMutation();
+  const uploadFile = useUpload();
 
   const handleClick = () => {
     fileInputRef.current?.click();
@@ -53,72 +52,45 @@ export function ProfileImageUploader({ user }: ProfileImageUploaderProps) {
     setCroppedAreaPixels(croppedPixels);
   };
 
-  const uploadFile = (
-    file: Blob,
-    signedUrl: string
-  ): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest()
-
-      xhr.open('PUT', signedUrl)
-      xhr.setRequestHeader('Content-Type', file.type)
-
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          resolve()
-        } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`))
-        }
-      }
-
-      xhr.onerror = () => {
-        reject(new Error('Upload failed'))
-      }
-
-      xhr.send(file)
-    })
-  }
-
+  const { mutateAsync: getPresignedUrl } = useApiMutation("[POST] /api/user/get-update-image-signed-url");
+  const { mutateAsync: confirmUpload } = useApiMutation("[POST] /api/user/get-update-image-signed-url/confirm-upload");
+  const revalidate = useApiInvalidate();
   const handleUpload = async () => {
     if (!imageSrc || !croppedAreaPixels) return;
 
-    try {
-      const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
+    const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
 
-      const fileName = `profile.jpeg`;
-      const fileType = croppedBlob.type;
-      const fileSize = croppedBlob.size;
-
-      const { url, key, publicUrl } = await getPresignedUrl.mutateAsync({
-        fileName,
-        contentType: fileType,
-        fileSize,
-      });
-
-      await uploadFile(croppedBlob, url);
-
-      confirmUpload.mutate({ key }, {
-        onSuccess: () => {
-          setPreviewUrl(publicUrl);
-          setShowCropDialog(false);
-          utils.user.self.invalidate();
-        },
-        onError: () => {
-          toast({
-            title: "Erro ao enviar imagem",
-            description: "Tente novamente.",
-            variant: "destructive",
-          });
-        }
-      });
-    } catch (err) {
-      console.error(err);
+    const fileName = `profile.jpeg`;
+    const fileType = croppedBlob.type;
+    const fileSize = croppedBlob.size;
+    const onError = () => {
       toast({
         title: "Erro ao enviar imagem",
         description: "Tente novamente.",
         variant: "destructive",
       });
     }
+    const { url, key, publicUrl } = await getPresignedUrl({
+      body: {
+        fileName,
+        contentType: fileType,
+        fileSize,
+      }
+    }, {
+      onSuccess: async () => {
+        await uploadFile(croppedBlob, url);
+        
+        confirmUpload({ body: { key } }, {
+          onSuccess: () => {
+            setPreviewUrl(publicUrl);
+            setShowCropDialog(false);
+            revalidate('[GET] /api/user/self');
+          },
+          onError
+        });
+      },
+      onError
+    });
   };
 
   return (

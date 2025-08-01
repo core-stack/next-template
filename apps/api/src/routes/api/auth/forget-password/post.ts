@@ -12,7 +12,7 @@ export default async function handler(
 ) {
   const { email } = req.body;
   const user = await req.server.prisma.user.findUnique({ where: { email } });
-  if (!user) return reply.status(404).send({ message: "Usuário não encontrado" });
+  if (!user) return reply.status(404).send({ message: /*i18n*/("User not found") });
   await req.server.prisma.$transaction(async (tx) => {
     const { token } = await tx.verificationToken.create({
       data: {
@@ -36,7 +36,7 @@ export default async function handler(
       },
     });
   })
-  return reply.status(200).send({ message: "Email enviado com sucesso" });
+  return reply.status(200).send({ message: /*i18n*/("Email sent") });
 }
 
 export const options: RouteShorthandOptions = {

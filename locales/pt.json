@@ -88,7 +88,7 @@
   "Profile": "",
   "Help and Support": "",
   "Logout": "",
-  "You are not logged in": "",
+  "You are not logged in": "Você não esta logado",
   "You can`t access this tenant": "",
   "You don't have permission to access this resource": "",
   "Convite aceito": "",
@@ -121,5 +121,18 @@
   "Save changes": "",
   "Create": "",
   "Tenant created": "",
-  "Tenant updated successfully": ""
+  "Tenant updated successfully": "",
+  "The password must be at least 5 characters": "",
+  "Manage your personal information": "",
+  "General": "",
+  "Now you are a member of": "",
+  "Error": "",
+  "An error occurred while accepting the invite, please try again": "",
+  "An error occurred while rejecting the invite, please try again": "",
+  "Tenant Invite": "",
+  "You have been invited to": "",
+  "Tenant": "",
+  "Name updated": "",
+  "Error updating name": "",
+  "Manage your tenants": ""
 }

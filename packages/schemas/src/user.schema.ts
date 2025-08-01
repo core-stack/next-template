@@ -6,6 +6,7 @@ import { passwordSchema } from './password.schema';
 export const updatePasswordSchema = z.object({
   currentPassword: passwordSchema,
   newPassword: passwordSchema,
+  confirmPassword: passwordSchema,
 });
 export type UpdatePasswordSchema = z.infer<typeof updatePasswordSchema>;
 
@@ -38,7 +39,7 @@ export const getSelfSchema = z.object({
   role: roleSchema,
   image: z.string().optional().nullable(),
   createdAt: z.date({ message: /*i18n*/("Creation date is required") }),
-  updatedAt: z.date({ message: /*i18n*/("Update date must be a valid date") }).optional(),
+  updatedAt: z.date({ message: /*i18n*/("Update date must be a valid date") }).nullable(),
   members: memberSchema.extend({
     role: roleSchema,
     tenant: z.object({

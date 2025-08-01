@@ -13,7 +13,7 @@ export default async function handler(
     where: { id: session.user.id },
     data: { name: req.body.name },
   });
-  return reply.status(200).send({ message: "Nome alterado com sucesso" });
+  return reply.status(200).send({ message: /*i18n*/("Name updated") });
 }
 
 export const options: RouteShorthandOptions = {

@@ -26,9 +26,9 @@ export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) =
       });
     }
   } catch {
-    return reply.code(401).send({ error: 'UNAUTHORIZED' });
+    return reply.code(401).send({ error: 'UNAUTHORIZED', message: req.t/*i18n*/("You are not logged in") });
   }
 
-  if (!session) return reply.code(401).send({ error: 'UNAUTHORIZED' });
+  if (!session) return reply.code(401).send({ error: 'UNAUTHORIZED', message: req.t/*i18n*/("You are not logged in") });
   req.session = session;
 };

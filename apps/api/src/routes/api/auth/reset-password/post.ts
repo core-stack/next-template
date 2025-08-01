@@ -11,13 +11,13 @@ export default async function handler(
 ) {
   const { token, password } = req.body;
   const verificationToken = await req.server.prisma.verificationToken.findUnique({ where: { token }, include: { user: true } });
-  if (!verificationToken?.user) return reply.status(404).send({ message: "Usuário não encontrado" });
+  if (!verificationToken?.user) return reply.status(404).send({ message: /*i18n*/("User not found") });
   await req.server.prisma.user.update({
     where: { id: verificationToken.user.id },
     data: { password: await hashPassword(password) }
   });
   
-  return reply.status(200).send({ message: "Senha alterada com sucesso" });
+  return reply.status(200).send({ message: /*i18n*/("Password updated") });
 }
 
 export const options: RouteShorthandOptions = {

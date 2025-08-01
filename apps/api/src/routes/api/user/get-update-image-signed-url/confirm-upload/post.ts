@@ -21,7 +21,7 @@ export default async function handler(
       width: 200
     });
   })
-  return reply.status(200).send({ message: "Imagem alterada com sucesso" });
+  return reply.status(200).send({ message: /*i18n*/("Image updated") });
 }
 
 export const options: RouteShorthandOptions = {

@@ -1,6 +1,6 @@
 "use client"
 
-import { CreditCard, LayoutDashboard, Plus, Settings, Users, Zap } from 'lucide-react';
+import { LayoutDashboard, Plus, Settings, Users, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -10,24 +10,24 @@ import {
 } from '@/components/ui/select';
 import { usePermission } from '@/context/permission';
 import { DialogType } from '@/dialogs';
+import { useApiQuery } from '@/hooks/use-api-query';
 import { useDialog } from '@/hooks/use-dialog';
-import { RouterOutput } from '@/lib/trpc/app.router';
-import { trpc } from '@/lib/trpc/client';
 import { cn } from '@/lib/utils';
+import { ApiTenantSlugGet } from '@packages/common';
 import { Permission } from '@packages/permission';
 
 import { MemberInfo } from './member-info';
 
 interface WorkspaceSidebarProps {
   slug: string
-  currentWokspace: RouterOutput["workspace"]["getBySlug"]
+  tenant: ApiTenantSlugGet.Response200
 }
 
-export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProps) {
+export function TenantSidebar({ slug, tenant }: WorkspaceSidebarProps) {
   const pathname = usePathname() || ""
   const router = useRouter();
   const { can } = usePermission();
-  const { data: workspaces = [currentWokspace] } = trpc.workspace.get.useQuery();
+  const { data: tenants = [tenant] } = useApiQuery("[GET] /api/tenant");
   const { openDialog } = useDialog();
 
   const routes = [
@@ -46,18 +46,11 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
       permissions: [Permission.GET_MEMBERS]
     },
     {
-      label: "Faturamento",
-      icon: CreditCard,
-      href: `/w/${slug}/billing`,
-      active: pathname === `/w/${slug}/billing`,
-      permissions: [Permission.GET_BILLING]
-    },
-    {
       label: "Configurações",
       icon: Settings,
       href: `/w/${slug}/settings`,
       active: pathname === `/w/${slug}/settings`,
-      permissions: [Permission.UPDATE_WORKSPACE]
+      permissions: [Permission.UPDATE_TENANT]
     },
   ]
 
@@ -78,7 +71,7 @@ export function WorkspaceSidebar({ slug, currentWokspace }: WorkspaceSidebarProp
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Seus workspaces</SelectLabel>
-              {workspaces.filter(w => w.disabledAt === null).map(ws => (
+              {tenants.filter(w => w.disabledAt === null).map(ws => (
                 <SelectItem key={ws.id} value={ws.slug}>
                   {ws.name}
                 </SelectItem>
