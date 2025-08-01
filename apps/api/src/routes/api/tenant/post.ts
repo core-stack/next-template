@@ -1,9 +1,8 @@
-import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
-
-import { errorResponseSchema } from '@/schemas/error-response.schema';
-import { successResponseSchema } from '@/schemas/success-response.schema';
-import { ROLES } from '@packages/permission';
-import { CreateTenantSchema, createTenantSchema } from '@packages/schemas';
+import { errorResponseSchema } from "@/schemas/error-response.schema";
+import { successResponseSchema } from "@/schemas/success-response.schema";
+import { permissionsToNumber, ROLES } from "@packages/permission";
+import { CreateTenantSchema, createTenantSchema } from "@packages/schemas";
+import { FastifyReply, FastifyRequest, RouteShorthandOptions } from "fastify";
 
 export default async function handler(
   req: FastifyRequest<{ Body: CreateTenantSchema }>,
@@ -27,17 +26,18 @@ export default async function handler(
         slug: body.slug,
         roles: {
           createMany: {
-            data: ROLES.tenant.default.map(r => ({
-              key: r.key,
-              name: r.name,
-              permissions: r.permissions.reduce((acc, p) => acc | p, 0),
-              scope: "TENANT"
-            }))
+            data: ROLES.tenant.default.map(role => ({
+              key: role.key,
+              name: role.name,
+              permissions: permissionsToNumber(role.permissions),
+              scope: "TENANT",
+            })),
           }
         }
       }
     });
-    const member = await tx.member.create({
+
+    await tx.member.create({
       data: {
         email: session.user.email,
         owner: true,
@@ -45,7 +45,11 @@ export default async function handler(
         image: session.user.image,
         role: {
           connect: {
-            key_scope: { key: ROLES.tenant.admin.key, scope: "TENANT" }
+            key_scope_tenantId: {
+              key: ROLES.tenant.admin.key,
+              scope: "TENANT",
+              tenantId: tenant.id
+            }
           }
         },
         tenant: {
@@ -61,7 +65,7 @@ export default async function handler(
       }
     });
   });
- 
+
   await req.server.auth.reloadSession(session.id);
 
   return reply.status(200).send({ message: /*i18n*/("Tenant created") });

@@ -83,6 +83,7 @@ export class Auth {
   async getSession(accessToken?: string): Promise<Session | undefined> {
     if (!accessToken) return undefined;
     const token = this.jwt.verifyToken<AccessToken>(accessToken);
+    console.log("Access Token:", token);
 
     if (!token) throw new UnauthorizedError();
     const { sessionId } = token;

@@ -1,7 +1,6 @@
-import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
-
-import { errorResponseSchema } from '@/schemas/error-response.schema';
-import { getTenantsList } from '@packages/schemas';
+import { errorResponseSchema } from "@/schemas/error-response.schema";
+import { getTenantsList } from "@packages/schemas";
+import { FastifyReply, FastifyRequest, RouteShorthandOptions } from "fastify";
 
 export default async function handler(
   req: FastifyRequest,
@@ -9,8 +8,8 @@ export default async function handler(
 ) {
   const { session } = req;
   const tenants = await req.server.prisma.tenant
-    .findMany({ 
-      where: { members: { some: { id: session.user.id } } }, 
+    .findMany({
+      where: { members: { some: { userId: session.user.id } } },
       include: { _count: { select: { members: true }} }
     });
 

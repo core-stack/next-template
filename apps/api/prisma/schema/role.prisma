@@ -27,6 +27,6 @@ model Role {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([key, scope])
+  @@unique([key, scope, tenantId])
   @@map("roles")
 }

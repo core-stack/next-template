@@ -1,10 +1,8 @@
-import { redirect } from 'next/navigation';
+import { NotificationsProvider } from "@/context/notifications";
+import { fetchApi } from "@/lib/fetcher";
+import { redirect } from "next/navigation";
 
-import { NotificationsProvider } from '@/context/notifications';
-import { PermissionProvider } from '@/context/permission';
-import { fetchApi } from '@/lib/fetcher';
-
-import { TenantSidebar } from './components/tenant-sidebar';
+import { TenantSidebar } from "./components/tenant-sidebar";
 
 import type { ReactNode } from "react"
 interface WorkspaceLayoutProps {
@@ -24,12 +22,10 @@ export default async function WorkspaceLayout({ children, params }: WorkspaceLay
 
   return (
     <NotificationsProvider>
-      <PermissionProvider>
-        <div className="flex min-h-screen">
-          <TenantSidebar slug={slug} tenant={data!} />
-          <div className="flex-1 overflow-auto">{children}</div>
-        </div>
-      </PermissionProvider>
+      <div className="flex min-h-screen">
+        <TenantSidebar slug={slug} tenant={data!} />
+        <div className="flex-1 overflow-auto">{children}</div>
+      </div>
     </NotificationsProvider>
   )
 }

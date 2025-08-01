@@ -44,7 +44,10 @@ const defaultGlobalUserRole = defaultGlobalRoles.find(role => role.default === "
 const defaultTenantAdminRole = defaultTenantRoles.find(role => role.default === "tenant-admin");
 const defaultTenantUserRole = defaultTenantRoles.find(role => role.default === "tenant-user");
 
-export const ROLES = Object.freeze({
+if (!defaultGlobalAdminRole || !defaultGlobalUserRole || !defaultTenantAdminRole || !defaultTenantUserRole) {
+  throw new Error("Default roles not found in the configuration files.");
+}
+export const ROLES = {
   global: {
     default: defaultGlobalRoles as RolesSchema,
     admin: defaultGlobalAdminRole as RoleSchema,
@@ -55,4 +58,4 @@ export const ROLES = Object.freeze({
     admin: defaultTenantAdminRole as RoleSchema,
     user: defaultTenantUserRole as RoleSchema
   }
-});
+} as const;
