@@ -1,26 +1,19 @@
-import type { Metadata } from "next"
-
+"use client"
 
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { fetchApi } from '@/lib/fetcher';
+import { useApiQuery } from '@/hooks/use-api-query';
 
 import { General } from './components/general';
 import { ProfileHead } from './components/head';
 import { UpdatePassword } from './components/password';
 
-export const metadata: Metadata = {
-  title: "Perfil",
-  description: "Gerencie suas informações pessoais",
-}
-
-export default async function ProfilePage() {
-  const [user, hasPassword] = await Promise.all([
-    fetchApi("[GET] /api/user/self"),
-    fetchApi("[GET] /api/user/has-password")
-  ]);
-  if (!user.data) return null;
-  if (!hasPassword.data) return null;
+export default function ProfilePage() {
+  const { data: user } = useApiQuery("[GET] /api/user/self");
+  const { data: hasPassword } = useApiQuery("[GET] /api/user/has-password");
+  
+  if (!user) return null;
+  if (!hasPassword) return null;
   return (
     <div className="container py-10 m-auto">
       <div className="flex flex-col gap-6 max-w-3xl mx-auto">
@@ -35,11 +28,11 @@ export default async function ProfilePage() {
           </TabsList>
 
           <TabsContent value="general">
-            <General user={user.data} />
+            <General user={user} />
           </TabsContent>
 
           <TabsContent value="password">
-            <UpdatePassword hasPassword={hasPassword.data.hasPassword} />
+            <UpdatePassword hasPassword={hasPassword.hasPassword} />
           </TabsContent>
         </Tabs>
       </div>

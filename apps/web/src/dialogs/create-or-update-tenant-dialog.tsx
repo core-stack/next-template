@@ -67,11 +67,11 @@ export function CreateOrUpdateTenantDialog({ tenant }: TenantDialogProps) {
     <ScrollArea className='max-h-[90vh] pr-3'>
       <div className='p-1'>
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Editar workspace" : "Criar workspace"}</DialogTitle>
+          <DialogTitle>{isEditing ? t/*i18n*/("Edit tenant") : t/*i18n*/("Create tenant")}</DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Edite as informações do ser workspace"
-              : "Preencha as informações para criar um novo workspace"}
+              ? t/*i18n*/("Change the information below to update the tenant")
+              : t/*i18n*/("Create a new tenant")}
           </DialogDescription>
         </DialogHeader>
 

@@ -1,17 +1,14 @@
 "use client"
 
-import { User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 
+import { FormInput } from '@/components/form/input';
 import { Button } from '@/components/ui/button';
 import {
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
 } from '@/components/ui/card';
-import {
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Form } from '@/components/ui/form';
 import { useApiMutation } from '@/hooks/use-api-mutation';
 import { toast } from '@/hooks/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -62,31 +59,16 @@ export const General = ({ user }: Props) => {
 
         <Form {...form}>
           <form onSubmit={onSubmit} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input className="pl-10" placeholder="Seu nome" disabled={isLoading} {...field} />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormInput name='name' label={t/*i18n*/("Name")} />
             <CardFooter className="flex justify-end gap-2">
               {
                 isDirty &&
                 <Button variant="destructive-outline" type="reset" disabled={isLoading} onClick={reset}>
-                  Cancelar
+                  {t/*i18n*/("Cancel")}
                 </Button>
               }
               <Button type="submit" disabled={isLoading || !isDirty}>
-                Salvar alterações
+                {t/*i18n*/("Save")}
               </Button>
             </CardFooter>
           </form>

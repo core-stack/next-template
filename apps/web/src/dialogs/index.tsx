@@ -1,5 +1,5 @@
 "use client";
-import { CreateOrUpdateTenantDialog } from './create-or-update-workspace-dialog';
+import { CreateOrUpdateTenantDialog } from './create-or-update-tenant-dialog';
 import { InviteMemberDialog } from './invite-member-dialog';
 import { PlanComparisonDialog } from './plan-comparison-dialog';
 

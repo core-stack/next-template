@@ -134,5 +134,21 @@
   "Tenant": "Tenant",
   "Name updated": "Name updated",
   "Error updating name": "Error updating name",
-  "Manage your tenants": "Manage your tenants"
+  "Manage your tenants": "Manage your tenants",
+  "Edit tenant": "Edit tenant",
+  "Change the information below to update the tenant": "Change the information below to update the tenant",
+  "Create a new tenant": "Create a new tenant",
+  "Email already in use": "Email already in use",
+  "User not found": "User not found",
+  "Email sent": "Email sent",
+  "Email or password invalid": "Email or password invalid",
+  "Password updated": "Password updated",
+  "Tenant not found": "Tenant not found",
+  "Current password required": "Current password required",
+  "Current password invalid": "Current password invalid",
+  "Image updated": "Image updated",
+  "Save": "Save",
+  "Current password": "Current password",
+  "New password": "New password",
+  "Confirm password": "Confirm password"
 }
