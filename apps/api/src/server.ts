@@ -1,20 +1,19 @@
-import Fastify from 'fastify';
-import { serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod';
+import fastifyCookiePlugin from "@fastify/cookie";
+import cors from "@fastify/cors";
+import Fastify from "fastify";
+import { serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
 
-import fastifyCookiePlugin from '@fastify/cookie';
-import cors from '@fastify/cors';
-
-import { env } from './env';
-import { errorHandler } from './error-handler';
-import authPlugin from './plugins/auth';
-import bootstrapPlugin from './plugins/bootstrap';
-import cronPlugin from './plugins/cron';
-import envPlugin from './plugins/env';
-import i18nPlugin from './plugins/i18n';
-import prismaPlugin from './plugins/prisma';
-import queuePlugin from './plugins/queue';
-import routerPlugin from './plugins/router';
-import storagePlugin from './plugins/storage';
+import { env } from "./env";
+import { errorHandler } from "./error-handler";
+import authPlugin from "./plugins/auth";
+import bootstrapPlugin from "./plugins/bootstrap";
+import cronPlugin from "./plugins/cron";
+import envPlugin from "./plugins/env";
+import i18nPlugin from "./plugins/i18n";
+import prismaPlugin from "./plugins/prisma";
+import queuePlugin from "./plugins/queue";
+import routerPlugin from "./plugins/router";
+import storagePlugin from "./plugins/storage";
 
 async function main() {
   const app = Fastify({
@@ -33,7 +32,7 @@ async function main() {
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
-  
+
   await app.register(cors, {
     origin: env.FRONTEND_URL,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -52,10 +51,11 @@ async function main() {
       accessTokenDuration: env.JWT_ACCESS_TOKEN_DURATION,
       refreshTokenDuration: env.JWT_REFRESH_TOKEN_DURATION,
     },
-    store: { type: "redis", options: { url: env.REDIS_URL } },
+    store: { type: env.AUTH_STORE_TYPE, options: { url: env.REDIS_URL } },
     providers: {}
   });
   await app.register(bootstrapPlugin);
+
   await app.register(storagePlugin, {
     accessKeyId: env.AWS_ACCESS_KEY_ID,
     secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
@@ -66,7 +66,7 @@ async function main() {
   });
 
   await app.register(routerPlugin);
-  
+
   await app.listen({ port: env.API_PORT });
 }
 main();
