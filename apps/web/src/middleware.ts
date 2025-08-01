@@ -1,4 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+
+import { publicRoutes, REDIRECT_WHEN_NOT_AUTHENTICATED_PATH } from "./routes";
 
 export const config = {
   matcher: [
@@ -11,30 +13,19 @@ export const config = {
      */
     "/((?!api/|_next/|_proxy/|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest).*)",
   ],
-  runtime: "nodejs",
 };
-
-const REDIRECT_WHEN_NOT_AUTHENTICATED_PATH = "/auth/login";
-
-const publicRoutes = [
-  { path: '/auth/login', whenAuthneticated: "redirect" },
-  { path: '/auth/create-account', whenAuthneticated: "redirect" },
-  { path: '/auth/activate', whenAuthneticated: "redirect" },
-  { path: '/pricing', whenAuthneticated: "next" },
-  { path: '/terms', whenAuthneticated: "next" },
-  { path: '/privacy', whenAuthneticated: "next" },
-] as const
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get('access-token')?.value;
 
-  const publicRoute = publicRoutes.find(route => pathname.startsWith(route.path));
+  const publicRoute = publicRoutes.find(route => route.exact ? pathname === route.path : pathname.startsWith(route.path));
+
   if (!token && publicRoute) {
     return NextResponse.next();
   }
 
-  if (token && publicRoute && publicRoute.whenAuthneticated === "redirect") {
+  if (token && publicRoute && publicRoute.whenAuthenticated === "redirect") {
     const redirectUrl = new URL("/", req.url);
     return NextResponse.redirect(redirectUrl);
   }

@@ -1,7 +1,7 @@
-import { buildUrl } from '@/utils/build-url';
-import { catchError } from '@/utils/catch-error';
-import { ApiPath, apiRoutes, RouteData } from '@packages/common';
-import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { buildUrl } from "@/utils/build-url";
+import { catchError } from "@/utils/catch-error";
+import { ApiPath, apiRoutes, RouteData } from "@packages/common";
+import { useQuery, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
 
 export function useApiQuery<Path extends ApiPath>(
   path: Path,
@@ -10,11 +10,12 @@ export function useApiQuery<Path extends ApiPath>(
     query?: RouteData<Path>["querystring"];
     body?: RouteData<Path>["body"];
     enabled?: boolean;
-  } & UseQueryOptions
+  } & Omit<UseQueryOptions, "queryKey" | "queryFn">
 ): UseQueryResult<RouteData<Path>["response"], RouteData<Path>["error"]> {
   const method = apiRoutes[path].method;
 
   return useQuery({
+    ...opts,
     queryKey: [path, opts?.params, opts?.query, opts?.body],
     enabled: opts?.enabled,
     queryFn: async () => {
@@ -29,7 +30,7 @@ export function useApiQuery<Path extends ApiPath>(
           body: JSON.stringify(opts?.body ?? {}),
         }),
       });
-      
+
       const [json, err] = await catchError<RouteData<Path>["response"]>(res.json());
       if (err !== null) throw err;
       if (!res.ok) throw json;

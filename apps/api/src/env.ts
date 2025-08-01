@@ -1,5 +1,4 @@
 import { getEnv } from "@packages/env";
-import crypto from "crypto";
 import dotenv from "dotenv";
 import { z } from "zod";
 
@@ -9,7 +8,7 @@ const envSchema = z.object({
   DEFAULT_INVITE_EXPIRES: z.coerce.number().default(7 * 60 * 60 * 24 * 1000), // 7 day
   DISABLED_WORKSPACES_DELETE_AFTER: z.coerce.number().default(90 * 24 * 60 * 60 * 1000), // 90 days
 
-  JWT_SECRET: z.string().default(crypto.randomBytes(32).toString("hex")),
+  JWT_SECRET: z.string().default("change-me"),
   JWT_ACCESS_TOKEN_DURATION: z.coerce.number().default(60 * 5 * 1000), // 5 min
   JWT_REFRESH_TOKEN_DURATION: z.coerce.number().default(60 * 60 * 24 * 30 * 1000), // 30 days
 

@@ -1,26 +1,24 @@
 "use client";
-import { HelpCircle, LogOut, User } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useApiMutation } from '@/hooks/use-api-mutation';
-import { useUser } from '@/hooks/use-user';
-import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useAuth } from "@/context/auth";
+import { useApiMutation } from "@/hooks/use-api-mutation";
+import { cn } from "@/lib/utils";
+import { HelpCircle, LogOut, User } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export const UserProfile = () => {
   const router = useRouter();
   const t = useTranslations();
-  const { data: user } = useUser();
+  const { user } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { mutate } = useApiMutation("[POST] /api/auth/logout");
   const handleLogout = () => {
     mutate({}, { onSuccess: () => router.push("/auth/login") });
   }
-  
   return (
     <Popover onOpenChange={setIsCollapsed} open={isCollapsed}>
       <PopoverTrigger asChild>

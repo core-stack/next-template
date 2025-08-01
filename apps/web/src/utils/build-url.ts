@@ -1,5 +1,3 @@
-
-
 export function buildUrl(path: string, params?: Record<string, any>, query?: Record<string, any>) {
   const match = path.match(/\] (.+)$/)
   let finalPath = match ? match[1] : "";

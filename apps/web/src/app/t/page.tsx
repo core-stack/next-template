@@ -1,10 +1,10 @@
-import { TenantsHeader } from '@/components/tenant-header';
+import { TenantsHeader } from "@/components/tenant-header";
 
-import { CreateTenantButton } from './components/create-button';
-import { TenantHead } from './components/head';
-import { TenantList } from './components/list';
+import { CreateTenantButton } from "./components/create-button";
+import { TenantHead } from "./components/head";
+import { TenantList } from "./components/list";
 
-export default function Workspaces() {
+export default function Tenants() {
   return (
     <>
       <TenantsHeader />

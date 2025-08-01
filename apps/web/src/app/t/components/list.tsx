@@ -1,28 +1,25 @@
 "use client"
 
-import { ArrowBigRight, Building, Settings, Users } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
-} from '@/components/ui/card';
-import { usePermission } from '@/context/permission';
-import { DialogType } from '@/dialogs';
-import { useApiQuery } from '@/hooks/use-api-query';
-import { useDialog } from '@/hooks/use-dialog';
-import { useUser } from '@/hooks/use-user';
-import { cn } from '@/lib/utils';
-import { ArrayElement } from '@/types/array';
-import { ApiTenantGet } from '@packages/common';
-import { Permission } from '@packages/permission';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/context/auth";
+import { usePermission } from "@/context/permission";
+import { DialogType } from "@/dialogs";
+import { useApiQuery } from "@/hooks/use-api-query";
+import { useDialog } from "@/hooks/use-dialog";
+import { cn } from "@/lib/utils";
+import { ArrayElement } from "@/types/array";
+import { ApiTenantGet } from "@packages/common";
+import { Permission } from "@packages/permission";
+import { ArrowBigRight, Building, Settings, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 export function TenantList() {
   const { data: tenants } = useApiQuery("[GET] /api/tenant");
-  const { data: user } = useUser();
-  const { canTenant } = usePermission()
+  const { user } = useAuth();
+  const { canTenant } = usePermission();
   const { openDialog } = useDialog();
   return (
     <>

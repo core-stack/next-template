@@ -1,18 +1,17 @@
 "use client";
-import { Bell, ChevronDown, HelpCircle, LogOut, Moon, Sun, User } from 'lucide-react';
-import Link from 'next/link';
-import { useState } from 'react';
-
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useNotifications } from '@/context/notifications';
-import { useTheme } from '@/context/theme';
-import { useUser } from '@/hooks/use-user';
-import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useAuth } from "@/context/auth";
+import { useNotifications } from "@/context/notifications";
+import { useTheme } from "@/context/theme";
+import { cn } from "@/lib/utils";
+import { Bell, ChevronDown, HelpCircle, LogOut, Moon, Sun, User } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 export const MemberInfo = () => {
-  const { data: user } = useUser();
+  const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const handleLogout = () => {

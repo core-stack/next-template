@@ -1,9 +1,9 @@
 "use client"
-import { useParams } from 'next/navigation';
-import React from 'react';
+import { can as canPermission, Permission } from "@packages/permission";
+import { useParams } from "next/navigation";
+import React from "react";
 
-import { useUser } from '@/hooks/use-user';
-import { can as canPermission, Permission } from '@packages/permission';
+import { useAuth } from "./auth";
 
 type PermissionContextType = {
   can: (permission: Permission | Permission[]) => boolean;
@@ -16,7 +16,7 @@ export const PermissionContext = React.createContext<PermissionContextType>({
 
 export const PermissionProvider = ({ children }: { children: React.ReactNode }) => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: user } = useUser();
+  const { user } = useAuth();
   const permissions = user?.members.map((member) => ({
     tenantId: member.tenantId,
     role: member.role,

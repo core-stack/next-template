@@ -1,10 +1,9 @@
-import { NextIntlClientProvider } from 'next-intl';
-
-import { Toaster } from '@/components/ui/toaster';
-import { DialogProvider } from '@/context/dialog';
-import { QueryClientContext } from '@/context/query-client';
-import { ThemeProvider } from '@/context/theme';
-import { dialogs } from '@/dialogs';
+import { Toaster } from "@/components/ui/toaster";
+import { DialogProvider } from "@/context/dialog";
+import { QueryClientContext } from "@/context/query-client";
+import { ThemeProvider } from "@/context/theme";
+import { dialogs } from "@/dialogs";
+import { NextIntlClientProvider } from "next-intl";
 
 export function Providers({ children }: { children: React.ReactNode}) {
   return (
