@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useWorkspace } from "@/hooks/use-workspace";
-import { RouterOutput } from "@/lib/trpc/app.router";
-import { trpc } from "@/lib/trpc/client";
+import { useApiInvalidate } from "@/hooks/use-api-invalidate";
+import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useApiQuery } from "@/hooks/use-api-query";
+import { useTenant } from "@/hooks/use-tenant";
 import { ArrayElement } from "@/types/array";
+import { ApiTenantSlugInviteGet } from "@packages/common";
 import {
   ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel,
   getSortedRowModel, SortingState, useReactTable, VisibilityState
@@ -12,16 +14,16 @@ import { ArrowUpDown } from "lucide-react";
 import { useState } from "react";
 
 export const InvitesTable = () => {
-  const { isOwner, slug } = useWorkspace();
-  const { data: invites = [] } = trpc.invite.getByWorkspace.useQuery({ slug });
+  const { isOwner, slug } = useTenant();
+  const { data: invites = [] } = useApiQuery("[GET] /api/tenant/:slug/invite");
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({});
-  const utils = trpc.useUtils();
-  const { mutate } = trpc.invite.delete.useMutation();
+  const invalidate = useApiInvalidate();
+  const { mutate } = useApiMutation("[DELETE] /api/tenant/:slug/invite/:id");
 
-  const inviteColumns: ColumnDef<ArrayElement<RouterOutput["invite"]["getByWorkspace"]>>[] = [
+  const inviteColumns: ColumnDef<ArrayElement<ApiTenantSlugInviteGet.Response200>>[] = [
     {
       accessorKey: "email",
       header: "Email",
@@ -98,9 +100,11 @@ export const InvitesTable = () => {
               size="sm"
               onClick={() => {
                 mutate({
-                  id: row.original.id,
-                  slug,
-                }, { onSuccess: () => utils.invite.getByWorkspace.invalidate() })
+                  params: {
+                    id: row.original.id,
+                    slug
+                  },
+                }, { onSuccess: () => invalidate("[GET] /api/tenant/:slug/invite") })
               }}
             >
               Cancelar

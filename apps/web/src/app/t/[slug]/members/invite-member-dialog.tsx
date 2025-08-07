@@ -7,9 +7,10 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { trpc } from "@/lib/trpc/client";
-import { inviteMemberSchema, InviteMemberSchema } from "@/lib/trpc/schema";
+import { useApiInvalidate } from "@/hooks/use-api-invalidate";
+import { useApiMutation } from "@/hooks/use-api-mutation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { InviteMemberSchema, inviteMemberSchema } from "@packages/schemas";
 import { Loader2, MinusCircle, PlusCircle } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -38,13 +39,13 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
   const removeField = (index: number) => remove(index);
   const addField = (index: number) => insert(index + 1, { email: "", role: "WORKSPACE_MEMBER" });
 
-  const utils = trpc.useUtils();
-  const { mutate } = trpc.invite.invite.useMutation();
+  const invalidate = useApiInvalidate();
+  const { mutate } = useApiMutation("[POST] /api/tenant/:slug/invite");
   async function onSubmit(data: InviteMemberSchema) {
     data.slug = slug;
-    mutate(data, {
+    mutate({ body: data,  params: { slug } }, {
       onSuccess: () => {
-        utils.invite.getByWorkspace.invalidate();
+        invalidate("[GET] /api/tenant/:slug/invite")
         form.reset();
         onOpenChange(false);
       }

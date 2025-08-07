@@ -1,14 +1,11 @@
 "use client"
 
-import { AlertTriangle } from 'lucide-react';
-import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertTriangle } from "lucide-react";
+import { useState } from "react";
 
-import { Button } from '@/components/ui/button';
-import {
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
-} from '@/components/ui/card';
-
-import { ConfirmDeleteDialog } from './confirm-delete-dialog';
+import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
 
 interface DangerZoneProps {
   workspaceName: string
@@ -44,7 +41,7 @@ export function DangerZone({ workspaceName }: DangerZoneProps) {
       <ConfirmDeleteDialog
         isDeleteDialogOpen={isDeleteDialogOpen}
         setIsDeleteDialogOpen={setIsDeleteDialogOpen}
-        workspaceName={workspaceName}
+        tenantName={workspaceName}
       />
     </>
   )

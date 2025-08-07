@@ -1,54 +1,51 @@
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { useState } from "react";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from "@/components/ui/table";
-import { useWorkspace } from "@/hooks/use-workspace";
-import { trpc } from "@/lib/trpc/client";
-import { MemberSchema } from "@/lib/trpc/schema/member";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useApiQuery } from "@/hooks/use-api-query";
+import { useTenant } from "@/hooks/use-tenant";
+import { ArrayElement } from "@/types/array";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@radix-ui/react-select";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from "@radix-ui/react-select";
-import {
-  ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel,
-  getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState
+  ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel,
+  getSortedRowModel, SortingState, useReactTable, VisibilityState
 } from "@tanstack/react-table";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 export const MembersTable = () => {
-  const { isOwner, slug } = useWorkspace();
-  const { data: members = [] } = trpc.member.getInWorkspace.useQuery({ slug });
+  const t = useTranslations();
+  const { isOwner, slug } = useTenant();
+  const { data: members = [] } = useApiQuery("[GET] /api/tenant/:slug/members", { params: { slug } });
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
 
-  const memberColumns: ColumnDef<MemberSchema>[] = [
+  const memberColumns: ColumnDef<ArrayElement<typeof members>>[] = [
     {
-      accessorKey: "user.name",
-      header: "Usuário",
+      accessorKey: "name",
+      header: t/*i18n*/("User"),
       cell: ({ row }) => {
         const member = row.original
         return (
           <div className="flex items-center gap-3">
             <Avatar>
-              <AvatarImage src={member.user.image || undefined} className='rounded-full w-10 h-10' />
-              <AvatarFallback className='rounded-full w-10 h-10'>{member.user.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+              <AvatarImage src={member.image || undefined} className='rounded-full w-10 h-10' />
+              <AvatarFallback className='rounded-full w-10 h-10'>{member.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
-              <div className="font-medium">{member.user.name}</div>
-              <div className="text-sm text-muted-foreground">{member.user.email}</div>
+              <div className="font-medium">{member.name}</div>
+              <div className="text-sm text-muted-foreground">{member.email}</div>
             </div>
             {member.owner && (
               <Badge variant="outline" className="ml-2 bg-primary/10 text-primary border-primary/20">
-                Proprietário
+                {t/*i18n*/("Owner")}
               </Badge>
             )}
           </div>
@@ -64,7 +61,7 @@ export const MembersTable = () => {
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="p-0 hover:bg-transparent"
           >
-            Função
+            {t/*i18n*/("Role")}
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         )

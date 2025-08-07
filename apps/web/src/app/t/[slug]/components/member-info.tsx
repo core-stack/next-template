@@ -2,24 +2,18 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useAuth } from "@/context/auth";
 import { useNotifications } from "@/context/notifications";
 import { useTheme } from "@/context/theme";
-import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 import { Bell, ChevronDown, HelpCircle, LogOut, Moon, Sun, User } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export const MemberInfo = () => {
-  const { data: user } = trpc.user.self.useQuery();
+  const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
-  const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { mutate } = trpc.auth.logout.useMutation();
-  const handleLogout = () => {
-    mutate(undefined, { onSuccess: () => router.push("/auth/login") });
-  }
   const { showNotifications, unreadNotifications } = useNotifications();
 
   return (
@@ -108,7 +102,7 @@ export const MemberInfo = () => {
 
         <div className="pt-2 border-t">
           <button
-            onClick={handleLogout}
+            onClick={logout}
             className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted w-full text-left text-red-500 hover:text-red-600"
           >
             <LogOut className="h-4 w-4" />

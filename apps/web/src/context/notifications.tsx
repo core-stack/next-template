@@ -4,13 +4,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useApiInvalidate } from "@/hooks/use-api-invalidate";
+import { useApiQuery } from "@/hooks/use-api-query";
 import useFcmToken from "@/hooks/use-fcm-token";
 import firebaseApp from "@/lib/firebase.client";
-import { RouterOutput } from "@/lib/trpc/app.router";
-import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 import { ArrayElement } from "@/types/array";
-import { formatFromNow } from "@/utils/date";
+import { GetNotificationsSchema } from "@packages/schemas";
 import { getMessaging, onMessage } from "firebase/messaging";
 import { Info } from "lucide-react";
 import Link from "next/link";
@@ -18,7 +18,7 @@ import { useParams } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type NotificationContextType = {
-  notifications: RouterOutput["notification"]["getNotifications"]
+  notifications?: GetNotificationsSchema
   unreadNotifications: boolean
   unreadCount: number
   markAllAsRead: () => Promise<void>
@@ -30,8 +30,8 @@ const NotificationContext = createContext<NotificationContextType>({
   notifications: [],
   unreadNotifications: false,
   unreadCount: 0,
-  markAllAsRead: () => Promise.resolve(),
-  markAsRead: () => Promise.resolve(),
+  markAllAsRead: Promise.resolve,
+  markAsRead: Promise.resolve,
   showNotifications: () => { },
   hideNotifications: () => { },
 })
@@ -45,8 +45,8 @@ export function NotificationsProvider({ children }: Props) {
   const hideNotifications = () => setOpen(false)
   const { slug } = useParams<{ slug: string }>()
 
-  const utils = trpc.useUtils()
-  const { data: notifications } = trpc.notification.getNotifications.useQuery({ slug }, { initialData: [] });
+  const invalidate = useApiInvalidate();
+  const { data: notifications } = useApiQuery("[GET] /api/notification");
   const { mutateAsync: markAllAsReadMutation } = trpc.notification.markAllAsRead.useMutation()
   const { mutateAsync: markAsReadMutation } = trpc.notification.markAsRead.useMutation()
   const unreadNotifications = notifications?.some(notification => !notification.read)
@@ -54,11 +54,12 @@ export function NotificationsProvider({ children }: Props) {
 
   const markAllAsRead = async () => {
     await markAllAsReadMutation({ slug })
-    await utils.notification.getNotifications.invalidate({ slug })
+    invalidate("[GET] /api/notification")
+    invalidate("[GET] /api/notification")
   }
   const markAsRead = async (id: string) => {
     await markAsReadMutation({ slug, id })
-    await utils.notification.getNotifications.invalidate({ slug })
+    invalidate("[GET] /api/notification")
   }
 
   useEffect(() => {
@@ -133,7 +134,7 @@ export function NotificationsProvider({ children }: Props) {
 export const useNotifications = () => useContext(NotificationContext)
 
 interface NotificationItemProps {
-  notification: ArrayElement<RouterOutput["notification"]["getNotifications"]>
+  notification: ArrayElement<GetNotificationsSchema>
   onRead: (id: string) => void
 }
 

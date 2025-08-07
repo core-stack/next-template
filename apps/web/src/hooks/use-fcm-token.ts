@@ -1,8 +1,7 @@
+import { publicEnv } from "@/env/env.public";
 import { getMessaging, getToken } from "firebase/messaging";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-
-import { trpc } from "@/lib/trpc/client";
 
 import firebaseApp from "../lib/firebase.client";
 
@@ -25,7 +24,10 @@ const useFcmToken = () => {
 
           // Check if permission is granted before retrieving the token
           if (permission === 'granted') {
-            const currentToken = await getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY });
+            const currentToken = await getToken(
+              messaging,
+              { vapidKey: publicEnv.NEXT_PUBLIC_FIREBASE_VAPID_KEY }
+            );
             syncFcmToken({ token: currentToken, slug });
             if (currentToken) {
               setToken(currentToken);

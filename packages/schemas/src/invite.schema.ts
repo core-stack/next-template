@@ -1,6 +1,6 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { inviteSchema, roleSchema, tenantSchema } from './models';
+import { inviteSchema, roleSchema, tenantSchema } from "./models";
 
 export const inviteMemberSchema = z.object({
   slug: z.string({ message: /*i18n*/("Slug is required") })

@@ -1,12 +1,12 @@
 "use client";
-import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import React from "react";
+import { useFormContext } from "react-hook-form";
 
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { Input } from '../ui/input';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import { Input } from "../ui/input";
 
 type Props = React.ComponentProps<"input"> & {
-  label?: string
+  label?: string | React.ReactNode
   name: string
 }
 export const FormInput = (props: Props) => {

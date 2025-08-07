@@ -1,30 +1,31 @@
 "use client"
 
+import { FormInput } from "@/components/form/input";
+import { FormPassword } from "@/components/form/password";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
 } from "@/components/ui/dialog";
-import {
-  Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { trpc } from "@/lib/trpc/client";
-import { DisableWorkspaceSchema, disableWorkspaceSchema } from "@/lib/trpc/schema";
+import { Form } from "@/components/ui/form";
+import { useApiMutation } from "@/hooks/use-api-mutation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { disableTenantSchema, DisableTenantSchema } from "@packages/schemas";
+import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 type Props = {
   isDeleteDialogOpen: boolean;
   setIsDeleteDialogOpen: (open: boolean) => void;
-  workspaceName: string;
+  tenantName: string;
 }
-export const ConfirmDeleteDialog = ({ isDeleteDialogOpen, setIsDeleteDialogOpen, workspaceName }: Props) => {
+export const ConfirmDeleteDialog = ({ isDeleteDialogOpen, setIsDeleteDialogOpen, tenantName }: Props) => {
   const { slug } = useParams<{ slug: string }>();
-  const form = useForm<DisableWorkspaceSchema>({
-    resolver: zodResolver(disableWorkspaceSchema),
+  const t = useTranslations();
+  const form = useForm<DisableTenantSchema>({
+    resolver: zodResolver(disableTenantSchema),
     defaultValues: {
       password: "",
       slug,
@@ -34,81 +35,50 @@ export const ConfirmDeleteDialog = ({ isDeleteDialogOpen, setIsDeleteDialogOpen,
 
   const isLoading = form.formState.isSubmitting;
 
-  const { mutate } = trpc.workspace.disable.useMutation();
+  const { mutate } = useApiMutation("[POST] /api/tenant/:slug/disable");
   const onSubmit = form.handleSubmit(async (data) => {
-    mutate(data, { onSuccess: () => setIsDeleteDialogOpen(false) });
+    mutate({ body: data, params: { slug } }, { onSuccess: () => setIsDeleteDialogOpen(false) });
   })
 
   return (
     <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Excluir organização</DialogTitle>
+          <DialogTitle>{t/*i18n*/("Delete Tenant")}</DialogTitle>
           <DialogDescription>
-            Esta ação não pode ser desfeita. Isso excluirá permanentemente a organização{" "}
-            <span className="font-semibold">{workspaceName}</span> e removerá todos os dados associados.
+            {t/*i18n*/("Are you sure you want to delete")}{" "}
+            <span className="font-semibold">{tenantName}</span> {t/*i18n*/("and all its data?")}.
           </DialogDescription>
         </DialogHeader>
 
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Aviso</AlertTitle>
+          <AlertTitle>{t/*i18n*/("Are you sure?")}</AlertTitle>
           <AlertDescription>
-            Todos os projetos, arquivos e dados serão excluídos permanentemente e não poderão ser recuperados.
+            {t/*i18n*/("This action cannot be undone.")}
           </AlertDescription>
         </Alert>
         <Form {...form}>
           <form onSubmit={onSubmit}>
             <div className="space-y-4 py-2">
-              <FormField
-                control={form.control}
+              <FormInput
                 name="confirmText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Digite <span className="font-semibold">{workspaceName}</span> para confirmar:</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="resize-none"
-                        {...field}
-                        placeholder={workspaceName}
-                        value={field.value || ""}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormDescription>Uma breve descrição sobre sua organização.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label={<>{t/*i18n*/("Type")} <span className="font-semibold">{tenantName}</span> {t/*i18n*/("to confirm")}</>}
+                placeholder={tenantName}
+                disabled={isLoading}
               />
-              <FormField
-                control={form.control}
+              <FormPassword
                 name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Digite sua senha para confirmar:</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="resize-none"
-                        type="password"
-                        {...field}
-                        placeholder="Sua senha"
-                        value={field.value || ""}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormDescription>Por motivos de segurança, precisamos confirmar sua senha para realizar esta ação.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label={t/*i18n*/("Type your password to confirm")}
+                disabled={isLoading}
               />
             </div>
             <DialogFooter>
-              <Button variant="outline" type='button' onClick={() => setIsDeleteDialogOpen(false)} disabled={isLoading}>
-                Cancelar
+              <Button variant="outline" type='button' onClick={() => setIsDeleteDialogOpen(false)} isLoading={isLoading}>
+                {t/*i18n*/("Cancel")}
               </Button>
-              <Button variant="destructive">
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Excluir permanentemente
+              <Button variant="destructive" isLoading={isLoading}>
+                {t/*i18n*/("Delete")}
               </Button>
             </DialogFooter>
           </form>
