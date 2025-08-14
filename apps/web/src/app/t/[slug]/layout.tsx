@@ -1,24 +1,23 @@
-import { NotificationsProvider } from "@/context/notifications";
-import { fetchApi } from "@/lib/fetcher";
-import { redirect } from "next/navigation";
+"use client";
 
-import { TenantSidebar } from "./components/tenant-sidebar";
+import { redirect, useParams } from 'next/navigation';
+import React from 'react';
 
-import type { ReactNode } from "react"
-interface WorkspaceLayoutProps {
-  children: ReactNode
-  params: Promise<{
-    slug: string
-  }>
-}
+import { NotificationsProvider } from '@/context/notifications';
+import { useApiQuery } from '@/hooks/use-api-query';
 
-export default async function WorkspaceLayout({ children, params }: WorkspaceLayoutProps) {
-  const { slug } = await params;
-  const { data, success } = await fetchApi("[GET] /api/tenant/:slug", { params: { slug } });
-  if (!success) {
-    redirect("/w");
+import { TenantSidebar } from './components/tenant-sidebar';
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const { slug } = useParams<{ slug: string }>();
+  const { data, error, isLoading } = useApiQuery("[GET] /api/tenant/:slug", { params: { slug } });
+  if (error) {
+    return <div>error</div>
   }
-  if (data!.disabledAt) redirect(`/w/reactivate/${slug}`);
+  if (isLoading) {
+    return <div>loading</div>
+  }
+  if (data!.disabledAt) redirect(`/t/reactivate/${slug}`);
 
   return (
     <NotificationsProvider>

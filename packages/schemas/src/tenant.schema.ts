@@ -2,8 +2,7 @@ import { z } from 'zod';
 
 export const tenantSlugSchema = z
   .string({ message: /*i18n*/("Slug is required") })
-  .min(2, /*i18n*/("Slug must be at least 2 characters"))
-  .regex(/^[a-z0-9-]+$/, /*i18n*/("Slug can only contain lowercase letters, numbers and hyphens"));
+  .min(2, /*i18n*/("Slug must be at least 2 characters"));
 
 export type TenantSlugSchema = z.infer<typeof tenantSlugSchema>;
 

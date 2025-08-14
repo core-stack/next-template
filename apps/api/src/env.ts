@@ -1,12 +1,13 @@
-import { getEnv } from "@packages/env";
-import dotenv from "dotenv";
-import { z } from "zod";
+import dotenv from 'dotenv';
+import { z } from 'zod';
+
+import { getEnv } from '@packages/env';
 
 dotenv.config();
 const envBool = z.string().transform(v => v === "true");
 const envSchema = z.object({
   DEFAULT_INVITE_EXPIRES: z.coerce.number().default(7 * 60 * 60 * 24 * 1000), // 7 day
-  DISABLED_WORKSPACES_DELETE_AFTER: z.coerce.number().default(90 * 24 * 60 * 60 * 1000), // 90 days
+  DISABLED_TENANTS_DELETE_AFTER: z.coerce.number().default(90 * 24 * 60 * 60 * 1000), // 90 days
 
   JWT_SECRET: z.string().default("change-me"),
   JWT_ACCESS_TOKEN_DURATION: z.coerce.number().default(60 * 5 * 1000), // 5 min
@@ -48,6 +49,13 @@ const envSchema = z.object({
   DEFAULT_USER_EMAIL: z.string().email().default("admin@example.com"),
   DEFAULT_USER_PASSWORD: z.string().default("admin"),
   DEFAULT_USER_NAME: z.string().default("admin"),
+
+  GEMINI_API_KEY: z.string().optional(),
+
+  ARANGO_DB_URL: z.string().default("http://localhost:8529").optional(),
+  ARANGO_DB_NAME: z.string().default("default").optional(),
+  ARANGO_DB_USERNAME: z.string().default("root").optional(),
+  ARANGO_DB_PASSWORD: z.string(),
 }).superRefine((data, ctx) => {
   if (
     data.STORAGE_ENABLED &&

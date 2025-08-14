@@ -1,3 +1,3 @@
 import { tenantMiddleware } from '@/plugins/auth/middlewares';
 
-export default [tenantMiddleware];
+export default tenantMiddleware;

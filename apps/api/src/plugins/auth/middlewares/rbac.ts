@@ -5,6 +5,7 @@ import { can, mergePermissions, numberToPermissions, Permission } from '@package
 export const rbacMiddleware = (...requiredPermissions: Permission[]) => {
   return async (req: FastifyRequest, reply: FastifyReply) => {
     const { session, params } = req;
+    req.log.debug('rbacMiddleware', { session, params });
     if (!session) return reply.code(401).send({ error: 'UNAUTHORIZED', message: req.t/*i18n*/("You are not logged in") });
 
     let permissions = numberToPermissions(session.user.permissions);

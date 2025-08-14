@@ -1,20 +1,21 @@
 "use client"
 
-import { FormInput } from "@/components/form/input";
-import { FormPassword } from "@/components/form/password";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { AlertTriangle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+
+import { FormInput } from '@/components/form/input';
+import { FormPassword } from '@/components/form/password';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
-} from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { disableTenantSchema, DisableTenantSchema } from "@packages/schemas";
-import { AlertTriangle } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
-import { useForm } from "react-hook-form";
+} from '@/components/ui/dialog';
+import { Form } from '@/components/ui/form';
+import { useApiMutation } from '@/hooks/use-api-mutation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { disableTenantSchema, DisableTenantSchema } from '@packages/schemas';
 
 type Props = {
   isDeleteDialogOpen: boolean;
@@ -55,7 +56,7 @@ export const ConfirmDeleteDialog = ({ isDeleteDialogOpen, setIsDeleteDialogOpen,
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>{t/*i18n*/("Are you sure?")}</AlertTitle>
           <AlertDescription>
-            {t/*i18n*/("This action cannot be undone.")}
+            {t/*i18n*/("This action cannot be undone")}
           </AlertDescription>
         </Alert>
         <Form {...form}>

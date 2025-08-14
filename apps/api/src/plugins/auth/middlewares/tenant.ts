@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 
 export const tenantMiddleware = async (req: FastifyRequest, reply: FastifyReply) => {
   const { session, params } = req;
+  req.log.info('tenantMiddleware', { session, params });
   if (!session) return reply.code(401).send({ error: 'UNAUTHORIZED', message: req.t/*i18n*/("You are not logged in") });
   let slug: string | undefined;
   if (params && typeof params === 'object' && 'slug' in params) {

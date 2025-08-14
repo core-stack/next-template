@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
-interface WorkspaceHeaderProps {
+interface TenantHeaderProps {
   workspace: {
     name: string
     description?: string
@@ -17,7 +17,7 @@ interface WorkspaceHeaderProps {
   }
 }
 
-export function WorkspaceHeader({ workspace }: WorkspaceHeaderProps) {
+export function TenantHeader({ workspace }: TenantHeaderProps) {
   const isBackgroundImage = workspace.backgroundImage.startsWith("http")
   const headerStyle = isBackgroundImage
     ? { backgroundImage: `url(${workspace.backgroundImage})`, backgroundSize: "cover" }

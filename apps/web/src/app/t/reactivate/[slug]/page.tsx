@@ -2,12 +2,9 @@ import type { Metadata } from "next"
 import { redirect } from 'next/navigation';
 
 import { TenantsHeader } from '@/components/tenant-header';
-import { auth } from '@/lib/auth';
-import { caller } from '@/lib/trpc/server';
-import { PreWorkspaceSchema } from '@packages/prisma';
-import { TRPCError } from '@trpc/server';
+import { fetchApi } from '@/lib/fetcher';
 
-import { ReactivateWorkspaceForm } from './reactivate-form';
+import { ReactivateTenantForm } from './reactivate-form';
 
 interface ReactivateWorkspacePageProps {
   params: Promise<{ slug: string }>
@@ -15,37 +12,27 @@ interface ReactivateWorkspacePageProps {
 
 export async function generateMetadata({ params }: ReactivateWorkspacePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const workspace = await caller.workspace.getBySlug({ slug, ignoreDisabled: true });
+  fetchApi("[GET] /api/tenant/:slug", { params: { slug } });
+  const { data } = await fetchApi("[GET] /api/tenant/:slug", { params: { slug } });
+  const tenant = data;
+  if (!tenant?.disabledAt) redirect(`/t/${slug}`);
   return {
-    title: `Reativar ${workspace?.name}`,
-    description: `Reative seu workspace "${workspace?.name}" antes que seja excluído permanentemente`,
+    title: `Reativar ${tenant?.name}`,
+    description: `Reative seu workspace "${tenant?.name}" antes que seja excluído permanentemente`,
   }
 }
 
 export default async function ReactivateWorkspacePage({ params }: ReactivateWorkspacePageProps) {
   const { slug } = await params
-  let workspace: PreWorkspaceSchema | undefined;
-  try {
-    workspace = await caller.workspace.getBySlug({ slug, ignoreDisabled: true })
-  } catch (error) {
-    if (error instanceof TRPCError && error.code === "NOT_FOUND") redirect("/w")
-    else throw error
-  }
-  if (!workspace) redirect("/w")
-  try {
-    const session = await auth.getSession()
-    if (!session?.user) redirect("/w")
-  } catch (error) {
-    if (error instanceof TRPCError && error.code === "NOT_FOUND") redirect("/w")
-    else throw error
-  }
+  const { data: tenant, error, success } = await fetchApi("[GET] /api/tenant/:slug", { params: { slug } });
+  if (!success || error || !tenant) redirect("/t");
 
   return (
     <>
       <TenantsHeader />
       <div className="container py-10">
         <div className="max-w-3xl mx-auto">
-          <ReactivateWorkspaceForm workspace={workspace} />
+          <ReactivateTenantForm tenant={tenant} />
         </div>
       </div>
     </>

@@ -1,7 +1,7 @@
-import { buildUrl } from "@/utils/build-url";
-import { catchError } from "@/utils/catch-error";
-import { ApiPath, apiRoutes, RouteData } from "@packages/common";
-import { useQuery, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
+import { buildUrl } from '@/utils/build-url';
+import { catchError } from '@/utils/catch-error';
+import { ApiPath, apiRoutes, RouteData } from '@packages/common';
+import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 
 export function useApiQuery<Path extends ApiPath>(
   path: Path,
@@ -20,7 +20,8 @@ export function useApiQuery<Path extends ApiPath>(
     enabled: opts?.enabled,
     queryFn: async () => {
       const url = buildUrl(path, opts?.params, opts?.query);
-
+      console.log(url);
+      
       const res = await fetch(url, {
         method,
         headers: {

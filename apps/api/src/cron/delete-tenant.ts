@@ -7,7 +7,7 @@ export default async function cron (app: FastifyInstance) {
   const tenants = await app.prisma.tenant.findMany({
     where: {
       disabledAt: {
-        gte: new Date(Date.now() - app.env.DISABLED_WORKSPACES_DELETE_AFTER),
+        gte: new Date(Date.now() - app.env.DISABLED_TENANTS_DELETE_AFTER),
       },
     },
     include: {

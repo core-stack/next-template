@@ -5,3 +5,4 @@ export * from "./member.schema";
 export * from "./notification.schema";
 export * from "./user.schema";
 export * from "./payment.schema";
+export * from "./memory.schema";

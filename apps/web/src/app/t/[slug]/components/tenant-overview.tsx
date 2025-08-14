@@ -4,7 +4,7 @@ import { BarChart, Calendar, Clock, CreditCard, Layers, Users } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-export function WorkspaceOverview() {
+export function TenantOverview() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

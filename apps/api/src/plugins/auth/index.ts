@@ -1,13 +1,14 @@
-import { Member, PrismaClient, Role, User } from "@/__generated__/prisma";
-import fp from "fastify-plugin";
+import fp from 'fastify-plugin';
 
-import { UnauthorizedError } from "./error";
-import { AccessToken, JWT, RefreshToken } from "./jwt";
-import { Provider } from "./providers/types";
-import { Session } from "./session";
-import { MemoryStore } from "./store/memory";
-import { RedisStore, RedisStoreOptions } from "./store/redis";
-import { Store } from "./store/types";
+import { Member, PrismaClient, Role, User } from '@/__generated__/prisma';
+
+import { UnauthorizedError } from './error';
+import { AccessToken, JWT, RefreshToken } from './jwt';
+import { Provider } from './providers/types';
+import { Session } from './session';
+import { MemoryStore } from './store/memory';
+import { RedisStore, RedisStoreOptions } from './store/redis';
+import { Store } from './store/types';
 
 export class Auth {
   constructor(
@@ -82,13 +83,13 @@ export class Auth {
 
   async getSession(accessToken?: string): Promise<Session | undefined> {
     if (!accessToken) return undefined;
+    
     const token = this.jwt.verifyToken<AccessToken>(accessToken);
-    console.log("Access Token:", token);
 
     if (!token) throw new UnauthorizedError();
     const { sessionId } = token;
     const session = await this.store.get(sessionId);
-
+    
     if (!session) throw new UnauthorizedError();
     session.lastSeen = new Date();
     await this.store.set(sessionId, session);
@@ -169,7 +170,6 @@ type AuthOptions = {
 }
 export default fp(async (app, opts: AuthOptions) => {
   const logger = app.log.child({ plugin: 'AUTH' });
-
   const store = opts.store.type === "redis" ?
     new RedisStore<Session>(opts.store.options) :
     new MemoryStore<Session>();

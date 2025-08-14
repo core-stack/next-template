@@ -1,4 +1,4 @@
-import { WorkspaceOverview } from './components/workspace-overview';
+import { TenantOverview } from './components/tenant-overview';
 
 export default function TenantPage() {
   return (
@@ -7,7 +7,7 @@ export default function TenantPage() {
         <h1 className="text-3xl font-bold"></h1>
         <p className="text-muted-foreground"></p>
       </div>
-      <WorkspaceOverview />
+      <TenantOverview />
     </div>
   )
 }

@@ -1,0 +1,41 @@
+model Group {
+  id String @id @default(uuid())
+
+  slug        String
+  name        String
+  description String
+
+  parentId String? @map("parent_id")
+  parent   Group?  @relation(name: "parent_children", fields: [parentId], references: [id], onDelete: Cascade)
+  children Group[] @relation(name: "parent_children")
+
+  tenantId String @map("tenant_id")
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  createdBy   Member? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  GroupAccess GroupAccess[]
+  File        File[]
+
+  @@unique([slug, tenantId])
+  @@map("groups")
+}
+
+model GroupAccess {
+  id String @id @default(uuid())
+
+  groupId String @map("group_id")
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  memberId String @map("member_id")
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("group_access")
+}

@@ -1,9 +1,12 @@
-import { errorResponseSchema } from "@/schemas/error-response.schema";
-import { getNotificationsSchema, tenantSlugParamsSchema, TenantSlugParamsSchema } from "@packages/schemas";
-import { FastifyReply, FastifyRequest, RouteShorthandOptions } from "fastify";
+import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
+
+import { errorResponseSchema } from '@/schemas/error-response.schema';
+import {
+  getNotificationsSchema, tenantSlugParamsSchema, TenantSlugParamsSchema
+} from '@packages/schemas';
 
 export default async function handler(
-  req: FastifyRequest<{ Params: TenantSlugParamsSchema, Querystring:  }>,
+  req: FastifyRequest<{ Params: TenantSlugParamsSchema }>,
   reply: FastifyReply
 ) {
   const { slug } = req.params;

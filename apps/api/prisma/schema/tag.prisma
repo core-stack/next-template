@@ -1,0 +1,15 @@
+model Tag {
+  id String @id @default(uuid())
+
+  name String
+
+  tenantId String @map("tenant_id")
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  FileTag   FileTag[]
+
+  @@unique([name, tenantId])
+  @@map("tags")
+}

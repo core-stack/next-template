@@ -31,16 +31,17 @@ async function findMiddlewares(app: FastifyInstance, routeDir: string, baseDir: 
   const middlewares: Middleware[] = [];
   let currentDir = routeDir;
 
-  // Percorre todas as pastas pai até chegar ao baseDir
+  // Traverse parent directories until reaching baseDir
   while (currentDir.startsWith(baseDir)) {
     const middlewarePath = path.join(currentDir, `middleware.${ext}`);
     
     try {
-      // Usando import dinâmico com caminho completo
+      // Dynamic import with absolute path
       const mod = await import(middlewarePath);
       if (typeof mod.default === 'function') {
         middlewares.push(mod.default);
-      } if (Array.isArray(mod.default)) {
+      } 
+      if (Array.isArray(mod.default)) {
         if (mod.default.length === 0) continue;
         if (mod.default.some(m => typeof m !== 'function')) {
           app.log.warn(`Middleware ${middlewarePath} is not a valid function`);
@@ -48,16 +49,16 @@ async function findMiddlewares(app: FastifyInstance, routeDir: string, baseDir: 
         middlewares.push(...mod.default);
       }
     } catch (error) {
-      // Arquivo não encontrado, continuamos a busca
+      // Middleware file not found, continue searching
     }
 
-    // Move para a pasta pai
+    // Move to the parent directory
     const parentDir = path.dirname(currentDir);
-    if (parentDir === currentDir) break; // Evita loop infinito
+    if (parentDir === currentDir) break; // Prevent infinite loop
     currentDir = parentDir;
   }
 
-  return middlewares;
+  return middlewares.reverse();
 }
 
 // Loader
@@ -75,8 +76,14 @@ export async function registerRoutes(app: FastifyInstance) {
     const routePath = buildRouteFromPath(file, baseDir);
     const { default: handler, options = {}, ignore, middlewares: modMiddlewares } = await import(file);
 
+    const routeName = `[${method.toUpperCase()}] ${routePath}`;
     if (ignore) {
-      logger.warn(`Route ${routePath} is ignored`);
+      logger.warn(`${routeName} is ignored`);
+      continue;
+    }
+
+    if (typeof handler !== "function") {
+      logger.error(`${routeName} is not a valid function`);
       continue;
     }
     const middlewares = await findMiddlewares(app, parsed.dir, baseDir);

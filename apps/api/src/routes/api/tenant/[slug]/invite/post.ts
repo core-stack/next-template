@@ -29,14 +29,14 @@ export default async function handler(
         await req.server.prisma.$transaction(async (tx) => {
           await req.server.queue.email.add("", {
             to: email,
-            subject: /*i18n*/("You have been invited to ") + tenant.name,
+            subject: req.t/*i18n*/("You have been invited to ") + tenant.name,
             template: EmailTemplate.INVITE,
             context: {
               tenantName: tenant.name,
               inviteUrl: `${env.FRONTEND_URL}/invite/${invite.id}`,
-              role: invite.role.name,
+              role: invite.role.name, 
               inviterName: req.session.user.name ?? "",
-              expirationDate: moment(invite.expiresAt).format("DD/MM/YYYY HH:mm"),
+              expirationDate: moment(invite.expiresAt).format(req.t/*i18n*/("MM/DD/YYYY HH:mm")),
             },
           });
           await tx.invite.update({ where: { id: invite.id }, data: { expiresAt: invite.expiresAt } });
@@ -64,14 +64,14 @@ export default async function handler(
 
       await req.server.queue.email.add("", {
         to: email,
-        subject: `Convite para o workspace ${tenant.name}`,
+        subject: req.t/*i18n*/("You have been invited to ") + tenant.name,
         template: EmailTemplate.INVITE,
         context: {
           tenantName: tenant.name,
           inviteUrl: `${env.FRONTEND_URL}/invite/${invite.id}`,
           role: invite.role.name,
           inviterName: req.session.user.name ?? "",
-          expirationDate: moment(invite.expiresAt).format("DD/MM/YYYY HH:mm"),
+          expirationDate: moment(invite.expiresAt).format(req.t/*i18n*/("MM/DD/YYYY HH:mm")),
         },  
       });
     });

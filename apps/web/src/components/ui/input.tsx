@@ -6,16 +6,17 @@ import { cn } from '@/lib/utils';
 
 import { Button } from './button';
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input"> & { containerClassName?: string }>(
+  ({ className, containerClassName, type, ...props }, ref) => {
     const [realType, setRealType] = React.useState(type);
     const [isClient, setIsClient] = React.useState(false);
 
     React.useEffect(() => {
       setIsClient(true);
     }, []);
+
     return (
-      <div className='relative'>
+      <div className={cn('relative', containerClassName)}>
         <input
           type={realType}
           className={cn(

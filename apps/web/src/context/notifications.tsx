@@ -1,21 +1,27 @@
-"use client"
+"use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useApiInvalidate } from "@/hooks/use-api-invalidate";
-import { useApiQuery } from "@/hooks/use-api-query";
-import useFcmToken from "@/hooks/use-fcm-token";
-import firebaseApp from "@/lib/firebase.client";
-import { cn } from "@/lib/utils";
-import { ArrayElement } from "@/types/array";
-import { GetNotificationsSchema } from "@packages/schemas";
-import { getMessaging, onMessage } from "firebase/messaging";
-import { Info } from "lucide-react";
-import Link from "next/link";
-import { useParams } from "next/navigation";
-import { createContext, useContext, useEffect, useState } from "react";
+import { getMessaging, onMessage } from 'firebase/messaging';
+import { Info } from 'lucide-react';
+import moment from 'moment';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { createContext, useContext, useEffect, useState } from 'react';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+  Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle
+} from '@/components/ui/sheet';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useApiInvalidate } from '@/hooks/use-api-invalidate';
+import { useApiMutation } from '@/hooks/use-api-mutation';
+import { useApiQuery } from '@/hooks/use-api-query';
+import useFcmToken from '@/hooks/use-fcm-token';
+import firebaseApp from '@/lib/firebase.client';
+import { cn } from '@/lib/utils';
+import { ArrayElement } from '@/types/array';
+import { GetNotificationsSchema } from '@packages/schemas';
 
 type NotificationContextType = {
   notifications?: GetNotificationsSchema
@@ -35,10 +41,13 @@ const NotificationContext = createContext<NotificationContextType>({
   showNotifications: () => { },
   hideNotifications: () => { },
 })
+
 type Props = {
   children: React.ReactNode
 }
+
 export function NotificationsProvider({ children }: Props) {
+  const t = useTranslations();
   useFcmToken();
   const [open, setOpen] = useState(false)
   const showNotifications = () => setOpen(true)
@@ -46,20 +55,19 @@ export function NotificationsProvider({ children }: Props) {
   const { slug } = useParams<{ slug: string }>()
 
   const invalidate = useApiInvalidate();
-  const { data: notifications } = useApiQuery("[GET] /api/notification");
-  const { mutateAsync: markAllAsReadMutation } = trpc.notification.markAllAsRead.useMutation()
-  const { mutateAsync: markAsReadMutation } = trpc.notification.markAsRead.useMutation()
-  const unreadNotifications = notifications?.some(notification => !notification.read)
-  const unreadCount = notifications?.filter(notification => !notification.read).length
+  const { data: notifications } = useApiQuery("[GET] /api/tenant/:slug/notification", { params: { slug } });
+  const { mutateAsync: markAllAsReadMutation } = useApiMutation("[POST] /api/tenant/:slug/notification/mark-all-as-read");
+  const { mutateAsync: markAsReadMutation } = useApiMutation("[POST] /api/tenant/:slug/notification/mark-as-read");
+  const unreadNotifications = notifications?.some(notification => !notification.read) ?? false
+  const unreadCount = notifications?.filter(notification => !notification.read).length ?? 0
 
   const markAllAsRead = async () => {
-    await markAllAsReadMutation({ slug })
-    invalidate("[GET] /api/notification")
-    invalidate("[GET] /api/notification")
+    await markAllAsReadMutation({ params: { slug } })
+    invalidate("[GET] /api/tenant/:slug/notification")
   }
   const markAsRead = async (id: string) => {
-    await markAsReadMutation({ slug, id })
-    invalidate("[GET] /api/notification")
+    await markAsReadMutation({ params: { slug }, body: { id } })
+    invalidate("[GET] /api/tenant/:slug/notification")
   }
 
   useEffect(() => {
@@ -82,11 +90,11 @@ export function NotificationsProvider({ children }: Props) {
         <SheetContent className="w-full sm:max-w-md" hideCloseButton>
           <SheetHeader className="pb-4 border-b">
             <div className="flex items-center justify-between">
-              <SheetTitle>Notificações</SheetTitle>
+              <SheetTitle>{t/*i18n*/("Notifications")}</SheetTitle>
               <SheetDescription>
                 {unreadNotifications && (
                   <Button variant="outline" size="sm" onClick={markAllAsRead}>
-                    Marcar todas como lidas
+                    {t/*i18n*/("Mark all as read")}
                   </Button>
                 )}
               </SheetDescription>
@@ -95,30 +103,31 @@ export function NotificationsProvider({ children }: Props) {
 
           <Tabs defaultValue="all" className="mt-4">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="all">Todas</TabsTrigger>
-              <TabsTrigger value="unread">Não lidas {unreadNotifications && `(${unreadCount})`}</TabsTrigger>
+              <TabsTrigger value="all">{t/*i18n*/("All")}</TabsTrigger>
+              <TabsTrigger value="unread">
+                {t/*i18n*/("Unread")} {unreadNotifications && `(${unreadCount})`}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="all" className="mt-4 space-y-4">
-              {notifications.length === 0 ? (
+              {notifications?.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p>Nenhuma notificação</p>
+                  <p>{t/*i18n*/("No notifications")}</p>
                 </div>
               ) : (
-                notifications.map((notification) => (
+                notifications?.map((notification) => (
                   <NotificationItem key={notification.id} notification={notification} onRead={markAsRead} />
                 ))
               )}
             </TabsContent>
 
             <TabsContent value="unread" className="mt-4 space-y-4">
-              {notifications.filter(n => !n.read).length === 0 ? (
+              {notifications?.filter(n => !n.read).length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p>Nenhuma notificação não lida</p>
+                  <p>{t/*i18n*/("No unread notifications")}</p>
                 </div>
               ) : (
-                notifications
-                  .filter(n => !n.read)
+                notifications?.filter(n => !n.read)
                   .map(notification => (
                     <NotificationItem key={notification.id} notification={notification} onRead={markAsRead} />
                   ))
@@ -131,6 +140,7 @@ export function NotificationsProvider({ children }: Props) {
     </NotificationContext.Provider>
   )
 }
+
 export const useNotifications = () => useContext(NotificationContext)
 
 interface NotificationItemProps {
@@ -139,6 +149,7 @@ interface NotificationItemProps {
 }
 
 function NotificationItem({ notification, onRead }: NotificationItemProps) {
+  const t = useTranslations();
   return (
     <div
       className={cn(
@@ -166,7 +177,7 @@ function NotificationItem({ notification, onRead }: NotificationItemProps) {
           </div>
           <p className="text-sm text-muted-foreground">{notification.description}</p>
           <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">{formatFromNow(notification.createdAt)}</p>
+            <p className="text-xs text-muted-foreground">{moment(notification?.createdAt).fromNow()}</p>
             <div className="flex items-center gap-2">
               {!notification.read && (
                 <Button
@@ -177,7 +188,7 @@ function NotificationItem({ notification, onRead }: NotificationItemProps) {
                     onRead(notification.id);
                   }}
                 >
-                  Marcar como lida
+                  {t/*i18n*/("Mark as read")}
                 </Button>
               )}
               {notification.link && (
@@ -187,7 +198,7 @@ function NotificationItem({ notification, onRead }: NotificationItemProps) {
                   asChild
                 >
                   <Link href={notification.link}>
-                    Acessar
+                    {t/*i18n*/("Access")}
                   </Link>
                 </Button>
               )}

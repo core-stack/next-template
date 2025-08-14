@@ -1,6 +1,6 @@
-import { FastifyReply, FastifyRequest } from "fastify";
+import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { Session } from "../session";
+import { Session } from '../session';
 
 export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) => {
   const accessToken = req.cookies['access-token'];
@@ -8,8 +8,10 @@ export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) =
 
   let session: Session | undefined;
   try {
+    req.log.info('authMiddleware', { accessToken, refreshToken });
     session = await req.server.auth.getSession(accessToken);
-
+    req.log.info(session);
+    
     if (!session && refreshToken) {
       const refreshResult = await req.server.auth.refreshToken(refreshToken);
       session = refreshResult.session;
@@ -27,7 +29,6 @@ export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) =
     }
   } catch (e) {
     req.log.error(e);
-
     return reply.code(401).send({ error: 'UNAUTHORIZED', message: req.t/*i18n*/("You are not logged in") });
   }
 

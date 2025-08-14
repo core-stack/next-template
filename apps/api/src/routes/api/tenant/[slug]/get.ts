@@ -8,6 +8,7 @@ export default async function handler(
   req: FastifyRequest<{ Params: TenantSlugParams }>,
   reply: FastifyReply
 ) {
+  req.log.debug('getTenant');
   const { slug } = req.params;
   const tenant = await req.server.prisma.tenant.findUnique({ where: { slug } });
   if (!tenant) return reply.status(404).send({ message: /*i18n*/("Tenant not found") });

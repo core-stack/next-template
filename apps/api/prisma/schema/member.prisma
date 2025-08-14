@@ -24,8 +24,11 @@ model Member {
 
   owner Boolean @default(false)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  File        File[]
+  Group       Group[]
+  GroupAccess GroupAccess[]
 
   @@unique([userId, tenantId])
   @@unique([email, tenantId])
