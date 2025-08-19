@@ -24,6 +24,9 @@ export class RelationshipReporitory extends EdgeRepository<Relationship> {
   }
 
   async findExistingRelationshipsBulk(relationships: Relationship[]) {
+    if (!this.collection) {
+      this.connect();
+    }
     if (relationships.length === 0) return [];
     
     const cursor = await this.collection!.database.query(aql`

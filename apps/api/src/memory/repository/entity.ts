@@ -32,7 +32,7 @@ export class EntityReporitory extends DocumentRepository<Entity> {
 
   async saveWithRelations(e: Entity | Entity[], rel: Relationship | Relationship[]) {
     if (!this.collection) {
-      throw new Error('Collections not connected');
+      this.connect();
     }
   
     const entities = Array.isArray(e) ? e : [e];
@@ -75,6 +75,9 @@ export class EntityReporitory extends DocumentRepository<Entity> {
   }
 
   private async findExistingEntitiesBulk(entities: Entity[]): Promise<Entity[]> {
+    if (!this.collection) {
+      this.connect();
+    }
     if (entities.length === 0) return [];
     
     const cursor = await this.collection!.database.query(aql`

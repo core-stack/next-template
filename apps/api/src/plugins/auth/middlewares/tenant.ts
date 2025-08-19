@@ -2,7 +2,6 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 
 export const tenantMiddleware = async (req: FastifyRequest, reply: FastifyReply) => {
   const { session, params } = req;
-  req.log.info('tenantMiddleware', { session, params });
   if (!session) return reply.code(401).send({ error: 'UNAUTHORIZED', message: req.t/*i18n*/("You are not logged in") });
   let slug: string | undefined;
   if (params && typeof params === 'object' && 'slug' in params) {
@@ -12,8 +11,10 @@ export const tenantMiddleware = async (req: FastifyRequest, reply: FastifyReply)
     return reply.code(403).send({ error: 'FORBIDDEN', message: req.t/*i18n*/("You can`t access this tenant") });
   }
 
-  const canAccess = req.session.tenants.some((tenant) => tenant.slug === slug);
-  if (!canAccess) {
+  const tenant = req.session.tenants.find((tenant) => tenant.slug === slug);
+  if (!tenant) {
     return reply.code(403).send({ error: 'FORBIDDEN', message: req.t/*i18n*/("You can`t access this tenant") });
   }
+
+  req.tenant = tenant;
 }

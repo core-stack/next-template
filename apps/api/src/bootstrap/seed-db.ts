@@ -16,7 +16,7 @@ export default async function seedDatabase({ prisma, log, env }: FastifyInstance
         createdAt: new Date(),
         role: {
           connect: {
-            key_scope: { key: ROLES.global.admin.key, scope: "GLOBAL" }
+            key_scope_tenantId: { key: ROLES.global.admin.key, scope: "GLOBAL", tenantId: null },
           }
         },
       }

@@ -4,11 +4,9 @@ import { randomUUID } from 'node:crypto';
 import { env } from '@/env';
 import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
 
+import { saveDocsWithRelations, saveEntitiesWithRelations, saveSource } from './database';
 import { Doc, DocMetadata } from './model/doc';
 import { Source } from './model/source';
-import { docRepository } from './repository/doc';
-import { entityRepository } from './repository/entity';
-import { sourceRepository } from './repository/source';
 import { entityExtractor } from './services/entity-extraction/llm';
 
 const embeddingModel = new GoogleGenerativeAIEmbeddings({
@@ -20,11 +18,13 @@ export type SaveMemoryParams = {
   createdBy: string;
   text: string;
   title: string;
+  sourceType: Source["type"];
   type: DocMetadata["type"];
   groupPath: string;
 }
-export const saveMemory = async ({ createdBy, tenantId, text, title, type, groupPath }: SaveMemoryParams) => {
-
+export const saveMemory = async ({ createdBy, tenantId, text, title, type, sourceType, groupPath }: SaveMemoryParams) => {
+  console.log("saveMemory", { tenantId, createdBy, text, title, type, groupPath });
+  
   // separar o texto em chunks
   const splitter = new MarkdownTextSplitter({
     chunkOverlap: 200,
@@ -39,28 +39,28 @@ export const saveMemory = async ({ createdBy, tenantId, text, title, type, group
     return path;
   }, "");
 
-
   const sourceId = randomUUID();
   const modifiedAt = new Date();
   // source
   const source = {
     _key: sourceId,
     originalName: title,
-    type,
+    type: sourceType,
+    tenantId,
     metadata: {
       modifiedAt,
       modifiedBy: createdBy,
       groups
     }
   } as Source;
-  await sourceRepository.save(source);
+  await saveSource(source);
 
   await Promise.all(chunks.map(async (chunk, index) => {
     // extrair entidades e relacionamentos
-    const { entities, relationships } = await entityExtractor.extract(tenantId, sourceId, chunk);
-    
-    // gerar embeddings
-    const embeddings = await embeddingModel.embedQuery(chunk);
+    const [{ entities, relationships }, embeddings] = await Promise.all([
+      entityExtractor.extract(tenantId, sourceId, chunk),
+      embeddingModel.embedQuery(chunk)
+    ]);
     
     const doc = {
       _key: randomUUID(),
@@ -78,21 +78,24 @@ export const saveMemory = async ({ createdBy, tenantId, text, title, type, group
       }
     } as Doc;
     
-    await entityRepository.saveWithRelations(entities, relationships);
+    await saveEntitiesWithRelations(entities, relationships);
+
     const docRelations = entities.map(ent => ({
-      _from: `entity/${ent._key}`,
-      _to: `doc/${doc._key}`,
+      _from: `entities/${ent._key}`,
+      _to: `docs/${doc._key}`,
       type: "contains",
       strength: 1,
       tenantId
     }));
+  
     docRelations.push({
-      _from: `source/${sourceId}`,
-      _to: `doc/${doc._key}`,
+      _from: `sources/${sourceId}`,
+      _to: `docs/${doc._key}`,
       type: "contains",
       strength: 1,
       tenantId,
     });
-    await docRepository.saveWithRelations(doc, docRelations);
+
+    await saveDocsWithRelations(doc, docRelations);
   }));
 }

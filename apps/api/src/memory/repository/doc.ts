@@ -23,6 +23,9 @@ export class DocReporitory extends DocumentRepository<Doc> {
   }
 
   async saveWithRelations(e: Doc | Doc[], rel: Relationship | Relationship[], opts?: InsertDocumentOptions) {
+    if (!this.collection) {
+      this.connect();
+    }
     await this.save(e, opts);
     await this.relationshipRepository.save(rel);
   }

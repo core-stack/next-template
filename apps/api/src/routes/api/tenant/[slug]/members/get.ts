@@ -1,12 +1,16 @@
-import { errorResponseSchema } from "@/schemas/error-response.schema";
-import { getMembersInTenantSchema, tenantSlugParamsSchema, TenantSlugParamsSchema } from "@packages/schemas";
-import { FastifyReply, FastifyRequest, RouteShorthandOptions } from "fastify";
+import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
+
+import { errorResponseSchema } from '@/schemas/error-response.schema';
+import { getTenantFromSlug } from '@/utils/load-tenant';
+import {
+  getMembersInTenantSchema, tenantSlugParamsSchema, TenantSlugParamsSchema
+} from '@packages/schemas';
 
 export default async function handler(
   req: FastifyRequest<{ Params: TenantSlugParamsSchema }>,
   reply: FastifyReply
 ) {
-  const tenant = await req.server.prisma.tenant.findUnique({ where: { slug: req.params.slug, disabledAt: null } });
+  const tenant = await getTenantFromSlug(req.server.prisma, req.params.slug);
   if (!tenant) return reply.status(404).send({ message: /*i18n*/("Tenant not found") });
 
   const members = await req.server.prisma.member.findMany({ where: { tenantId: tenant.id } });

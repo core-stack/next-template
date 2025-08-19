@@ -1,6 +1,6 @@
 import { TenantOverview } from './components/tenant-overview';
 
-export default function TenantPage() {
+export default function Page() {
   return (
     <div className="p-6">
       <div className="mb-6">

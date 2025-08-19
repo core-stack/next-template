@@ -10,7 +10,6 @@ export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) =
   try {
     req.log.info('authMiddleware', { accessToken, refreshToken });
     session = await req.server.auth.getSession(accessToken);
-    req.log.info(session);
     
     if (!session && refreshToken) {
       const refreshResult = await req.server.auth.refreshToken(refreshToken);

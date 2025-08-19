@@ -44,6 +44,9 @@ export abstract class DocumentRepository<Model = any> {
   }
 
   async save(e: Model | Model[], opts?: InsertDocumentOptions) {
+    if (!this.collection) {
+      await this.connect();
+    }
     if (this.collection) {
       const models = (Array.isArray(e) ? e : [e]).map((model) => {
         return this.schema.parse(model);
@@ -92,6 +95,9 @@ export abstract class EdgeRepository<Model = any> {
   }
 
   async save(e: Model | Model[], opts?: InsertDocumentOptions) {
+    if (!this.collection) {
+      await this.connect();
+    }
     if (this.collection) {
       const models = (Array.isArray(e) ? e : [e]).map((model) => {
         return this.schema.parse(model);

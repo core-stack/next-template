@@ -1,3 +1,5 @@
+import { parse } from 'node:path';
+
 import { env } from '@/env';
 import { Entity } from '@/memory/model/entity';
 import { Relationship } from '@/memory/model/relationship';
@@ -23,14 +25,17 @@ only extract relationships between entities that exist,
 before creating a relationship verify that the related entities exist, 
 if it does not exist, ignore or create the entity, never, never create 
 relationships with non-existent entities.
-
+no create duplicated entities or relationships, before add a new entity or relationship,
+verify if it exists, if exists, ignore.
+Add a sequencial unique id for in "_key" field of entities.
+in "_from" and "_to" fields in relationships, add the entity id
 Return a JSON object like:
 {{
-  "entities": [{{"name": "John", "type": "Person"}}],
+  "entities": [{{"_key": 1, "name": "John", "type": "Person"}}],
   "relationships": [
     {{
-      "_from": "John",
-      "_to": "Acme Inc.",
+      "_from": 1,
+      "_to": 2,
       "strength": 0.8, // 0.0 to 1.0 (1.0 being the most strong)
       "type": "employed_by"
     }}
@@ -53,10 +58,8 @@ Text: {text}`,
       const jsonMatch = jsonString.match(/```json\n([\s\S]*?)\n```/);
       const parsed = JSON.parse(jsonMatch ? jsonMatch[1] : jsonString) as EntityRelationshipExtractionResult;
       
-      const entityKeyMap = new Map<string, string>();
       const enrichedEntities: Entity[] = parsed.entities.map(entity => {
         const _key = generateKey(tenantId, entity.text, entity.type);
-        entityKeyMap.set(entity.text, _key);
         return {
           ...entity,
           _key,
@@ -66,16 +69,16 @@ Text: {text}`,
       });
 
       const enrichedRelationships: Relationship[] = parsed.relationships.map(rel => {
-        const sourceKey = entityKeyMap.get(rel._from);
-        const targetKey = entityKeyMap.get(rel._to);
-        if (!sourceKey || !targetKey) {
-          console.warn(`Missing entity for relationship: ${rel._from} -> ${rel._to}`);
+        const source = parsed.entities.find(e => e._key === rel._from);
+        const target = parsed.entities.find(e => e._key === rel._to);
+        if (!source || !target) {
+          console.warn(`Missing entity for relationship: ${rel.type}`);
           return null;
         }
         return {
           ...rel,
-          _from: sourceKey ?? rel._from,
-          _to: targetKey ?? rel._to,
+          _from: `entities/${generateKey(tenantId, source.text, source.type)}`,
+          _to: `entities/${generateKey(tenantId, target.text, target.type)}`,
           tenantId
         };
       }).filter(Boolean) as Relationship[];

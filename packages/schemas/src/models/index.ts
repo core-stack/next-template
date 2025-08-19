@@ -4,6 +4,7 @@ export * from "./member";
 export * from "./notification";
 export * from "./subscription";
 export * from "./user";
+export * from "./group";
 export * from "./verification-token";
 export * from "./tenant";
 export * from "./role";

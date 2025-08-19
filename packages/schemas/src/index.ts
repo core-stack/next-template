@@ -6,3 +6,4 @@ export * from "./notification.schema";
 export * from "./user.schema";
 export * from "./payment.schema";
 export * from "./memory.schema";
+export * from "./group.schema";
