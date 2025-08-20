@@ -7,6 +7,7 @@ export default async function seedDatabase({ prisma, log, env }: FastifyInstance
   log.info("Seeding database...");
   if ((await prisma.user.count()) === 0) {
     log.info("No users found, creating default user...");
+    const adminRole = await prisma.role.findFirstOrThrow({ where: { key: ROLES.global.admin.key, scope: "GLOBAL" } });
     await prisma.user.create({
       data: {
         email: env.DEFAULT_USER_EMAIL,
@@ -16,7 +17,7 @@ export default async function seedDatabase({ prisma, log, env }: FastifyInstance
         createdAt: new Date(),
         role: {
           connect: {
-            key_scope_tenantId: { key: ROLES.global.admin.key, scope: "GLOBAL", tenantId: null },
+            id: adminRole.id,
           }
         },
       }

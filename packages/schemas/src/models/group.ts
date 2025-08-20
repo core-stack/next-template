@@ -5,9 +5,10 @@ export const groupSchema = z.object({
   
   name: z.string().min(1),
   slug: z.string().trim().min(1, /*i18n*/("Slug cannot be empty")),
-  description: z.string().optional().default(""),
+  description: z.string().optional(),
+  path: z.string().optional(),
 
-  parentId: z.string().uuid().optional().nullable(),
+  parentId: z.string().uuid().optional(),
   tenantId: z.string().uuid(),
   createdById: z.string().uuid().optional(),
 
@@ -15,4 +16,4 @@ export const groupSchema = z.object({
   updatedAt: z.date().optional(),
 });
 
-export type Group = z.infer<typeof groupSchema>;
+export type GroupSchema = z.infer<typeof groupSchema>;

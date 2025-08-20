@@ -13,17 +13,29 @@ type Props = {
 }
 export function Topbar({ slug }: Props) {
   const searchParams = useSearchParams();
-  const groups = searchParams.get("groups")?.split("/") || [];
+  const groups = searchParams.get("path")?.split("/").filter(Boolean) || [];
   return (
     <header className="w-full flex h-14 items-center gap-3 border-b bg-background px-5">
       <div className="flex items-center gap-2 w-full">
         <Breadcrumb>
           <BreadcrumbList>
+          {
+            groups.length > 0 && (
+              <>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href={`/t/${slug}/groups`}>
+                    Groups
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+              </>
+            )
+          }
             {
               groups.map((group, index) => (
                 <React.Fragment key={group}>
                   <BreadcrumbItem>
-                    <BreadcrumbLink active={index + 1 === groups.length} href={`/t/${slug}/${groups.slice(0, index + 1).join("/")}`}>
+                    <BreadcrumbLink active={index + 1 === groups.length} href={`/t/${slug}/groups?path=/${groups.slice(0, index + 1).join("/")}`}>
                       {group}
                     </BreadcrumbLink>
                   </BreadcrumbItem>

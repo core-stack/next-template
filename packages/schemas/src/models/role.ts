@@ -5,10 +5,10 @@ export const roleSchema = z.object({
   name: z.string(),
   permissions: z.number().int(),
   scope: z.enum(["GLOBAL", "TENANT"]),
-  tenantId: z.string().uuid().nullable(),
-  creatorId: z.string().uuid().nullable(),
+  tenantId: z.string().uuid().optional(),
+  creatorId: z.string().uuid().optional(),
   createdAt: z.date(),
-  updatedAt: z.date().nullable(),
+  updatedAt: z.date().optional(),
 })
 
 export type RoleSchema = z.infer<typeof roleSchema>;

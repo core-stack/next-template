@@ -1,24 +1,19 @@
 import { z } from 'zod';
 
-import { groupSchema } from './models/group';
-import { tenantSlugParamsSchema } from './tenant.schema';
+import { groupSchema, GroupSchema } from './models/group';
 
-export const createGroupSchema = groupSchema.omit({ id: true, createdAt: true, updatedAt: true, createdById: true, tenantId: true });
+export const createGroupSchema = groupSchema.omit({ id: true, createdAt: true, updatedAt: true, createdById: true, tenantId: true, parentId: true });
 export type CreateGroupSchema = z.infer<typeof createGroupSchema>;
 
-export const updateGroupSchema = groupSchema.omit({ id: true, createdAt: true, updatedAt: true, createdById: true, tenantId: true });
+export const updateGroupSchema = groupSchema.omit({ createdAt: true, updatedAt: true, createdById: true, tenantId: true, parentId: true, path: true });
 export type UpdateGroupSchema = z.infer<typeof updateGroupSchema>;
 
 export const getGroupQueryParamsSchema = z.object({
-  parentId: z.string().uuid().optional(),
+  path: z.string().optional(),
 });
 export type GetGroupQueryParamsSchema = z.infer<typeof getGroupQueryParamsSchema>;
 
-export const updateOrDeleteGroupParamsSchema = tenantSlugParamsSchema.extend({
-  id: z.string().uuid(),
-});
-export type UpdateOrDeleteGroupParamsSchema = z.infer<typeof updateOrDeleteGroupParamsSchema>;
-
-
+export { groupSchema };
+export type { GroupSchema };
 export const getGroupsSchema = groupSchema.array();
 export type GetGroupsSchema = z.infer<typeof getGroupsSchema>;

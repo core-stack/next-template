@@ -5,9 +5,9 @@ export const inviteSchema = z.object({
   tenantId: z.string().uuid(),
   email: z.string().email(),
   roleId: z.string().uuid(),
-  userId: z.string().uuid().nullable(),
+  userId: z.string().uuid().optional(),
   expiresAt: z.date(),
   createdAt: z.date(),
-  updatedAt: z.date().nullable(),
+  updatedAt: z.date().optional(),
 });
 export type InviteSchema = z.infer<typeof inviteSchema>;

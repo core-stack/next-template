@@ -15,10 +15,10 @@ export const tenantSchema = z.object({
   name: z.string({ message: /*i18n*/("Name is required") })
     .min(2, /*i18n*/("Name must be at least 2 characters")),
   slug: tenantSlugSchema,
-  description: z.string().nullable(),
-  disabledAt: z.date().nullable(),
+  description: z.string().optional(),
+  disabledAt: z.date().optional(),
   createdAt: z.date({ message: /*i18n*/("Creation date is required") }),
-  updatedAt: z.date().nullable(),
+  updatedAt: z.date().optional(),
 });
 export type TenantSchema = z.infer<typeof tenantSchema>;
 

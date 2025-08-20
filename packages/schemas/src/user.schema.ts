@@ -37,9 +37,9 @@ export const getSelfSchema = z.object({
   name: z.string().optional(),
   email: z.string({ message: /*i18n*/("Email is required") }).email(/*i18n*/("The email is invalid")),
   role: roleSchema,
-  image: z.string().optional().nullable(),
+  image: z.string().optional().optional(),
   createdAt: z.date({ message: /*i18n*/("Creation date is required") }),
-  updatedAt: z.date({ message: /*i18n*/("Update date must be a valid date") }).nullable(),
+  updatedAt: z.date({ message: /*i18n*/("Update date must be a valid date") }).optional(),
   members: memberSchema.extend({
     role: roleSchema,
     tenant: z.object({

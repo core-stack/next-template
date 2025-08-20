@@ -10,13 +10,17 @@ export default async function handler(
   req: FastifyRequest<{ Params: TenantSlugParamsSchema, Body: CreateGroupSchema }>,
   reply: FastifyReply
 ) {
-  const { description, name, parentId, slug } = req.body;
+  const { description, name, path, slug } = req.body;
+  const parentSlug = path?.split('/').at(-1);
+  const parent = path ? await req.server.prisma.group.findUnique({ where: { slug_tenantId: { slug: parentSlug, tenantId: req.tenant.id } } }) : undefined;
+  
   await req.server.prisma.group.create({
     data: {
       description,
       name,
+      path: parent ? `${parent.path ? parent.path : '/' + parent.slug}/${slug}` : null,
       slug,
-      parent: parentId ? { connect: { id: parentId } } : undefined,
+      parent: parent ? { connect: { id: parent.id } } : undefined,
       tenant: { connect: { id: req.tenant.id } },
       createdBy: { connect: { id: req.tenant.memberId } },
       GroupAccess: {

@@ -4,6 +4,7 @@ model Group {
   slug        String
   name        String
   description String
+  path        String?
 
   parentId String? @map("parent_id")
   parent   Group?  @relation(name: "parent_children", fields: [parentId], references: [id], onDelete: Cascade)

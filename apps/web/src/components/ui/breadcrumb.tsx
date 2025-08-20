@@ -1,4 +1,5 @@
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
+import Link from 'next/link';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
@@ -42,11 +43,12 @@ BreadcrumbItem.displayName = "BreadcrumbItem"
 const BreadcrumbLink = React.forwardRef<
   HTMLAnchorElement,
   React.ComponentPropsWithoutRef<"a"> & {
+    href: string
     asChild?: boolean
     active?: boolean
   }
 >(({ asChild, active, className, ...props }, ref) => {
-  const Comp = asChild ? Slot : "a"
+  const Comp = asChild ? Slot : Link
 
   return (
     <Comp

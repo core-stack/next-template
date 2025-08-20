@@ -5,16 +5,16 @@ export const notificationSchema = z.object({
 
   title: z.string(),
   description: z.string(),
-  link: z.string().nullable(),
+  link: z.string().optional(),
   read: z.boolean(),
 
   tenantId: z.string(),
 
-  createdById: z.string().nullable(),
+  createdById: z.string().optional(),
 
   destinationId: z.string(),
 
   createdAt: z.date(),
-  readAt: z.date().nullable(),
+  readAt: z.date().optional(),
 });
 export type PreNotificationSchema = z.infer<typeof notificationSchema>;

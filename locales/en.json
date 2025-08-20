@@ -207,5 +207,15 @@
   "Sources": "Sources",
   "This action cannot be undone": "This action cannot be undone",
   "Uploads": "Uploads",
-  "Data": "Data"
+  "Data": "Data",
+  "Create Group": "Create Group",
+  "Group created": "Group created",
+  "Group updated": "Group updated",
+  "Memory saved": "Memory saved",
+  "Edit group": "Edit group",
+  "Create group": "Create group",
+  "Change the information below to update the group": "Change the information below to update the group",
+  "Create a new group": "Create a new group",
+  "Group URL": "Group URL",
+  "Your group will be creating in": "Your group will be creating in"
 }

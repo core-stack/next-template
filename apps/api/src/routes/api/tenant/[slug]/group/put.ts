@@ -3,30 +3,27 @@ import { FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify';
 import { errorResponseSchema } from '@/schemas/error-response.schema';
 import { successResponseSchema } from '@/schemas/success-response.schema';
 import {
-  updateGroupSchema, UpdateGroupSchema, updateOrDeleteGroupParamsSchema,
-  UpdateOrDeleteGroupParamsSchema
+  tenantSlugParamsSchema, TenantSlugParamsSchema, updateGroupSchema, UpdateGroupSchema
 } from '@packages/schemas';
 
 export default async function handler(
-  req: FastifyRequest<{ Params: UpdateOrDeleteGroupParamsSchema, Body: UpdateGroupSchema }>,
+  req: FastifyRequest<{ Params: TenantSlugParamsSchema, Body: UpdateGroupSchema }>,
   reply: FastifyReply
 ) {
-  const { description, name, parentId, slug } = req.body;
+  const { description, name, slug, id } = req.body;
   await req.server.prisma.group.update({
-    where: { id: req.params.id },
+    where: { id },
     data: {
       description,
       name,
       slug,
-      parent: parentId ? { connect: { id: parentId } } : undefined,
     }
   });
   return reply.status(200).send({ message: /*i18n*/("Group updated") });
 }
-
 export const options: RouteShorthandOptions = {
   schema: {
-    params: updateOrDeleteGroupParamsSchema,
+    params: tenantSlugParamsSchema,
     body: updateGroupSchema,
     response: {
       200: successResponseSchema,

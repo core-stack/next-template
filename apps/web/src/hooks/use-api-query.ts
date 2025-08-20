@@ -20,7 +20,6 @@ export function useApiQuery<Path extends ApiPath>(
     enabled: opts?.enabled,
     queryFn: async () => {
       const url = buildUrl(path, opts?.params, opts?.query);
-      console.log(url);
       
       const res = await fetch(url, {
         method,

@@ -13,6 +13,7 @@ export const tenantMiddleware = async (req: FastifyRequest, reply: FastifyReply)
 
   const tenant = req.session.tenants.find((tenant) => tenant.slug === slug);
   if (!tenant) {
+    req.log.warn(`Tenant not found in session, tenant middleware not working in route: ${req.url}`);
     return reply.code(403).send({ error: 'FORBIDDEN', message: req.t/*i18n*/("You can`t access this tenant") });
   }
 

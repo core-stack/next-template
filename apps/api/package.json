@@ -38,6 +38,7 @@
     "@google/generative-ai": "^0.24.1",
     "@langchain/core": "^0.3.67",
     "@langchain/google-genai": "^0.2.16",
+    "@langchain/qdrant": "^0.1.3",
     "@packages/common": "workspace:*",
     "@packages/config-eslint": "workspace:*",
     "@packages/env": "workspace:*",

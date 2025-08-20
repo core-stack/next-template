@@ -13,7 +13,7 @@ export enum EmailTemplate {
 
 const forgetPasswordSchema = z.object({
   resetUrl: z.string().url(),
-  name: z.string().nullable(),
+  name: z.string().optional(),
 });
 const inviteSchema = z.object({
   tenantName: z.string(),
@@ -24,10 +24,10 @@ const inviteSchema = z.object({
 });
 const activeAccountSchema = z.object({
   activationUrl: z.string().url(),
-  name: z.string().nullable(),
+  name: z.string().optional(),
 });
 const changePasswordSchema = z.object({
-  name: z.string().nullable(),
+  name: z.string().optional(),
 });
 const notificationSchema = z.object({
   title: z.string(),

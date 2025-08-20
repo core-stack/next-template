@@ -1,19 +1,21 @@
-import fastifyCookiePlugin from "@fastify/cookie";
-import cors from "@fastify/cors";
-import Fastify from "fastify";
-import { serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
+import Fastify from 'fastify';
+import { serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod';
 
-import { env } from "./env";
-import { errorHandler } from "./error-handler";
-import authPlugin from "./plugins/auth";
-import bootstrapPlugin from "./plugins/bootstrap";
-import cronPlugin from "./plugins/cron";
-import envPlugin from "./plugins/env";
-import i18nPlugin from "./plugins/i18n";
-import prismaPlugin from "./plugins/prisma";
-import queuePlugin from "./plugins/queue";
-import routerPlugin from "./plugins/router";
-import storagePlugin from "./plugins/storage";
+import fastifyCookiePlugin from '@fastify/cookie';
+import cors from '@fastify/cors';
+
+import { env } from './env';
+import { errorHandler } from './error-handler';
+import authPlugin from './plugins/auth';
+import bootstrapPlugin from './plugins/bootstrap';
+import cronPlugin from './plugins/cron';
+import envPlugin from './plugins/env';
+import i18nPlugin from './plugins/i18n';
+import nullToUndefinedPlugin from './plugins/null-to-undefined';
+import prismaPlugin from './plugins/prisma';
+import queuePlugin from './plugins/queue';
+import routerPlugin from './plugins/router';
+import storagePlugin from './plugins/storage';
 
 async function main() {
   const app = Fastify({
@@ -65,6 +67,7 @@ async function main() {
     region: env.AWS_REGION,
   });
 
+  await app.register(nullToUndefinedPlugin);
   await app.register(routerPlugin);
 
   await app.listen({ port: env.API_PORT });

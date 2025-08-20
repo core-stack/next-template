@@ -14,7 +14,9 @@ export function buildUrl(
       );  
     }
   }
-
+  query = Object.fromEntries(
+    Object.entries(query ?? {}).filter(([, value]) => value !== undefined && value !== null)
+  )
   const search = query
     ? `?${new URLSearchParams(query).toString()}`
     : "";

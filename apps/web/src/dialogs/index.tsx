@@ -1,4 +1,5 @@
 "use client";
+import { CreateOrUpdateGroupDialog } from './create-group-dialog';
 import { CreateOrUpdateTenantDialog } from './create-or-update-tenant-dialog';
 import { InviteMemberDialog } from './invite-member-dialog';
 import { PlanComparisonDialog } from './plan-comparison-dialog';
@@ -7,6 +8,8 @@ export enum DialogType {
   CREATE_TENANT = "create-workspace",
   UPDATE_TENANT = "update-workspace",
   CONFIRM_DELETE_TENANT = "confirm-delete-workspace",
+  CREATE_GROUP = "create-group",
+  UPDATE_GROUP = "update-group",
   INVITE_MEMBER = "invite-member",
   PLAN_COMPARISON = "plan-comparison",
 }
@@ -14,6 +17,8 @@ export enum DialogType {
 export const dialogs = {
   [DialogType.CREATE_TENANT]: (props: any) => <CreateOrUpdateTenantDialog {...props} />,
   [DialogType.UPDATE_TENANT]: (props: any) => <CreateOrUpdateTenantDialog {...props} />,
+  [DialogType.CREATE_GROUP]: (props: any) => <CreateOrUpdateGroupDialog {...props} />,
+  [DialogType.UPDATE_GROUP]: (props: any) => <CreateOrUpdateGroupDialog {...props} />,
   [DialogType.INVITE_MEMBER]: () => <InviteMemberDialog />,
   [DialogType.PLAN_COMPARISON]: (props: any) => <PlanComparisonDialog {...props} />
 }

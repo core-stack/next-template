@@ -6,6 +6,22 @@ import {
   tenantSlugParamsSchema
 } from '@packages/schemas';
 
+function nullToUndefined(obj: any): any {
+
+  if (obj instanceof Date) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(nullToUndefined);
+  } else if (obj && typeof obj === "object" && obj !== null) {
+    return Object.fromEntries(
+      Object.entries(obj).map(([k, v]) => [k, v === null ? undefined : nullToUndefined(v)])
+    );
+  }
+  return obj === null ? undefined : obj;
+}
+
 export default async function handler(
   req: FastifyRequest<{ Params: TenantSlugParamsSchema, Querystring: GetGroupQueryParamsSchema }>,
   reply: FastifyReply
@@ -13,10 +29,11 @@ export default async function handler(
   const groups = await req.server.prisma.group.findMany({
     where: { 
       tenantId: req.tenant.id,
-      parentId: req.query.parentId
+      path: req.query.path ?? null
     }
   });
-  return reply.status(200).send(groups);
+  req.log.info(nullToUndefined(groups));
+  return reply.status(200).send(nullToUndefined(groups));
 }
 
 export const options: RouteShorthandOptions = {
