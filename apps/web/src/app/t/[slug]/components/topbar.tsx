@@ -1,6 +1,6 @@
 "use client"
 
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import React from 'react';
 
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -14,6 +14,8 @@ type Props = {
 export function Topbar({ slug }: Props) {
   const searchParams = useSearchParams();
   const groups = searchParams.get("path")?.split("/").filter(Boolean) || [];
+  const pathname = usePathname();
+  
   return (
     <header className="w-full flex h-14 items-center gap-3 border-b bg-background px-5">
       <div className="flex items-center gap-2 w-full">
@@ -35,7 +37,7 @@ export function Topbar({ slug }: Props) {
               groups.map((group, index) => (
                 <React.Fragment key={group}>
                   <BreadcrumbItem>
-                    <BreadcrumbLink active={index + 1 === groups.length} href={`/t/${slug}/groups?path=/${groups.slice(0, index + 1).join("/")}`}>
+                    <BreadcrumbLink active={index + 1 === groups.length} href={`${pathname}?path=/${groups.slice(0, index + 1).join("/")}`}>
                       {group}
                     </BreadcrumbLink>
                   </BreadcrumbItem>

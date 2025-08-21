@@ -7,6 +7,7 @@ import { NotificationsProvider } from '@/context/notifications';
 import { useApiQuery } from '@/hooks/use-api-query';
 
 import { TenantSidebar } from './components/tenant-sidebar';
+import { Topbar } from './components/topbar';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { slug } = useParams<{ slug: string }>();
@@ -23,7 +24,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <NotificationsProvider>
       <div className="flex min-h-screen">
         <TenantSidebar slug={slug} tenant={data!} />
-        <div className="flex-1 overflow-auto">{children}</div>
+        <div className="flex-1 overflow-auto">
+          <Topbar slug={slug} />
+          {children}
+        </div>
       </div>
     </NotificationsProvider>
   )

@@ -2,7 +2,7 @@
 
 import { FileText, Home, LayoutDashboard, Settings, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 import { Sidebar } from '@/components/sidebar';
 import { ApiTenantSlugGet } from '@packages/common';
@@ -16,8 +16,9 @@ interface TenantSidebarProps {
 export function TenantSidebar({ slug }: TenantSidebarProps) {
   const pathname = usePathname() || ""
   const t = useTranslations();
-
-  const routes = [
+  const searchParams = useSearchParams();
+  const path = searchParams.get("path") ? `?path=${searchParams.get("path")}` : "";
+  const tenantRoutes = [
     {
       label: t/*i18n*/("General"),
       icon: Home,
@@ -28,34 +29,51 @@ export function TenantSidebar({ slug }: TenantSidebarProps) {
     {
       label: t/*i18n*/("Groups"),
       icon: LayoutDashboard,
-      href: `/t/${slug}/groups`,
-      active: pathname === `/t/${slug}/groups`,
-      permissions: []
-    },
-    {
-      label: t/*i18n*/("Sources"),
-      icon: FileText,
-      href: `/t/${slug}/sources`,
-      active: pathname === `/t/${slug}/sources`,
+      href: `/t/${slug}/groups${path}`,
+      active: pathname.includes(`/t/${slug}/groups`),
       permissions: []
     },
     {
       label: t/*i18n*/("Members"),
       icon: Users,
-      href: `/t/${slug}/members`,
+      href: `/t/${slug}/members${path}`,
       active: pathname.includes(`/t/${slug}/members`),
       permissions: [Permission.GET_MEMBERS]
     },
     {
       label: t/*i18n*/("Settings"),
       icon: Settings,
-      href: `/t/${slug}/settings`,
+      href: `/t/${slug}/settings${path}`,
+      active: pathname.includes(`/t/${slug}/settings`),
+      permissions: [Permission.UPDATE_TENANT]
+    },
+  ]
+
+  const groupRoutes = [
+    {
+      label: t/*i18n*/("Sources"),
+      icon: FileText,
+      href: `/t/${slug}/sources${path}`,
+      active: pathname === `/t/${slug}/sources`,
+      permissions: []
+    },
+    {
+      label: t/*i18n*/("Members"),
+      icon: Users,
+      href: `/t/${slug}/members${path}`,
+      active: pathname.includes(`/t/${slug}/members`),
+      permissions: [Permission.GET_MEMBERS]
+    },
+    {
+      label: t/*i18n*/("Settings"),
+      icon: Settings,
+      href: `/t/${slug}/settings${path}`,
       active: pathname === `/t/${slug}/settings`,
       permissions: [Permission.UPDATE_TENANT]
     },
   ]
 
   return (
-    <Sidebar routes={routes} />
+    <Sidebar routes={{ [t/*i18n*/("Tenant")]: tenantRoutes, [t/*i18n*/("Group")]: groupRoutes }} />
   )
 }
