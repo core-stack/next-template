@@ -19,8 +19,8 @@ model Group {
   createdById String? @map("created_by")
   createdBy   Member? @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
-  GroupAccess GroupAccess[]
-  File        File[]
+  groupAccess GroupAccess[]
+  source      Source[]
 
   @@unique([slug, tenantId])
   @@map("groups")

@@ -1,6 +1,8 @@
 import fp from 'fastify-plugin';
 
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  CopyObjectCommand, GetObjectCommand, PutObjectCommand, S3Client
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 type S3Options = {
@@ -10,6 +12,12 @@ type S3Options = {
   region: string;
   publicBaseURL?: string;
   defaultBucket?: string;
+}
+
+type GetPreSignedUploadUrlOptions = {
+  publicAccess?: boolean;
+  bucket?: string
+  temp?: boolean 
 }
 export class S3Service {
   private readonly s3: S3Client;
@@ -28,7 +36,22 @@ export class S3Service {
     });
   }
 
-  async getPreSignedUploadUrl(key: string, contentType: string, publicAccess = false, bucket = this.defaultBucket): Promise<string> {
+  async getPreSignedUploadUrl(
+    key: string,
+    contentType: string,
+    { publicAccess, bucket, temp }: GetPreSignedUploadUrlOptions = {
+      publicAccess: false,
+      temp: false
+    }
+  ): Promise<string> {
+    if (!bucket) {
+      bucket = this.defaultBucket
+    }
+    if (temp) {
+      key = `temp/${key}`
+    }
+    console.log(bucket, key);
+    
     const command = new PutObjectCommand({
       Bucket: bucket,
       Key: key,
@@ -36,6 +59,18 @@ export class S3Service {
       ACL: publicAccess ? "public-read" : "private",
     });
     return getSignedUrl(this.s3, command, { expiresIn: 300 });
+  }
+
+  async confirmTempUpload(key: string, bucket = this.defaultBucket): Promise<boolean> {
+    key = `temp/${key}`
+    const command = new CopyObjectCommand({
+      Bucket: bucket,
+      CopySource: `/${bucket}/${key}`,
+      Key: key,
+    });
+
+    const res = await this.s3.send(command);
+    return res.$metadata.httpStatusCode >= 200 && res.$metadata.httpStatusCode < 300
   }
 
   async getPreSignedDownloadUrl(key: string, bucket = this.defaultBucket): Promise<string> {

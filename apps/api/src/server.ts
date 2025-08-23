@@ -20,6 +20,7 @@ import storagePlugin from './plugins/storage';
 async function main() {
   const app = Fastify({
     logger: {
+      level: env.LOG_LEVEL,
       transport: {
         target: "pino-pretty",
         options: {
@@ -28,8 +29,9 @@ async function main() {
           ignore: 'pid,hostname,plugin',
           messageFormat: '[{plugin}] {msg}',
         }
-      }
-    }
+      },
+    },
+    disableRequestLogging: true,
   }).withTypeProvider<ZodTypeProvider>();
 
   app.setValidatorCompiler(validatorCompiler);

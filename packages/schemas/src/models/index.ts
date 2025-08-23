@@ -8,3 +8,4 @@ export * from "./group";
 export * from "./verification-token";
 export * from "./tenant";
 export * from "./role";
+export * from "./source";

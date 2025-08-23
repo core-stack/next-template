@@ -8,10 +8,10 @@ export type CreateGroupSchema = z.infer<typeof createGroupSchema>;
 export const updateGroupSchema = groupSchema.omit({ createdAt: true, updatedAt: true, createdById: true, tenantId: true, parentId: true, path: true });
 export type UpdateGroupSchema = z.infer<typeof updateGroupSchema>;
 
-export const getGroupQueryParamsSchema = z.object({
+export const groupQueryParamsSchema = z.object({
   path: z.string().optional(),
 });
-export type GetGroupQueryParamsSchema = z.infer<typeof getGroupQueryParamsSchema>;
+export type GroupQueryParamsSchema = z.infer<typeof groupQueryParamsSchema>;
 
 export { groupSchema };
 export type { GroupSchema };

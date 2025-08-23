@@ -1,0 +1,6 @@
+{
+  "watch": ["src"],
+  "ext": "ts,tsx,json",
+  "ignore": ["node_modules"],
+  "exec": "concurrently 'tsx watch src/server.ts' 'pnpm watch:routes'"
+}

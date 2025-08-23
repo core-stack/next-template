@@ -26,9 +26,9 @@ model Member {
 
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  File        File[]
-  Group       Group[]
-  GroupAccess GroupAccess[]
+  sources     Source[]
+  groups      Group[]
+  groupAccess GroupAccess[]
 
   @@unique([userId, tenantId])
   @@unique([email, tenantId])

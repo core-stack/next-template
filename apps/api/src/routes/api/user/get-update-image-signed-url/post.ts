@@ -12,7 +12,7 @@ export default async function handler(
   reply: FastifyReply
 ) {
   const key = `user-profile/${randomUUID()}.${req.body.fileName.split(".").pop()}`;
-  const url = await req.server.storage.getPreSignedUploadUrl(key, req.body.contentType, true);
+  const url = await req.server.storage.getPreSignedUploadUrl(key, req.body.contentType, { publicAccess: true });
   return reply.status(200).send(
     { url, key, publicUrl: req.server.storage.buildPublicUrl(key) }
   );

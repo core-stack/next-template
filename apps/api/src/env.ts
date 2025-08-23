@@ -56,6 +56,8 @@ const envSchema = z.object({
   ARANGO_DB_NAME: z.string().default("default").optional(),
   ARANGO_DB_USERNAME: z.string().default("root").optional(),
   ARANGO_DB_PASSWORD: z.string(),
+
+  LOG_LEVEL: z.enum(["silent", "trace", "debug", "info", "warn", "error", "fatal"]).default("info"),
 }).superRefine((data, ctx) => {
   if (
     data.STORAGE_ENABLED &&

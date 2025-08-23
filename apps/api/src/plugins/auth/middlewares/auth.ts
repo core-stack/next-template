@@ -8,7 +8,6 @@ export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) =
 
   let session: Session | undefined;
   try {
-    req.log.info('authMiddleware', { accessToken, refreshToken });
     session = await req.server.auth.getSession(accessToken);
     
     if (!session && refreshToken) {
